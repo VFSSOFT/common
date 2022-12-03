@@ -3,6 +3,8 @@
 
 #include "MyCoreDef.h"
 
+#include "MyCriticalSection.h"
+
 class MyILogger {
 public:
   virtual void OutoutLog(const char* msg) = 0;
@@ -66,6 +68,8 @@ private:
   char m_SuffixBuf[16];
   char m_LogBuf[1024 + 256]; // 256 for log prefix
   char m_LogLevelStrs[6][8];
+
+  MyCriticalSection m_CriticalSection;
 };
 
 #endif // _MY_LOGGER_H_

@@ -110,15 +110,18 @@ void MyLogger::LogHexDump(const char* data, int len) {
       line[index2] = ASCII_VISIABLE_CHAR_MAP[c];
     }
 
+    m_CriticalSection.Acquire();
     if (m_ILogger) {
         m_ILogger->OutoutLog(line);
     } else {
         printf("%s\n", line);
     }
+    m_CriticalSection.Release();
   }
 }
 
 void MyLogger::Log(MyLogLevel level, const char* fmt, va_list args) {
+  m_CriticalSection.Acquire();
   int curLen = MakePrefix(level);
   curLen += vsprintf(&m_LogBuf[curLen], fmt, args);
   if (m_ILogger) {
@@ -126,6 +129,7 @@ void MyLogger::Log(MyLogLevel level, const char* fmt, va_list args) {
   } else {
     printf("%s\n", m_LogBuf);
   }
+  m_CriticalSection.Release();
 }
 
 int MyLogger::MakePrefix(MyLogLevel logLevel) {

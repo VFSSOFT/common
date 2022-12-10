@@ -12,7 +12,7 @@ public:
     bool Aborted() { return m_Aborted; }
 
     int Start();
-    int Abort();
+    virtual int Abort();
     bool WaitForExit(int millis);
     virtual int Run() = 0;
 

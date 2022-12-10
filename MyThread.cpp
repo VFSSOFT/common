@@ -41,7 +41,9 @@ int MyThread::Start() {
 int MyThread::Abort() {
     m_Aborted = true;
     if (m_ThreadHandle != NULL) {
-        TerminateThread(m_ThreadHandle, 0);
+        if (!WaitForExit(30 * 1000)) {
+            TerminateThread(m_ThreadHandle, 0);
+        }
         CloseHandle(m_ThreadHandle);
         m_ThreadHandle = NULL;
     }
@@ -58,15 +60,7 @@ bool MyThread::WaitForExit(int millis) {
 }
 
 int MyThread::ThreadEntry() {
-    int err = 0;
-
-    if (err = this->Run()) goto done;
-
-done:
-    if (err) {
-        Abort();
-    }
-    return err;
+    return this->Run();
 }
 
 #endif // _MY_THREAD_CPP_

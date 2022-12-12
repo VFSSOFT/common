@@ -15,6 +15,10 @@ public:
   int AppendInt(int intVal, int placeHolderLen=0);
   int SetInt64(UINT64 val, int placeHolderLen=0);
   int AppendInt64(UINT64 intVal, int placeHolderLen=0);
+
+  int SetWithFormat(const char* fmt, ...);
+  int AppendWithFormat(const char* fmt, ...);
+
   BOOL Equals(const char* str, BOOL caseInsensitive=FALSE) {
     if (this->Length() == 0) return str == NULL;
     if (caseInsensitive) return strcmpi(this->Deref(), str) == 0;

@@ -54,6 +54,27 @@ int MyStringA::AppendInt64(UINT64 intVal, int placeHolderLen) {
   return Append(buf);
 }
 
+int MyStringA::SetWithFormat(const char* fmt, ...) {
+    int formattedLen = 0;
+    char tmpBuf[1024];
+    va_list args;
+    va_start(args, fmt);
+    formattedLen = vsprintf(tmpBuf, fmt, args);
+    va_end(args);
+
+    return this->Set(tmpBuf, formattedLen);
+}
+int MyStringA::AppendWithFormat(const char* fmt, ...) {
+    int formattedLen = 0;
+    char tmpBuf[1024];
+    va_list args;
+    va_start(args, fmt);
+    formattedLen = vsprintf(tmpBuf, fmt, args);
+    va_end(args);
+
+    return this->Append(tmpBuf, formattedLen);
+}
+
 int MyStringA::DerefAsInt64() {
     INT64 val = 0;
     for (int i = 0; i < Length(); i++) {

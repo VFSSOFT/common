@@ -43,6 +43,7 @@ public:
 
   bool LogDebugExEnabled() { return m_LogLevel >= MyLogLevel::DebugEx; }
   bool LogDebugEnabled() { return m_LogLevel >= MyLogLevel::Debug; }
+  bool LogVerboseEnabled() { return m_LogLevel >= MyLogLevel::Verbose; }
 
   void LogError(const char* fmt, ...);
   void LogInfo(const char* fmt, ...);

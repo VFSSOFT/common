@@ -11,6 +11,20 @@ MyBuffer::~MyBuffer() {
   this->Reset();
 }
 
+int MyBuffer::SetCharAt(int index, char c) {
+    if (index < 0 || index > Length()) 
+        return MY_ERR_INDEX_OUT_OF_BOUNDARY;
+
+    m_Buffer[index] = c;
+    return 0;
+}
+int MyBuffer::CharAt(int index) {
+    if (index < 0 || index > Length()) 
+        return MY_ERR_INDEX_OUT_OF_BOUNDARY;
+
+    return m_Buffer[index];
+}
+
 int MyBuffer::Set(const char* data, int len) {
   return Set(0, data, len);
 }

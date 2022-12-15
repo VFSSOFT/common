@@ -21,6 +21,9 @@ public:
 
   bool Empty() { return m_Length == 0; }
 
+  int SetCharAt(int index, char c);
+  int CharAt(int index);
+
   int Set(const char* data, int len);
   int Set(int index, const char* data, int len);
   int Append(const char* data, int len);

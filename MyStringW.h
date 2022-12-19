@@ -13,6 +13,7 @@ public:
 
   int Set(const WCHAR* str);
   int Set(const WCHAR* str, int len);
+  int Set(MyStringW* wstr);
   int SetUtf8(const char* str, int len);
   int Append(const WCHAR* str, int len=-1);
   int AppendChar(WCHAR c);

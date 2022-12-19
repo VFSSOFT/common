@@ -28,6 +28,9 @@ int MyStringW::Set(const WCHAR* str, int len) {
   if (errCode = SetLength(len)) return errCode;
   return errCode;
 }
+int MyStringW::Set(MyStringW* wstr) {
+    return Set(wstr->Deref(), wstr->Length());
+}
 int MyStringW::SetUtf8(const char* str, int len) {
   int errCode = 0;
   if (len < 0)

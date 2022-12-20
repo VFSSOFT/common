@@ -77,21 +77,17 @@ int MyStringA::AppendWithFormat(const char* fmt, ...) {
 
 int MyStringA::DerefAsInt64() {
     INT64 val = 0;
-    for (int i = 0; i < Length(); i++) {
+    bool negative = Length() > 0 && Deref()[0] == '-';
+    int i = negative ? 1 : 0;
+    for (; i < Length(); i++) {
         char c = Deref()[i] - '0';
         assert(c >= 0 && c <= 9);
         val = val * 10 + c;
     }
-    return val;
+    return negative ? -1 * val : val;
 }
 int MyStringA::DerefAsInt() {
-  int intVal = 0;
-  for (int i = 0; i < Length(); i++) {
-    char c = Deref()[i] - '0';
-    assert(c >= 0 && c <= 9);
-    intVal = intVal * 10 + c;
-  }
-  return intVal;
+    return (int)DerefAsInt64();
 }
 
 int MyStringA::ToLower() {

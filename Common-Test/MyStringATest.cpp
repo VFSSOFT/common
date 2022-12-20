@@ -39,7 +39,7 @@ TEST(MyStringATest, SetZeroLengthStringTest) {
 
   EXPECT_EQ(0, str.Set("1", 0));
   EXPECT_EQ(0, str.Length());
-  EXPECT_TRUE(str.Deref() == NULL);
+  EXPECT_STREQ(str.Deref(), "");
 }
 
 TEST(MyStringATest, TruncateLengthTest) {
@@ -72,3 +72,82 @@ TEST(MyStringATest, AppendAfterSetTest) {
     EXPECT_STREQ("TESTAAA", str.Deref());
     EXPECT_EQ(str.Length(), 7);
 }
+
+TEST(MyStringATest, AppendIntTest1) {
+    int err = 0;
+    MyStringA str;
+
+    err = str.AppendInt(0);
+    EXPECT_EQ(err, 0);
+
+    EXPECT_STREQ(str.Deref(), "0");
+    EXPECT_EQ(str.DerefAsInt(), 0);
+}
+
+TEST(MyStringATest, AppendIntTest2) {
+    int err = 0;
+    MyStringA str;
+
+    err = str.AppendInt(103);
+    EXPECT_EQ(err, 0);
+
+    EXPECT_STREQ(str.Deref(), "103");
+    EXPECT_EQ(str.DerefAsInt(), 103);
+}
+
+TEST(MyStringATest, AppendIntTest3) {
+    int err = 0;
+    MyStringA str;
+
+    err = str.AppendInt(-2);
+    EXPECT_EQ(err, 0);
+
+    EXPECT_STREQ(str.Deref(), "-2");
+    EXPECT_EQ(str.DerefAsInt(), -2);
+}
+TEST(MyStringATest, AppendInt64Test1) {
+    int err = 0;
+    MyStringA str;
+
+    err = str.AppendInt64(0);
+    EXPECT_EQ(err, 0);
+
+    EXPECT_STREQ(str.Deref(), "0");
+    EXPECT_EQ(str.DerefAsInt64(), 0);
+}
+
+TEST(MyStringATest, AppendInt64Test2) {
+    int err = 0;
+    MyStringA str;
+
+    err = str.AppendInt64(103);
+    EXPECT_EQ(err, 0);
+
+    EXPECT_STREQ(str.Deref(), "103");
+    EXPECT_EQ(str.DerefAsInt64(), 103);
+}
+
+TEST(MyStringATest, AppendInt64Test3) {
+    int err = 0;
+    MyStringA str;
+
+    err = str.AppendInt64(-2);
+    EXPECT_EQ(err, 0);
+
+    EXPECT_STREQ(str.Deref(), "-2");
+    EXPECT_EQ(str.DerefAsInt64(), -2);
+}
+
+TEST(MyStringATest, AppendInt64Test4) {
+    int err = 0;
+    MyStringA str;
+
+    err = str.Set("bytes=");
+    EXPECT_EQ(err, 0);
+
+    err = str.AppendInt64(0);
+    EXPECT_EQ(err, 0);
+
+    EXPECT_STREQ(str.Deref(), "bytes=0");
+}
+

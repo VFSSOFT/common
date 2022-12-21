@@ -27,6 +27,8 @@ public:
   MyLogLevel LogLevel() { return m_LogLevel; }
   void SetLogLevel(MyLogLevel val) { m_LogLevel = val; }
 
+  MyILogger* ILogger() { return m_ILogger; }
+
   inline void SetPrefix(const char* prefix) {
     memset(m_PrefixBuf, 0, 16);
     int l = 16 < strlen(prefix) ? 16 : strlen(prefix);

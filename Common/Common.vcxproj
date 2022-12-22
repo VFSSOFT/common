@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\MyArray.h" />
+    <ClInclude Include="..\MyArrays.h" />
     <ClInclude Include="..\MyAStrValHashMap.h" />
     <ClInclude Include="..\MyBuffer.h" />
     <ClInclude Include="..\MyCoreDef.h" />
@@ -166,6 +167,7 @@
     <ClInclude Include="..\MyWStrValHashMap.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\MyArrays.cpp" />
     <ClCompile Include="..\MyBuffer.cpp" />
     <ClCompile Include="..\MyDataPacket.cpp" />
     <ClCompile Include="..\MyDate.cpp" />

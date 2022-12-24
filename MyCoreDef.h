@@ -55,6 +55,8 @@
 #define SET_FLAG(x, f, onOff) ((x) = (onOff) ? ((x) | (f)) : ((x) &~(f)))
 #define IS_FLAG_ON(x, f) (((x) & (f)) != 0)
 
+#define BOOL_STR(x) ((x) ? "True" : "False")
+
 #define MAX(a, b) ((a) < (b) ? (b) : (a))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 

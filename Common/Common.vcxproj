@@ -147,6 +147,7 @@
     <ClInclude Include="..\MyCoreDef.h" />
     <ClInclude Include="..\MyDataPacket.h" />
     <ClInclude Include="..\MyDate.h" />
+    <ClInclude Include="..\MyEncodings.h" />
     <ClInclude Include="..\MyFile.h" />
     <ClInclude Include="..\MyFileAttributes.h" />
     <ClInclude Include="..\MyJSON.h" />
@@ -171,6 +172,7 @@
     <ClCompile Include="..\MyBuffer.cpp" />
     <ClCompile Include="..\MyDataPacket.cpp" />
     <ClCompile Include="..\MyDate.cpp" />
+    <ClCompile Include="..\MyEncodings.cpp" />
     <ClCompile Include="..\MyFile.cpp" />
     <ClCompile Include="..\MyFileAttributes.cpp" />
     <ClCompile Include="..\MyJSON.cpp" />

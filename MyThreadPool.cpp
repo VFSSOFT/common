@@ -48,20 +48,21 @@ int MyThreadPool::Init(int maxThreadCount) {
     return 0;
 }
 int MyThreadPool::Destroy() {
-    m_Mutex.Acquire();
+    m_Lock.Acquire();
+    m_PendingTasks.Reset();
     for (int i = 0; i < m_Threads.Size(); i++) {
         MyThreadPoolItem* item = m_Threads.Get(i);
         item->Abort();
     }
     m_Threads.Reset();
-    m_Mutex.Release();
+    m_Lock.Release();
     return 0;
 }
 
 bool MyThreadPool::IsFull() {
     bool isFull = true;
 
-    m_Mutex.Acquire();
+    m_Lock.Acquire();
     if (m_Threads.Size() < m_MaxThreadCount) {
         isFull = false;
     } else {
@@ -72,7 +73,7 @@ bool MyThreadPool::IsFull() {
             }
         }
     }
-    m_Mutex.Release();
+    m_Lock.Release();
 
     return isFull;
 }
@@ -80,7 +81,7 @@ bool MyThreadPool::IsFull() {
 int MyThreadPool::QueueTask(MyThreadPoolItemEntry threadEntry, void* param, UINT64* retTaskId) {
     int err = 0;
 
-    m_Mutex.Acquire();
+    m_Lock.Acquire();
 
     *retTaskId = m_NextTaskId;
     m_NextTaskId++;
@@ -96,14 +97,14 @@ int MyThreadPool::QueueTask(MyThreadPoolItemEntry threadEntry, void* param, UINT
         MyThreadPoolItem* item = m_Threads.AddNew();
         if (err = item->Init(this)) return LastError(err, item->LastErrorMessage());
     }
-    m_Mutex.Release();
+    m_Lock.Release();
 
     return 0;
 }
 
 int MyThreadPool::CancelTask(UINT64 taskId) {
     int err = 0;
-    m_Mutex.Acquire();
+    m_Lock.Acquire();
 
     bool isPending = false;
     MyLinkListNode<MyThreadPoolTaskInfo>* node = m_PendingTasks.Head();
@@ -130,22 +131,26 @@ int MyThreadPool::CancelTask(UINT64 taskId) {
     }
 
 done:
-    m_Mutex.Release();
+    m_Lock.Release();
     return err;
 }
 
 bool MyThreadPool::GetNextPendingTask(MyThreadPoolTaskInfo* retTaskInfo) {
 
+    // Quick check, so that when the Destroy is being calling, GetNextPendingTask will return without dead lock
+    // Calling Empty is safe here, because Empty() will only checks the integer, it will not cause an memory crash issue
+    if (m_PendingTasks.Empty()) return false;
+
     bool hasMore = false;
 
-    m_Mutex.Acquire();
+    m_Lock.Acquire();
     if (!m_PendingTasks.Empty()) {
         hasMore = true;
         retTaskInfo->CopyFrom(m_PendingTasks.Head()->Data);
         retTaskInfo->Entry = m_PendingTasks.Head()->Data->Entry;
         m_PendingTasks.Remove(m_PendingTasks.Head());
     }
-    m_Mutex.Release();
+    m_Lock.Release();
 
     return hasMore;
 }

@@ -3,7 +3,7 @@
 
 #include "MyArray.h"
 #include "MyThread.h"
-#include "MyMutex.h"
+#include "MyLock.h"
 #include "MyLinkList.h"
 
 class MyThreadPool;
@@ -62,7 +62,7 @@ public:
     PRIVATE_FUNCTION bool GetNextPendingTask(MyThreadPoolTaskInfo* retTaskInfo);
 
 private:
-    MyMutex                              m_Mutex;
+    MyLock                               m_Lock;
     int                                  m_MaxThreadCount;
     MyArray<MyThreadPoolItem>            m_Threads;
     UINT64                               m_NextTaskId;

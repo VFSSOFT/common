@@ -12,6 +12,7 @@ DWORD WINAPI MyThreadEntry(LPVOID lpParam) {
 MyThread::MyThread() {
     INIT_LAST_ERROR;
     m_ThreadHandle = NULL;
+    m_ThreadId = -1;
     m_Aborted = false;
 }
 MyThread::~MyThread() {
@@ -19,14 +20,13 @@ MyThread::~MyThread() {
 }
 
 int MyThread::Start() {
-    DWORD threadId;
     HANDLE handle = CreateThread(
         NULL,
         0,
         MyThreadEntry,
         this,
         0,
-        &threadId
+        &m_ThreadId
     );
 
     if (handle == NULL) {

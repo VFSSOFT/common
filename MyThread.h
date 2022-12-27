@@ -21,6 +21,7 @@ public:
 private:
     bool   m_Aborted;
     HANDLE m_ThreadHandle;
+    DWORD  m_ThreadId; // It helps debug, so keep it.
     MY_LAST_ERROR_DECL;
 };
 

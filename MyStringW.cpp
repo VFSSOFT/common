@@ -150,12 +150,10 @@ int MyStringW::LastIndexOf(const WCHAR* str) {
 int MyStringW::IndexOf(const WCHAR c, int startIndex) {
   if (m_Length == 0) return -1;
 
-  LPCWSTR curStr = m_Buffer + startIndex;
-  int index = 0;
+  int index = startIndex;
+  while (index < m_Length && m_Buffer[index] != c) index++;
 
-  while (index < m_Length && curStr[index] != c) index++;
-
-  return index < m_Length ? index + startIndex : -1;
+  return index < m_Length ? index : -1;
 }
 int MyStringW::LastIndexOf(const WCHAR c) {
   int index    = -1;

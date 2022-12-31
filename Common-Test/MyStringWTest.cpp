@@ -192,3 +192,17 @@ TEST(MyStringWTest, AppendAfterSetTest) {
     EXPECT_EQ(str.Length(), 7);
 }
 
+TEST(MyStringWTest, LastIndexOfTest) {
+    const wchar_t* rawstr = L"C:\\Users\\martin\\Desktop\\testdata/oss-bucket-chengdu/1G.txt.meta";
+
+    int err = 0;
+    MyStringW str;
+
+    err = str.Set(rawstr);
+    EXPECT_EQ(err, 0);
+
+    int index = str.LastIndexOf(L'/');
+    EXPECT_EQ(index, 51);
+    
+}
+

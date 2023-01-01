@@ -31,6 +31,15 @@ public:
 
   int HashCode();
 
+    static bool IsLowercaseLetter(const char c);
+    static bool IsUppercaseLetter(const char c);
+    static bool IsLetter(const char c);
+    static bool IsLowercaseLetter(const char* str, int len);
+    static bool IsUppercaseLetter(const char* str, int len);
+    static bool IsLetter(const char* str, int len);
+    static bool IsDigit(const char c);
+    static bool IsDigit(const char* str, int len);
+
 #ifdef _WIN32
   int SetUnicode(const wchar_t* uniStr, int len);
   int Append(const wchar_t* uniStr, int len);

@@ -121,6 +121,40 @@ int MyStringA::HashCode() {
     return hash1 + (hash2 * 1566083941);
 }
 
+bool MyStringA::IsLowercaseLetter(const char c) {
+    return c >= 'a' && c <= 'z';
+}
+bool MyStringA::IsUppercaseLetter(const char c) {
+    return c >= 'A' && c <= 'Z';
+}
+bool MyStringA::IsLetter(const char c) {
+    return IsLowercaseLetter(c) || IsUppercaseLetter(c);
+}
+bool MyStringA::IsLowercaseLetter(const char* str, int len) {
+    for (int i = 0; i < len; i++) {
+        if (!IsLowercaseLetter(str[i])) return false;
+    }
+    return true;
+}
+bool MyStringA::IsUppercaseLetter(const char* str, int len) {
+    for (int i = 0; i < len; i++) {
+        if (!IsUppercaseLetter(str[i])) return false;
+    }
+    return true;
+}
+bool MyStringA::IsLetter(const char* str, int len) {
+    return IsLowercaseLetter(str, len) || IsUppercaseLetter(str, len);
+}
+bool MyStringA::IsDigit(const char c) {
+    return c >= '0' && c <= '9';
+}
+bool MyStringA::IsDigit(const char* str, int len) {
+    for (int i = 0; i < len; i++) {
+        if (!IsDigit(str[i])) return false;
+    }
+    return true;
+}
+
 
 #ifdef _WIN32
 int MyStringA::SetUnicode(const wchar_t* uniStr, int len) {

@@ -135,7 +135,7 @@ int MyBuffer::ExtendCap(int cap) {
     }
   }
   memset(m_Buffer + m_Length, 0, newCap - m_Length);
-  m_Cap = newCap;
+  m_Cap = newCap - MY_BUFFER_RESERVED_BYTES;
   return 0;
 }
 

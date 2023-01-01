@@ -289,6 +289,42 @@ int MyFile::DeleteFile(const wchar_t* path) {
     return 0;
 }
 
+int MyFile::Rename(const wchar_t* oldPath, const wchar_t* newPath, bool ignoreExistedError) {
+    BOOL suc = ::MoveFileExW(oldPath, newPath, MOVEFILE_COPY_ALLOWED);
+    if (!suc) {
+        m_LastErrorCode = GetLastError();
+        if (ignoreExistedError && m_LastErrorCode == ERROR_ALREADY_EXISTS) {
+            m_LastErrorCode = 0;
+            return 0;
+        }
+        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
+        return m_LastErrorCode;
+    }
+    return 0;
+}
+
+int MyFile::FullPath(const wchar_t* path, MyStringW* fullPath) {
+    int err = 0;
+
+    wchar_t pathBuf[32 * KB] = { 0 };
+
+    DWORD usedLen = GetFullPathNameW(
+        path,
+        32 * KB,
+        pathBuf,
+        NULL
+    );
+
+    if (usedLen == 0) {
+        m_LastErrorCode = GetLastError();
+        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
+        return m_LastErrorCode;
+    }
+
+    fullPath->Set(pathBuf, usedLen);
+    return 0;
+}
+
 void* MyFile::OpenFileHandle(const wchar_t* path, int creationDisp, int desiredAccess, int shareMode) {
   DWORD dwDesiredAccess = 0;
   DWORD dwShareMode = 0;

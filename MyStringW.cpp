@@ -303,6 +303,23 @@ int MyStringW::JoinPath(const wchar_t* p1, int len1, const wchar_t* p2, int len2
     if (err = JoinPath(tmp.Deref(), tmp.Length(), p3, len3, ret)) return err;
     return 0;
 }
+int MyStringW::SplitPath(const wchar_t* path, int pathLen, MyStringW* dir, MyStringW* name) {
+    int err = 0;
+    MyStringW tmp;
 
+    if (dir) dir->Reset();
+    if (name) name->Reset();
+
+    if (pathLen == 0) return 0;
+    if (path[pathLen-1] == L'/') pathLen--;
+
+    tmp.Set(path, pathLen);
+    int index = tmp.LastIndexOf(L'/');
+    assert(index > 0);
+    if (dir) dir->Set(path, index); // no '/' suffix
+    if (name) name->Set(path + index + 1, pathLen - index - 1);
+
+    return 0;
+}
 
 #endif // _WIN32

@@ -43,6 +43,7 @@ public:
     static int WStrNCmp(const wchar_t* str1, int len1, const wchar_t* str2, int len2, bool caseSensitive);
     static int JoinPath(const wchar_t* p1, int len1, const wchar_t* p2, int len2, MyStringW* ret);
     static int JoinPath(const wchar_t* p1, int len1, const wchar_t* p2, int len2, const wchar_t* name, int lenName, MyStringW* ret);
+    static int SplitPath(const wchar_t* path, int pathLen, MyStringW* dir, MyStringW* name);
 
 private:
   int EnsureCap(int cap);

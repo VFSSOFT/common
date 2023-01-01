@@ -148,11 +148,7 @@ int MyFile::Read(UINT64 pos, const char* data, int* len) {
 }
 
 UINT64 MyFile::FileAttributes(const wchar_t* path) {
-  MyStringUtf16 wpath;
-  wpath.Append((UCHAR*)L"\\\\?\\");
-  wpath.Append((UCHAR*)path);
-
-  DWORD dwAttr = GetFileAttributesW((LPCWSTR)wpath.Deref());
+  DWORD dwAttr = GetFileAttributesW(path);
   if (dwAttr == INVALID_FILE_ATTRIBUTES) {
     return MyWin::GetSysLastErrorCode();
   }
@@ -160,11 +156,7 @@ UINT64 MyFile::FileAttributes(const wchar_t* path) {
 }
 
 int MyFile::SetFileAttributes(const wchar_t* path, UINT64 attr) {
-  MyStringUtf16 wpath;
-  wpath.Append((UCHAR*)L"\\\\?\\");
-  wpath.Append((UCHAR*)path);
-
-  BOOL sucess = ::SetFileAttributesW((LPCWSTR)wpath.Deref(), (DWORD)attr);
+  BOOL sucess = ::SetFileAttributesW(path, (DWORD)attr);
   if (!sucess) {
     return MyWin::GetSysLastErrorCode();
   }
@@ -172,20 +164,12 @@ int MyFile::SetFileAttributes(const wchar_t* path, UINT64 attr) {
 }
 
 BOOL MyFile::FileExists(const wchar_t* path) {
-  MyStringUtf16 wpath;
-  wpath.Append((UCHAR*)L"\\\\?\\");
-  wpath.Append((UCHAR*)path);
-
-  DWORD dwAttr = GetFileAttributesW((LPCWSTR)wpath.Deref());
+  DWORD dwAttr = GetFileAttributesW(path);
 
   return (dwAttr != INVALID_FILE_ATTRIBUTES && !(dwAttr & FILE_ATTRIBUTE_DIRECTORY));
 }
 bool MyFile::DirectoryExist(const wchar_t* path) {
-    MyStringUtf16 wpath;
-    wpath.Append((UCHAR*)L"\\\\?\\");
-    wpath.Append((UCHAR*)path);
-
-    DWORD dwAttr = GetFileAttributesW((LPCWSTR)wpath.Deref());
+    DWORD dwAttr = GetFileAttributesW(path);
     return (dwAttr != INVALID_FILE_ATTRIBUTES && (dwAttr & FILE_ATTRIBUTE_DIRECTORY));
 }
 int MyFile::ListDirectory(const wchar_t* path, MyArray<MyStringW>* filenames, MyValArray<UINT64>* attrs) {

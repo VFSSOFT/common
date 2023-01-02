@@ -15,6 +15,7 @@ public:
     static int GetSysLastErrorMessage(MyStringA* msg, int errCode=0);
 
     static void Milliseconds2LargeIntergerTime(INT64 ms, LARGE_INTEGER* largeInteger);
+    static LARGE_INTEGER LongLong2LargeInteger(const UINT64 val);
 
     static HRESULT RetrieveWindowsSid(MyStringW& sid);
 };

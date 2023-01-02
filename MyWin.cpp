@@ -32,6 +32,11 @@ int MyWin::GetSysLastErrorMessage(MyStringA* msg, int errCode) {
 void MyWin::Milliseconds2LargeIntergerTime(INT64 ms, LARGE_INTEGER* largeInteger) {
   largeInteger->QuadPart = ms * 10000;
 }
+LARGE_INTEGER MyWin::LongLong2LargeInteger(const UINT64 val) {
+    LARGE_INTEGER largeInteger;
+    largeInteger.QuadPart = val;
+    return largeInteger;
+}
 
 
 HRESULT MyWin::RetrieveWindowsSid(MyStringW &sid) {

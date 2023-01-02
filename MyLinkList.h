@@ -35,9 +35,15 @@ public:
   void Remove(MyLinkListNode<T>* node);
   void Reset();
 
+    void RemoveNoFree(MyLinkListNode<T>* node);
+    void Append(MyLinkListNode<T>* node);
+
 private:
   MyLinkListNode<T>* NewNode();
   void FreeNode(MyLinkListNode<T>* node);
+
+    void RemoveNode(MyLinkListNode<T>* node, bool freeNode);
+    void AppendNode(MyLinkListNode<T>* newNode);
 
 private:
   int                m_Size;
@@ -77,28 +83,9 @@ void MyLinkList<T>::Reset() {
 
 template <typename T>
 MyLinkListNode<T>* MyLinkList<T>::AppendNew() {
-  MyLinkListNode<T>* newNode = NewNode();
-
-  if (m_Tail == NULL) {
-    // LinkList is empty
-    m_Head = m_Tail = newNode;
-  } else {
-    if (m_Head == m_Tail) {
-      // LinkList contains only one node
-      m_Tail = newNode;
-      m_Tail->Prev = m_Head;
-      m_Head->Next = m_Tail;
-    } else {
-      // LinkList contains more than one node
-      m_Tail->Next = newNode;
-      newNode->Prev = m_Tail;
-
-      m_Tail = newNode;
-    }
-  }
-  m_Size++;
-
-  return newNode;
+    MyLinkListNode<T>* newNode = NewNode();
+    AppendNode(newNode);
+    return newNode;
 }
 
 template <typename T>
@@ -144,27 +131,66 @@ MyLinkListNode<T>* MyLinkList<T>::InsertAfter(MyLinkListNode<T>* node) {
 
 template <typename T>
 void MyLinkList<T>::Remove(MyLinkListNode<T>* node) {
-  MyLinkListNode<T>* prevNode = node->Prev;
-  MyLinkListNode<T>* nextNode = node->Next;
+  RemoveNode(node, true);
+}
 
-  if (prevNode == NULL && nextNode == NULL) {
-    // it's the only node in the current link list
-    m_Head = m_Tail = NULL;
-  } else if (prevNode == NULL) { // header node
-    nextNode->Prev = NULL;
-    m_Head = nextNode;
-  } else if (nextNode == NULL) { // tail node
-    MyLinkListNode<T>* prevNode = m_Tail->Prev;
-    prevNode->Next = NULL;
-    m_Tail = prevNode;
+template <typename T>
+void MyLinkList<T>::RemoveNoFree(MyLinkListNode<T>* node) {
+  RemoveNode(node, false);
+}
+
+template <typename T>
+void MyLinkList<T>::Append(MyLinkListNode<T>* node) {
+    AppendNode(node);
+}
+
+template <typename T>
+void MyLinkList<T>::AppendNode(MyLinkListNode<T>* newNode) {
+  if (m_Tail == NULL) {
+    // LinkList is empty
+    m_Head = m_Tail = newNode;
   } else {
-    // intermediate node
-    prevNode->Next = nextNode;
-    nextNode->Prev = prevNode;
+    if (m_Head == m_Tail) {
+      // LinkList contains only one node
+      m_Tail = newNode;
+      m_Tail->Prev = m_Head;
+      m_Head->Next = m_Tail;
+    } else {
+      // LinkList contains more than one node
+      m_Tail->Next = newNode;
+      newNode->Prev = m_Tail;
+
+      m_Tail = newNode;
+    }
   }
-  
-  FreeNode(node);
-  m_Size--;
+  m_Size++;
+}
+
+template <typename T>
+void MyLinkList<T>::RemoveNode(MyLinkListNode<T>* node, bool freeNode) {
+    MyLinkListNode<T>* prevNode = node->Prev;
+    MyLinkListNode<T>* nextNode = node->Next;
+
+    if (prevNode == NULL && nextNode == NULL) {
+        // it's the only node in the current link list
+        m_Head = m_Tail = NULL;
+    } else if (prevNode == NULL) { // header node
+        nextNode->Prev = NULL;
+        m_Head = nextNode;
+    } else if (nextNode == NULL) { // tail node
+        MyLinkListNode<T>* prevNode = m_Tail->Prev;
+        prevNode->Next = NULL;
+        m_Tail = prevNode;
+    } else {
+        // intermediate node
+        prevNode->Next = nextNode;
+        nextNode->Prev = prevNode;
+    }
+
+    node->Prev = NULL;
+    node->Next = NULL;
+    if (freeNode) FreeNode(node);
+    m_Size--;
 }
 
 template <typename T>

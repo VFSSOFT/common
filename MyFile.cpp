@@ -273,14 +273,10 @@ int MyFile::DeleteFile(const wchar_t* path) {
     return 0;
 }
 
-int MyFile::Rename(const wchar_t* oldPath, const wchar_t* newPath, bool ignoreExistedError) {
+int MyFile::Rename(const wchar_t* oldPath, const wchar_t* newPath) {
     BOOL suc = ::MoveFileExW(oldPath, newPath, MOVEFILE_COPY_ALLOWED);
     if (!suc) {
         m_LastErrorCode = GetLastError();
-        if (ignoreExistedError && m_LastErrorCode == ERROR_ALREADY_EXISTS) {
-            m_LastErrorCode = 0;
-            return 0;
-        }
         MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
         return m_LastErrorCode;
     }

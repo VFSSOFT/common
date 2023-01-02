@@ -51,7 +51,7 @@ public:
     int DeleteFile();
     int DeleteFile(const wchar_t* path);
 
-    int Rename(const wchar_t* oldPath, const wchar_t* newPath, bool ignoreExistedError);
+    int Rename(const wchar_t* oldPath, const wchar_t* newPath);
 
     int FullPath(const wchar_t* path, MyStringW* fullPath);
 

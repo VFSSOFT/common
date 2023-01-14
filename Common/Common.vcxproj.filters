@@ -93,6 +93,9 @@
     <ClInclude Include="..\MyEncodings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\MyWinService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\MyBuffer.cpp">
@@ -150,6 +153,9 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="..\MyEncodings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MyWinService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

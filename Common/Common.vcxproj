@@ -165,6 +165,7 @@
     <ClInclude Include="..\MyValArray.h" />
     <ClInclude Include="..\MyValLinkList.h" />
     <ClInclude Include="..\MyWin.h" />
+    <ClInclude Include="..\MyWinService.h" />
     <ClInclude Include="..\MyWStrValHashMap.h" />
   </ItemGroup>
   <ItemGroup>
@@ -186,6 +187,7 @@
     <ClCompile Include="..\MyThread.cpp" />
     <ClCompile Include="..\MyThreadPool.cpp" />
     <ClCompile Include="..\MyWin.cpp" />
+    <ClCompile Include="..\MyWinService.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

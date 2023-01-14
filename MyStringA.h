@@ -11,6 +11,7 @@ public:
 
   int Set(const char* str);
   int Set(const char* str, int len);
+  int Set(MyStringA* str);
   int Append(const char *str, int len=-1);
   int AppendInt(int intVal, int placeHolderLen=0);
   int SetInt64(UINT64 val, int placeHolderLen=0);

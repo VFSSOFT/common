@@ -10,6 +10,9 @@ int MyStringA::Set(const char* str) {
 int MyStringA::Set(const char* str, int len) {
   return MyBuffer::Set(str, len);
 }
+int MyStringA::Set(MyStringA* str) {
+    return MyBuffer::Set(str->Deref(), str->Length());
+}
 int MyStringA::Append(const char *str, int len) {
   len = len < 0 ? STR_LEN(str) : len;
   return MyBuffer::Append(str, len);

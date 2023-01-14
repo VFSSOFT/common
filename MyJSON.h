@@ -116,6 +116,7 @@ public:
   MyJsonValue* Find(const char* path);
 
   int InitRootNode(MyJsonValueType type) {
+    Reset();
     if (type == MyJsonValueType::arrayValue || type == MyJsonValueType::objectValue) {
       m_Root.SetValueType(type);
       return 0;

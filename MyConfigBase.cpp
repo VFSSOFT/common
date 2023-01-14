@@ -64,6 +64,17 @@ int MyConfigBase::AddStringChild(MyJsonValue* jsonVal, const char* key, MyString
     if (err = retStr->SetUnicode(val->Deref(), val->Length())) return LastError(err, "Failed to add string child");
     return 0;
 }
+int MyConfigBase::AddBoolChild(MyJsonValue* jsonVal, const char* key, bool val) {
+    int err = 0;
+    if (err = jsonVal->AddBoolChild(key, val)) return LastError(err, jsonVal->LastErrorMessage());
+    return 0;
+}
+int MyConfigBase::AddIntChild(MyJsonValue* jsonVal, const char* key, int val) {
+    int err = 0;
+    MyStringA* retStr = jsonVal->AddNumberChild(key, val);
+    if (retStr == NULL) return LastError(jsonVal->LastErrorCode(), jsonVal->LastErrorMessage());
+    return 0;
+}
 
 int MyConfigBase::ParseStringChild(MyJsonValue* jsonVal, MyStringA* val) {
     int err = 0;
@@ -85,6 +96,29 @@ int MyConfigBase::ParseStringChild(MyJsonValue* jsonVal, MyStringW* val) {
     }
 
     val->SetUtf8(jsonVal->StringValue()->Deref(), jsonVal->StringValue()->Length());
+    return 0;
+}
+int MyConfigBase::ParseBoolChild(MyJsonValue* jsonVal, bool* val) {
+    int err = 0;
+
+    if (jsonVal->ValueType() != MyJsonValueType::boolValue) {
+        m_LastErrorMessage.SetWithFormat("\"%s\" is not a boolean", jsonVal->Key()->Deref());
+        return MY_ERR_ENCODING_JSON;
+    }
+
+    *val = jsonVal->BoolValue();
+    return 0;
+}
+int MyConfigBase::ParseIntChild(MyJsonValue* jsonVal, int* val) {
+    int err = 0;
+
+    if (jsonVal->ValueType() != MyJsonValueType::numberValue) {
+        m_LastErrorMessage.SetWithFormat("\"%s\" is not a integer", jsonVal->Key()->Deref());
+        return MY_ERR_ENCODING_JSON;
+    }
+
+    MyStringA* retStr = jsonVal->NumberValue();
+    *val = retStr->DerefAsInt();
     return 0;
 }
 

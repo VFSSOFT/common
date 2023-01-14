@@ -22,9 +22,13 @@ public:
 
     int AddStringChild(MyJsonValue* jsonVal, const char* key, MyStringA* val);
     int AddStringChild(MyJsonValue* jsonVal, const char* key, MyStringW* val);
+    int AddBoolChild(MyJsonValue* jsonVal, const char* key, bool val);
+    int AddIntChild(MyJsonValue* jsonVal, const char* key, int val);
 
     int ParseStringChild(MyJsonValue* jsonVal, MyStringA* val);
     int ParseStringChild(MyJsonValue* jsonVal, MyStringW* val);
+    int ParseBoolChild(MyJsonValue* jsonVal, bool* val);
+    int ParseIntChild(MyJsonValue* jsonVal, int* val);
 
 protected:
 

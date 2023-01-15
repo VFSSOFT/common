@@ -78,6 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\Dev\fs\thirdpart\release\winx64\sqlite_release\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -153,6 +154,8 @@
     <ClInclude Include="..\MyJSON.h" />
     <ClInclude Include="..\MyLock.h" />
     <ClInclude Include="..\MyMutex.h" />
+    <ClInclude Include="..\MySqlEntity.h" />
+    <ClInclude Include="..\MySqlite.h" />
     <ClInclude Include="..\MyThread.h" />
     <ClInclude Include="..\MyThreadPool.h" />
     <ClInclude Include="..\MyValObjHashMap.h" />
@@ -180,6 +183,8 @@
     <ClCompile Include="..\MyLock.cpp" />
     <ClCompile Include="..\MyMemPool.cpp" />
     <ClCompile Include="..\MyMutex.cpp" />
+    <ClCompile Include="..\MySqlEntity.cpp" />
+    <ClCompile Include="..\MySqlite.cpp" />
     <ClCompile Include="..\MyStringA.cpp" />
     <ClCompile Include="..\MyStringUtf16.cpp" />
     <ClCompile Include="..\MyStringUtf8.cpp" />

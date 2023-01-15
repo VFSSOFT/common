@@ -96,6 +96,12 @@
     <ClInclude Include="..\MyWinService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\MySqlite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MySqlEntity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\MyBuffer.cpp">
@@ -156,6 +162,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\MyWinService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MySqlite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MySqlEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

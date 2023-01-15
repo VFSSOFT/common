@@ -41,13 +41,14 @@ int MySqlite::CreateTable(MySqlEntityBase* ent, bool dropIfExists) {
         sql.SetWithFormat("DROP TABLE IF EXISTS %s;\n", ent->TableName());
     }
 
-    sql.AppendWithFormat("CREATE TABLE %s (ID INTEGER PRIMARY KEY AUTOINCREMENT", ent->TableName());
+    sql.AppendWithFormat("CREATE TABLE %s (ID INTEGER PRIMARY KEY AUTOINCREMENT, ", ent->TableName());
     for (int i = 0; i < fields->Size(); i++) {
+        MySqlEntityField* f = fields->Get(i);
+        sql.AppendWithFormat("%s %s", f->SqlName(), f->SqlTypeName());
+
         if (i < fields->Size() - 1) {
             sql.Append(", ");
         }
-        MySqlEntityField* f = fields->Get(i);
-        sql.AppendWithFormat("%s %s", f->SqlName(), f->SqlTypeName());
     }
     sql.Append(");");
 
@@ -131,6 +132,7 @@ int MySqlite::Insert(MySqlEntityBase* ent) {
         HandleSqliteError(err);
         goto done;
     }
+    err = 0;
 
     // TODO: query the ID
 
@@ -247,48 +249,6 @@ int MySqlite::Delete(MySqlEntityBase* ent) {
     if (err != SQLITE_DONE) {
         HandleSqliteError(err);
         goto done;
-    }
-
-done:
-    if (stmt) {
-        sqlite3_finalize(stmt);
-    }
-
-    return err;
-}
-int MySqlite::Query(const char* tableName, MyArray<MySqlEntityBase>* retEntities) {
-    int err = 0;
-    int stepRet = 0;
-    sqlite3_stmt* stmt = NULL;
-    MyStringA sql;
-    MySqlEntityBase* curEntity;
-
-    retEntities->Reset();
-
-    sql.SetWithFormat("SELECT * FROM %s;", tableName);
-    err = sqlite3_prepare_v2(m_Handle, sql.Deref(), sql.Length(), &stmt, NULL);
-    if (err) {
-        HandleSqliteError(err);
-        goto done;
-    }
-
-    while (stepRet != SQLITE_DONE) {
-        stepRet = sqlite3_step(stmt);
-
-        switch (stepRet) {
-        case SQLITE_ROW:
-            curEntity = retEntities->AddNew();
-            if (err = ParseEntity(stmt, curEntity)) goto done;
-            curEntity->SetTableName(tableName);
-            break;
-
-        case SQLITE_DONE:
-            break;
-
-        default:
-            err = HandleSqliteError(stepRet);
-            goto done;
-        }
     }
 
 done:

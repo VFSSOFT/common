@@ -19,7 +19,8 @@ public:
     int Insert(MySqlEntityBase* ent);
     int Update(MySqlEntityBase* ent);
     int Delete(MySqlEntityBase* ent);
-    int Query(const char* tableName, MyArray<MySqlEntityBase>* retEntities);
+    template <class T>
+    int Query(const char* tableName, MyArray<T>* retEntities);
 
     static int EscapeText(const char* input, MyStringA* ret);
 
@@ -36,5 +37,50 @@ private:
 
     MY_LAST_ERROR_DECL;
 };
+
+template <class T>
+int MySqlite::Query(const char* tableName, MyArray<T>* retEntities) {
+    int err = 0;
+    int stepRet = 0;
+    sqlite3_stmt* stmt = NULL;
+    MyStringA sql;
+    MySqlEntityBase* curEntity;
+
+    retEntities->Reset();
+
+    sql.SetWithFormat("SELECT * FROM %s;", tableName);
+    err = sqlite3_prepare_v2(m_Handle, sql.Deref(), sql.Length(), &stmt, NULL);
+    if (err) {
+        HandleSqliteError(err);
+        goto done;
+    }
+
+    while (stepRet != SQLITE_DONE) {
+        stepRet = sqlite3_step(stmt);
+
+        switch (stepRet) {
+        case SQLITE_ROW:
+            curEntity = (MySqlEntityBase*) retEntities->AddNew();
+            if (err = ParseEntity(stmt, curEntity)) goto done;
+            curEntity->SetTableName(tableName);
+            break;
+
+        case SQLITE_DONE:
+            break;
+
+        default:
+            err = HandleSqliteError(stepRet);
+            goto done;
+        }
+    }
+
+done:
+    if (stmt) {
+        sqlite3_finalize(stmt);
+    }
+
+    return err;
+}
+
 
 #endif // _MY_SQLITE_H_

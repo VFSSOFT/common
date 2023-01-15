@@ -17,11 +17,15 @@ public:
     int CreateTable(MySqlEntityBase* ent, bool dropIfExists);
     int DeleteTable(const char* tableName);
     int Insert(MySqlEntityBase* ent);
-
+    int Update(MySqlEntityBase* ent);
+    int Delete(MySqlEntityBase* ent);
+    int Query(const char* tableName, MyArray<MySqlEntityBase>* retEntities);
 
     static int EscapeText(const char* input, MyStringA* ret);
 
 private:
+
+    int ParseEntity(sqlite3_stmt* stmt, MySqlEntityBase* curEntity);
     int Execute(const char* sql);
     int HandleSqliteError(int err);
 

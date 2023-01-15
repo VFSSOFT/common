@@ -10,4 +10,16 @@ const char* MySqlEntityField::SqlTypeName() {
 }
 
 
+MySqlEntityField* MySqlEntityBase::GetFieldBySqlName(const char* sqlName) {
+    for (int i = 0; i < m_Fields.Size(); i++) {
+        MySqlEntityField* f = m_Fields.Get(i);
+
+        if (STR_EQUALS(f->SqlName(), sqlName)) {
+            return f;
+        }
+    }
+    return NULL;
+}
+
+
 #endif // _MY_SQL_ENTITY_CPP_

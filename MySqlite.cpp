@@ -141,8 +141,202 @@ done:
 
     return err;
 }
+int MySqlite::Update(MySqlEntityBase* ent) {
+    int err = 0;
 
+    if (ent->ID() == 0) {
+        return LastError(MY_ERR_INVALID_PARAMETERS, "Entity's ID is empty");
+    }
 
+    sqlite3_stmt* stmt = NULL;
+    MyStringA sql, setStr, tmp;
+    MySqlEntityField* f = NULL;
+    MyArray<MySqlEntityField>* fields = ent->Fields();
+
+    for (int i = 0; i < fields->Size(); i++) {
+        f = fields->Get(i);
+
+        setStr.AppendWithFormat("%s=?", f->SqlName());
+
+        if (i < fields->Size() - 1) {
+            setStr.Append(",");
+        }
+    }
+
+    sql.SetWithFormat("UPDATE %s SET %s WHERE ID=%d;", ent->TableName(), setStr.Deref(), ent->ID());
+    err = sqlite3_prepare_v2(m_Handle, sql.Deref(), sql.Length(), &stmt, NULL);
+    if (err) {
+        HandleSqliteError(err);
+        goto done;
+    }
+
+    for (int i = 0; i < fields->Size(); i++) {
+        f = fields->Get(i);
+
+        switch (f->Type()) {
+        case SqlDataType::tNull:
+            if (err = sqlite3_bind_null(stmt, i + 1)) {
+                HandleSqliteError(err);
+                goto done;
+            }
+            break;
+
+        case SqlDataType::tInteger:
+            if (err = sqlite3_bind_int64(stmt, i + 1, f->IntegerValue())) {
+                HandleSqliteError(err);
+                goto done;
+            }
+            break;
+
+        case SqlDataType::tReal:
+            if (err = sqlite3_bind_double(stmt, i + 1, f->RealValue())) {
+                HandleSqliteError(err);
+                goto done;
+            }
+            break;
+
+        case SqlDataType::tText:
+            EscapeText(f->TextValue()->Deref(), &tmp);
+            if (err = sqlite3_bind_text(stmt, i + 1, tmp.Deref(), tmp.Length(), NULL)) {
+                HandleSqliteError(err);
+                goto done;
+            }
+            break;
+
+        case SqlDataType::tBlob:
+            if (err = sqlite3_bind_blob(stmt, i + 1, tmp.Deref(), tmp.Length(), NULL)) {
+                HandleSqliteError(err);
+                goto done;
+            }
+            break;
+        }
+    }
+
+    err = sqlite3_step(stmt);
+    if (err != SQLITE_DONE) {
+        HandleSqliteError(err);
+        goto done;
+    }
+
+done:
+    if (stmt) {
+        sqlite3_finalize(stmt);
+    }
+
+    return err;
+}
+
+int MySqlite::Delete(MySqlEntityBase* ent) {
+    int err = 0;
+
+    if (ent->ID() == 0) {
+        return LastError(MY_ERR_INVALID_PARAMETERS, "Entity's ID is empty");
+    }
+
+    sqlite3_stmt* stmt = NULL;
+    MyStringA sql, setStr, tmp;
+
+    sql.SetWithFormat("DELETE FROM %s WHERE ID=%d;", ent->TableName(), ent->ID());
+    err = sqlite3_prepare_v2(m_Handle, sql.Deref(), sql.Length(), &stmt, NULL);
+    if (err) {
+        HandleSqliteError(err);
+        goto done;
+    }
+
+    err = sqlite3_step(stmt);
+    if (err != SQLITE_DONE) {
+        HandleSqliteError(err);
+        goto done;
+    }
+
+done:
+    if (stmt) {
+        sqlite3_finalize(stmt);
+    }
+
+    return err;
+}
+int MySqlite::Query(const char* tableName, MyArray<MySqlEntityBase>* retEntities) {
+    int err = 0;
+    int stepRet = 0;
+    sqlite3_stmt* stmt = NULL;
+    MyStringA sql;
+    MySqlEntityBase* curEntity;
+
+    retEntities->Reset();
+
+    sql.SetWithFormat("SELECT * FROM %s;", tableName);
+    err = sqlite3_prepare_v2(m_Handle, sql.Deref(), sql.Length(), &stmt, NULL);
+    if (err) {
+        HandleSqliteError(err);
+        goto done;
+    }
+
+    while (stepRet != SQLITE_DONE) {
+        stepRet = sqlite3_step(stmt);
+
+        switch (stepRet) {
+        case SQLITE_ROW:
+            curEntity = retEntities->AddNew();
+            if (err = ParseEntity(stmt, curEntity)) goto done;
+            curEntity->SetTableName(tableName);
+            break;
+
+        case SQLITE_DONE:
+            break;
+
+        default:
+            err = HandleSqliteError(stepRet);
+            goto done;
+        }
+    }
+
+done:
+    if (stmt) {
+        sqlite3_finalize(stmt);
+    }
+
+    return err;
+}
+
+int MySqlite::ParseEntity(sqlite3_stmt* stmt, MySqlEntityBase* curEntity) {
+    int err = 0;
+
+    int colCount = sqlite3_column_count(stmt);
+    for (int i = 0; i < colCount; i++) {
+        const char* colName = sqlite3_column_name(stmt, i);
+
+        if (STR_EQUALS(colName, "ID")) {
+            curEntity->SetID(sqlite3_column_int64(stmt, i));
+        } else {
+            MySqlEntityField* curField = curEntity->GetFieldBySqlName(colName);
+
+            switch (curField->Type()) {
+            case SqlDataType::tNull:
+                break;
+
+            case SqlDataType::tInteger:
+                curField->SetIntegerValue(sqlite3_column_int64(stmt, i));
+                break;
+
+            case SqlDataType::tReal:
+                curField->SetRealValue(sqlite3_column_double(stmt, i));
+                break;
+
+            case SqlDataType::tText:
+                curField->TextValue()->Set((const char*)sqlite3_column_text(stmt, i));
+                break;
+
+            case SqlDataType::tBlob:
+                curField->BlobValue()->Set((const char*)sqlite3_column_blob(stmt, i), sqlite3_column_bytes(stmt, i));
+                break;
+
+            }
+        }
+    }
+
+    return 0;
+}
 int MySqlite::Execute(const char* sql) {
     int err = 0;
     char* sqlErrMsg = NULL;

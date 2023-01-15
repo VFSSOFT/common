@@ -14,7 +14,7 @@ enum class SqlDataType {
 
 class MySqlEntityField {
 public:
-    MySqlEntityField(): m_ID(0), m_Type(SqlDataType::tNull), m_IntegerValue(0), m_RealValue(0.0) {}
+    MySqlEntityField(): m_Type(SqlDataType::tNull), m_IntegerValue(0), m_RealValue(0.0) {}
 
     int Init(SqlDataType t, const char* propName, const char* sqlName) {
         m_Type = t;
@@ -45,9 +45,6 @@ public:
 
     const char* SqlTypeName();
 
-    UINT64 ID() { return m_ID; }
-    void SetID(UINT64 val) { m_ID = val; }
-
     SqlDataType Type() { return m_Type; }
     const char* PropName() { return m_PropName.Deref(); }
     const char* SqlName() { return m_SqlName.Deref(); }
@@ -60,7 +57,6 @@ public:
     MyBuffer* BlobValue() { return &m_BlobValue; }
 
 private:
-    UINT64      m_ID;
     SqlDataType m_Type;
 
     MyStringA   m_PropName;
@@ -77,15 +73,23 @@ private:
 
 class MySqlEntityBase {
 public:
-    MySqlEntityBase(const char* tableName) {
+    MySqlEntityBase(): m_ID(0) {}
+    MySqlEntityBase(const char* tableName): m_ID(0) {
         m_TableName.Set(tableName);
     }
 
+    UINT64 ID() { return m_ID; }
+    void SetID(UINT64 val) { m_ID = val; }
+
     const char* TableName() { return m_TableName.Deref(); }
+    void SetTableName(const char* tableName) { m_TableName.Set(tableName); }
     MyArray<MySqlEntityField>* Fields() { return &m_Fields; }
+
+    MySqlEntityField* GetFieldBySqlName(const char* sqlName);
 
 protected:
     MyStringA m_TableName;
+    UINT64    m_ID;
     MyArray<MySqlEntityField> m_Fields;
 };
 

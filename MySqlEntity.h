@@ -12,34 +12,91 @@ enum class SqlDataType {
     tBlob = 4
 };
 
+class MySqlValue {
+public:
+
+    MySqlValue(): m_Type(SqlDataType::tNull), m_IntegerValue(0), m_RealValue(0.0) {
+        
+    }
+    MySqlValue(INT64 val): m_Type(SqlDataType::tInteger), m_IntegerValue(val), m_RealValue(0.0){
+        
+    }
+    MySqlValue(double val): m_Type(SqlDataType::tReal), m_IntegerValue(0), m_RealValue(val) {
+        
+    }
+    MySqlValue(const char* val): m_Type(SqlDataType::tText), m_IntegerValue(0), m_RealValue(0.0) {
+        m_TextValue.Set(val);
+    }
+    MySqlValue(const char* blob, int blobLen): m_Type(SqlDataType::tBlob), m_IntegerValue(0), m_RealValue(0.0) {
+        m_BlobValue.Set(blob, blobLen);
+    }
+
+    SqlDataType Type() { return m_Type; }
+    void SetType(SqlDataType t) { m_Type = t; }
+
+    INT64 IntegerValue() {
+        assert(m_Type == SqlDataType::tInteger);
+        return m_IntegerValue;
+    }
+    double RealValue() {
+        assert(m_Type == SqlDataType::tReal);
+        return m_RealValue;
+    }
+    void SetIntegerValue(INT64 val) {
+        assert(m_Type == SqlDataType::tInteger);
+        m_IntegerValue = val;
+    }
+    void SetRealValue(double val) {
+        assert(m_Type == SqlDataType::tReal);
+        m_RealValue = val;
+    }
+    MyStringA* TextValue() {
+        assert(m_Type == SqlDataType::tText);
+        return &m_TextValue;
+    }
+    MyBuffer* BlobValue() {
+        assert(m_Type == SqlDataType::tBlob);
+        return &m_BlobValue;
+    }
+
+private:
+    SqlDataType m_Type;
+
+    INT64       m_IntegerValue;
+    double      m_RealValue;
+    MyStringA   m_TextValue;
+    MyBuffer    m_BlobValue;
+};
+
 class MySqlEntityField {
 public:
-    MySqlEntityField(): m_Type(SqlDataType::tNull), m_IntegerValue(0), m_RealValue(0.0) {}
+    MySqlEntityField(): m_Type(SqlDataType::tNull) {}
 
     int Init(SqlDataType t, const char* propName, const char* sqlName) {
         m_Type = t;
+        m_Value.SetType(t);
         m_PropName.Set(propName);
         m_SqlName.Set(sqlName);
         return 0;
     }
     int Init(SqlDataType t, const char* propName, const char* sqlName, INT64 val) {
         this->Init(t, propName, sqlName);
-        m_IntegerValue = val;
+        m_Value.SetIntegerValue(val);
         return 0;
     }
     int Init(SqlDataType t, const char* propName, const char* sqlName, double val) {
         this->Init(t, propName, sqlName);
-        m_RealValue = val;
+        m_Value.SetRealValue(val);
         return 0;
     }
     int Init(SqlDataType t, const char* propName, const char* sqlName, const char* str) {
         this->Init(t, propName, sqlName);
-        m_TextValue.Set(str);
+        m_Value.TextValue()->Set(str);
         return 0;
     }
     int Init(SqlDataType t, const char* propName, const char* sqlName, const char* blob, int blobLen) {
         this->Init(t, propName, sqlName);
-        m_BlobValue.Set(blob, blobLen);
+        m_Value.BlobValue()->Set(blob, blobLen);
         return 0;
     }
 
@@ -49,24 +106,19 @@ public:
     const char* PropName() { return m_PropName.Deref(); }
     const char* SqlName() { return m_SqlName.Deref(); }
 
-    INT64 IntegerValue() { return m_IntegerValue; }
-    double RealValue() { return m_RealValue; }
-    void SetIntegerValue(INT64 val) { m_IntegerValue = val; }
-    void SetRealValue(double val) { m_RealValue = val; }
-    MyStringA* TextValue() { return &m_TextValue; }
-    MyBuffer* BlobValue() { return &m_BlobValue; }
+    INT64 IntegerValue() { return m_Value.IntegerValue(); }
+    double RealValue() { return m_Value.RealValue(); }
+    void SetIntegerValue(INT64 val) { m_Value.SetIntegerValue(val); }
+    void SetRealValue(double val) { m_Value.SetRealValue(val); }
+    MyStringA* TextValue() { return m_Value.TextValue(); }
+    MyBuffer* BlobValue() { return m_Value.BlobValue(); }
 
 private:
     SqlDataType m_Type;
 
     MyStringA   m_PropName;
     MyStringA   m_SqlName;
-
-    // values
-    INT64       m_IntegerValue;
-    double      m_RealValue;
-    MyStringA   m_TextValue;
-    MyBuffer    m_BlobValue;
+    MySqlValue  m_Value;
 
     // other limitation or relationship
 };

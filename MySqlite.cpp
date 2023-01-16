@@ -257,6 +257,7 @@ int MySqlite::Delete(MySqlEntityBase* ent) {
         HandleSqliteError(err);
         goto done;
     }
+    err = 0;
 
 done:
     if (stmt) {

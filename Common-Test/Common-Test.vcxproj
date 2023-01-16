@@ -32,6 +32,10 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>D:\Dev\fs\thirdpart\release\winx64\sqlite_release\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Dev\fs\thirdpart\release\winx64\sqlite_release\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
   </ItemGroup>
@@ -42,6 +46,7 @@
     <ClCompile Include="MyDataPacketTest.cpp" />
     <ClCompile Include="MyDateTest.cpp" />
     <ClCompile Include="MyJsonTest.cpp" />
+    <ClCompile Include="MySqliteTest.cpp" />
     <ClCompile Include="MyStringWTest.cpp" />
     <ClCompile Include="MyValObjHashMapTest.cpp" />
     <ClCompile Include="MyLinkListTest.cpp" />
@@ -96,6 +101,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>sqlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

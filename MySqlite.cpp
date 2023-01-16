@@ -62,7 +62,9 @@ int MySqlite::DeleteTable(const char* tableName) {
 int MySqlite::Insert(MySqlEntityBase* ent) {
     int err = 0;
     sqlite3_stmt* stmt = NULL;
-    MyStringA sql, namesStr, placeholdersStr, tmp;
+    MyStringA sql, namesStr, placeholdersStr;
+    MyArray<MyStringA> strArgs;
+    MyStringA* curStrArg = NULL;
     MySqlEntityField* f = NULL;
     MyArray<MySqlEntityField>* fields = ent->Fields();
 
@@ -111,15 +113,16 @@ int MySqlite::Insert(MySqlEntityBase* ent) {
             break;
 
         case SqlDataType::tText:
-            EscapeText(f->TextValue()->Deref(), &tmp);
-            if (err = sqlite3_bind_text(stmt, i + 1, tmp.Deref(), tmp.Length(), NULL)) {
+            curStrArg = strArgs.AddNew();
+            EscapeText(f->TextValue()->Deref(), curStrArg);
+            if (err = sqlite3_bind_text(stmt, i + 1, curStrArg->Deref(), curStrArg->Length(), NULL)) {
                 HandleSqliteError(err);
                 goto done;
             }
             break;
 
         case SqlDataType::tBlob:
-            if (err = sqlite3_bind_blob(stmt, i + 1, tmp.Deref(), tmp.Length(), NULL)) {
+            if (err = sqlite3_bind_blob(stmt, i + 1, f->BlobValue()->Deref(), f->BlobValue()->Length(), NULL)) {
                 HandleSqliteError(err);
                 goto done;
             }
@@ -134,7 +137,7 @@ int MySqlite::Insert(MySqlEntityBase* ent) {
     }
     err = 0;
 
-    // TODO: query the ID
+    ent->SetID(sqlite3_last_insert_rowid(m_Handle));
 
 done:
     if (stmt) {
@@ -151,7 +154,9 @@ int MySqlite::Update(MySqlEntityBase* ent) {
     }
 
     sqlite3_stmt* stmt = NULL;
-    MyStringA sql, setStr, tmp;
+    MyStringA sql, setStr;
+    MyArray<MyStringA> strArgs;
+    MyStringA* curStrArg = NULL;
     MySqlEntityField* f = NULL;
     MyArray<MySqlEntityField>* fields = ent->Fields();
 
@@ -198,15 +203,16 @@ int MySqlite::Update(MySqlEntityBase* ent) {
             break;
 
         case SqlDataType::tText:
-            EscapeText(f->TextValue()->Deref(), &tmp);
-            if (err = sqlite3_bind_text(stmt, i + 1, tmp.Deref(), tmp.Length(), NULL)) {
+            curStrArg = strArgs.AddNew();
+            EscapeText(f->TextValue()->Deref(), curStrArg);
+            if (err = sqlite3_bind_text(stmt, i + 1, curStrArg->Deref(), curStrArg->Length(), NULL)) {
                 HandleSqliteError(err);
                 goto done;
             }
             break;
 
         case SqlDataType::tBlob:
-            if (err = sqlite3_bind_blob(stmt, i + 1, tmp.Deref(), tmp.Length(), NULL)) {
+            if (err = sqlite3_bind_blob(stmt, i + 1, f->BlobValue()->Deref(), f->BlobValue()->Length(), NULL)) {
                 HandleSqliteError(err);
                 goto done;
             }
@@ -219,6 +225,7 @@ int MySqlite::Update(MySqlEntityBase* ent) {
         HandleSqliteError(err);
         goto done;
     }
+    err = 0;
 
 done:
     if (stmt) {

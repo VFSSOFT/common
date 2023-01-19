@@ -8,7 +8,9 @@
 #include <stdarg.h>
 
 #ifdef _WIN32
-#define WIN32
+    #ifndef WIN32
+    #define WIN32
+    #endif
 #pragma warning(disable: 4267)
 #pragma warning(disable: 4996)
 

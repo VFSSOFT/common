@@ -296,13 +296,13 @@ int MyServiceManager::Query(const wchar_t* serviceName, MyWinServiceConfig* retC
     retConfig->ServiceType  = (int) lpsc->dwServiceType;
     retConfig->StartType    = (int) lpsc->dwStartType;
     retConfig->ErrorControl = (int) lpsc->dwErrorControl;
-    retConfig->BinaryPathName.Set(lpsc->lpBinaryPathName);
-    retConfig->LoadOrderGroup.Set(lpsc->lpLoadOrderGroup);
+    retConfig->BinaryPathName.Set((const WCHAR*)lpsc->lpBinaryPathName);
+    retConfig->LoadOrderGroup.Set((const WCHAR*)lpsc->lpLoadOrderGroup);
     retConfig->TagId = lpsc->dwTagId;
-    retConfig->Dependencies.Set(lpsc->lpDependencies);
-    retConfig->ServiceStartName.Set(lpsc->lpServiceStartName);
-    retConfig->DisplayName.Set(lpsc->lpDisplayName);
-    retConfig->Description.Set(lpsd->lpDescription);
+    retConfig->Dependencies.Set((const WCHAR*)lpsc->lpDependencies);
+    retConfig->ServiceStartName.Set((const WCHAR*)lpsc->lpServiceStartName);
+    retConfig->DisplayName.Set((const WCHAR*)lpsc->lpDisplayName);
+    retConfig->Description.Set((const WCHAR*)lpsd->lpDescription);
 
 done:
     if (lpsc) {

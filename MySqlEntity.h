@@ -138,6 +138,13 @@ public:
     MyArray<MySqlEntityField>* Fields() { return &m_Fields; }
 
     MySqlEntityField* GetFieldBySqlName(const char* sqlName);
+    
+    // Utils functions
+    const char* GetText(const char* sqlName);
+    void SetText(const char* sqlName, const char* val, int valLen);
+    
+    INT64 GetInt(const char* sqlName);
+    void SetInt(const char* sqlName, INT64 val);
 
 protected:
     MyStringA m_TableName;

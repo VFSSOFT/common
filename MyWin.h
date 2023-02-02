@@ -18,6 +18,8 @@ public:
     static LARGE_INTEGER LongLong2LargeInteger(const UINT64 val);
 
     static HRESULT RetrieveWindowsSid(MyStringW& sid);
+    
+    static int MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd);
 };
 
 class MyWinRegValue {

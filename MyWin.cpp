@@ -79,6 +79,21 @@ done:
     return err;
 }
 
+int MyWin::MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd) {
+    int ret = (int) ShellExecute(
+        hwnd,
+        op,
+        file,
+        parameters,
+        directory,
+        showCmd
+    );
+    if (ret > 32) {
+        return 0;
+    }
+    return ret;
+}
+
 
 
 

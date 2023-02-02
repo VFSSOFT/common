@@ -21,5 +21,21 @@ MySqlEntityField* MySqlEntityBase::GetFieldBySqlName(const char* sqlName) {
     return NULL;
 }
 
+const char* MySqlEntityBase::GetText(const char* sqlName) {
+    MySqlEntityField* f = GetFieldBySqlName(sqlName);
+    return f->TextValue()->Deref();
+}
+void MySqlEntityBase::SetText(const char* sqlName, const char* val, int valLen) {
+    MySqlEntityField* f = GetFieldBySqlName(sqlName);
+    f->TextValue()->Set(val, valLen);
+}
+INT64 MySqlEntityBase::GetInt(const char* sqlName) {
+    MySqlEntityField* f = GetFieldBySqlName(sqlName);
+    return f->IntegerValue();
+}
+void MySqlEntityBase::SetInt(const char* sqlName, INT64 val) {
+    MySqlEntityField* f = GetFieldBySqlName(sqlName);
+    f->SetIntegerValue(val);
+}
 
 #endif // _MY_SQL_ENTITY_CPP_

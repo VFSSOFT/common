@@ -8,6 +8,34 @@
 
 #include <windows.h>
 
+class MySystemInfo {
+public:
+    MyStringW ComputerName;
+    int       NumOfProcessors;
+    MyStringA ProcsssorArchitecture;
+    int       OSMajorVersion;
+    int       OSMinorVersion;
+    int       OSBuildNumber;
+    int       OSPlatformId;
+    MyStringW OSServicePack;
+    int       OSServicePackMajor;
+    int       OSServicePackMinor;
+    int       OSSuiteMask;
+    int       OSProductType;
+    
+    MySystemInfo(): 
+        NumOfProcessors(-1),
+        OSMajorVersion(-1),
+        OSMinorVersion(-1),
+        OSBuildNumber(-1),
+        OSPlatformId(-1),
+        OSServicePackMajor(-1),
+        OSServicePackMinor(-1),
+        OSSuiteMask(-1),
+        OSProductType(-1)
+    {}
+};
+
 // Base class that wrap all windows utils functions
 class MyWin {
 public:
@@ -20,6 +48,8 @@ public:
     static HRESULT RetrieveWindowsSid(MyStringW& sid);
     
     static int MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd);
+    
+    static void MyGetSystemInfo(MySystemInfo* sysInfo);
 };
 
 class MyWinRegValue {

@@ -94,7 +94,64 @@ int MyWin::MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameter
     return ret;
 }
 
-
+void MyWin::MyGetSystemInfo(MySystemInfo* sysInfo) {
+    WCHAR computerNameBuffer[MAX_COMPUTERNAME_LENGTH + 1];
+    DWORD computerNameBufferLen = MAX_COMPUTERNAME_LENGTH + 1;
+    
+    if (GetComputerName(computerNameBuffer, &computerNameBufferLen)) {
+        sysInfo->ComputerName.Set(computerNameBuffer, computerNameBufferLen);
+    } else {
+        sysInfo->ComputerName.Set(L"Unknown");
+    }
+    
+    SYSTEM_INFO si;
+    GetSystemInfo(&si);
+    
+    sysInfo->NumOfProcessors = (int) si.dwNumberOfProcessors;
+    
+    switch (si.wProcessorArchitecture) {
+    case PROCESSOR_ARCHITECTURE_AMD64:
+        sysInfo->ProcsssorArchitecture.Set("x64 (AMD or Intel)");
+        break;
+    case PROCESSOR_ARCHITECTURE_ARM:
+        sysInfo->ProcsssorArchitecture.Set("ARM");
+        break;
+    case PROCESSOR_ARCHITECTURE_ARM64:
+        sysInfo->ProcsssorArchitecture.Set("ARM64");
+        break;
+    case PROCESSOR_ARCHITECTURE_IA64:
+        sysInfo->ProcsssorArchitecture.Set("Intel Itanium-based");
+        break;
+    case PROCESSOR_ARCHITECTURE_INTEL:
+        sysInfo->ProcsssorArchitecture.Set("x86");
+        break;
+    case PROCESSOR_ARCHITECTURE_UNKNOWN:
+        sysInfo->ProcsssorArchitecture.Set("Unknown architecture");
+        break;
+    default:
+        sysInfo->ProcsssorArchitecture.SetWithFormat("Unkown architecture: %d", (int)si.wProcessorArchitecture);
+        break;
+    }
+    
+    NTSTATUS(WINAPI *RtlGetVersion)(LPOSVERSIONINFOEXW);
+    OSVERSIONINFOEX osInfo;
+    
+    *(FARPROC*)&RtlGetVersion = GetProcAddress(GetModuleHandleA("ntdll"), "RtlGetVersion");
+    assert(RtlGetVersion != NULL);
+    
+    osInfo.dwOSVersionInfoSize = sizeof(osInfo);
+    RtlGetVersion(&osInfo);
+    
+    sysInfo->OSMajorVersion = osInfo.dwMajorVersion;
+    sysInfo->OSMinorVersion = osInfo.dwMinorVersion;
+    sysInfo->OSBuildNumber  = osInfo.dwBuildNumber;
+    sysInfo->OSPlatformId   = osInfo.dwPlatformId;
+    sysInfo->OSServicePack.Set(osInfo.szCSDVersion);
+    sysInfo->OSServicePackMajor = osInfo.wServicePackMajor;
+    sysInfo->OSServicePackMinor = osInfo.wServicePackMinor;
+    sysInfo->OSSuiteMask        = osInfo.wSuiteMask;
+    sysInfo->OSProductType      = osInfo.wProductType;
+}
 
 
 MyWinReg::MyWinReg() {

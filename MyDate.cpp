@@ -218,7 +218,7 @@ int MyDate::FromMillisecondsFrom1970(UINT64 mills) {
 }
 
 int MyDate::Format(const char* format, MyStringA& ret) {
-  return MyDate::FormatTimeToStr(ret, format, m_Year, m_Month, m_Day, m_Hour, m_Minute, m_Second, m_MS, -1, -1, -1);
+  return MyDate::FormatTimeToStr(ret, format, m_Year, m_Month, m_Day, m_Hour, m_Minute, m_Second, m_MS, m_DayOfWeek, -1, -1);
 }
 int MyDate::FormatTimeToStr(MyStringA& ret, const char* format, int year, int month, int day, int hour, int minute, int second, int ms, int dayOfWeek, int offsetHour, int offsetMinutes) {
   int retCode = 0;

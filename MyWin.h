@@ -22,6 +22,7 @@ public:
     int       OSServicePackMinor;
     int       OSSuiteMask;
     int       OSProductType;
+    MyStringA MachineId;
     
     MySystemInfo(): 
         NumOfProcessors(-1),

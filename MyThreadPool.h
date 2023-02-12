@@ -17,17 +17,20 @@ public:
         Entry = NULL;
         Param = NULL;
         TaskId = 0;
+        Thread = NULL;
     }
 
     void CopyFrom(MyThreadPoolTaskInfo* other) {
         this->Entry = other->Entry;
         this->Param = other->Param;
         this->TaskId = other->TaskId;
+        this->Thread = other->Thread;
     }
 
     MyThreadPoolItemEntry Entry;
     void*                 Param;
     UINT64                TaskId;
+    MyThread*             Thread;
 };
 
 class MyThreadPoolItem : public MyThread {

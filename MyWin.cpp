@@ -151,6 +151,10 @@ void MyWin::MyGetSystemInfo(MySystemInfo* sysInfo) {
     sysInfo->OSServicePackMinor = osInfo.wServicePackMinor;
     sysInfo->OSSuiteMask        = osInfo.wSuiteMask;
     sysInfo->OSProductType      = osInfo.wProductType;
+    
+    MyWinRegValue machineIdRegValue;
+    MyWinReg::GetKeyValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\SQMClient", L"MachineId", machineIdRegValue);
+    sysInfo->MachineId.SetUnicode(machineIdRegValue.strValue + 1, wcslen(machineIdRegValue.strValue) - 2);
 }
 
 

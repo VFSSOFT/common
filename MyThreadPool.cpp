@@ -24,6 +24,7 @@ int MyThreadPoolItem::Run() {
     while (!Aborted()) {
         if (m_ThreadPool->GetNextPendingTask(&m_TaskInfo)) {
             m_IsBusy = true;
+            m_TaskInfo.Thread = this;
             m_TaskInfo.Entry(&m_TaskInfo);
             m_IsBusy = false;
         } else {

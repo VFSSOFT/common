@@ -10,9 +10,25 @@
 UINT64 MyUtils::CurrentThreadId() {
   
 #if _WIN32
-  return (UINT64)GetCurrentThreadId();
+    return (UINT64)GetCurrentThreadId();
 #else
-  return -1;
+    assert(false);
+    return -1;
+#endif
+}
+
+void MyUtils::RandomBytes(char* buf, int len) {
+
+#if _WIN32
+    NTSTATUS status = BCryptGenRandom(
+        NULL,
+        (PUCHAR)buf,
+        len,
+        BCRYPT_USE_SYSTEM_PREFERRED_RNG
+    );
+    assert(BCRYPT_SUCCESS(status));
+#else
+    assert(false);
 #endif
 }
 

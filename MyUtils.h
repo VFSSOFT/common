@@ -6,6 +6,8 @@
 class MyUtils {
 public:
   static UINT64 CurrentThreadId();
+
+  static void RandomBytes(char* buf, int len);
 };
 
 #endif  // _MY_UTILS_H_

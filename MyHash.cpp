@@ -15,6 +15,12 @@ int MyHash::CalcHash(int hashAlg, const char* data, int dataLen, unsigned char**
     return MY_ERR_OUT_OF_MEMORY;
 
   switch (hashAlg) {
+    case MYHASH_ALG_SHA1:
+        if (!(success = EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL))) {
+            errCode = MY_ERR_CRYPTO_ERROR;
+            goto done;
+        }
+        break;
 
   case MYHASH_ALG_SHA256:
     if (!(success = EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL))) {

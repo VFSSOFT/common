@@ -2,6 +2,7 @@
 #define MY_HASH_H_
 
 #define MYHASH_ALG_SHA256 1
+#define MYHASH_ALG_SHA1   2
 
 class MyHash {
 public:

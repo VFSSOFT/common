@@ -134,7 +134,7 @@ void MyLogger::Log(MyLogLevel level, const char* fmt, va_list args) {
 
 int MyLogger::MakePrefix(MyLogLevel logLevel) {
   // [Timestamp] [ThreadID] [LogLevel]
-  long long timestamp = MyDate::UtcNow();
+  UINT64 timestamp = MyDate::UtcNow();
   UINT64 tid = MyUtils::CurrentThreadId();
   const char* levelStr = m_LogLevelStrs[(int)logLevel];
 

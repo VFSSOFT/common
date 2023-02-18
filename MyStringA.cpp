@@ -110,7 +110,7 @@ int MyStringA::HashCode() {
 
     char* p = Deref();
     int len = Length();
-    while (len > 0) {
+    while (len > 1) {
         hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ p[0];
         hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ p[1];
         p += 2;

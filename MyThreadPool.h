@@ -42,7 +42,7 @@ public:
 
     MyThreadPoolTaskInfo* CurrentTaskInfo();
 
-    virtual int Run();
+    int Run() override;
 
 private:
     bool                 m_IsBusy;

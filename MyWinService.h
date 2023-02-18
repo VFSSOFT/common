@@ -29,6 +29,8 @@ public:
 class MyServiceManager {
 
 public:
+    MyServiceManager() {}
+
     int Install(MyWinServiceConfig* config);
     int Start(const wchar_t* serviceName);
     int Stop(const wchar_t* serviceName);

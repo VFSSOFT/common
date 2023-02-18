@@ -172,7 +172,7 @@ int MyEncodings::B64Decode(const char* encodedData, MyBuffer* decoded, bool remo
             if (err = decoded->AppendChar(c)) return err;
 
             if ((pos + 3 < len) && data[pos + 3] != '=' && data[pos + 3] != '.') {
-                int posOfChar3 = B64PosOfChar(pos + 3);
+                int posOfChar3 = B64PosOfChar(data[pos + 3]);
                 if (posOfChar3 == MY_ERR_BASE_ENCODING) return MY_ERR_BASE_ENCODING;
 
                 c = ((posOfChar2 & 0x03) << 6) + posOfChar3;

@@ -62,7 +62,7 @@ int MyBuffer::InsertChar(char c, int index) {
 
   memmove(m_Buffer + index + 1, m_Buffer + index, oldLen);
   m_Buffer[index] = c;
-  return errCode;
+  return 0;
 }
 int MyBuffer::Insert(const char* data, int len, int index) {
   if (index < 0 || index > Length()) 
@@ -83,7 +83,7 @@ int MyBuffer::Insert(const char* data, int len, int index) {
 
   memmove(m_Buffer + index + len, m_Buffer + index, oldLen - index);
   memcpy(m_Buffer + index, data, len);
-  return errCode;
+  return 0;
 }
 
 
@@ -235,7 +235,6 @@ int MyBuffer::LastIndexOf(const char c) {
   return -1;
 }
 int MyBuffer::LastIndexOf(const char c, int startIndex, int endIndex) {
-  char* pStart = m_Buffer + startIndex;
   int index = endIndex - 1;
   while (index >= startIndex) {
     char* pEnd = m_Buffer + index;

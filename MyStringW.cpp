@@ -109,7 +109,7 @@ int MyStringW::SetLength(int len) {
   if (len <= m_Cap) {
     // Leave the truncated data in the m_Buffer
     m_Buffer[len] = 0;
-  } else if (len > m_Cap) {
+  } else /*if (len > m_Cap)*/ {
     int errCode = this->EnsureCap(len);
     if (errCode != 0) return errCode;
   }
@@ -243,7 +243,7 @@ int MyStringW::HashCode() {
 
     wchar_t* p = m_Buffer;
     int len = m_Length;
-    while (len > 2) {
+    while (len > 1) {
         hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ p[0];
         hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ p[1];
         p += 2;

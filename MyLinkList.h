@@ -178,7 +178,6 @@ void MyLinkList<T>::RemoveNode(MyLinkListNode<T>* node, bool freeNode) {
         nextNode->Prev = NULL;
         m_Head = nextNode;
     } else if (nextNode == NULL) { // tail node
-        MyLinkListNode<T>* prevNode = m_Tail->Prev;
         prevNode->Next = NULL;
         m_Tail = prevNode;
     } else {

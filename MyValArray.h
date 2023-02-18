@@ -98,9 +98,6 @@ int MyValArray<T>::Insert(int idx, T item) {
 
 template <typename T>
 T MyValArray<T>::Get(int idx) {
-  if (idx < 0 || idx >= m_Size) {
-    int a = 0;
-  }
   assert(idx >= 0 && idx < m_Size);
   return m_Array[idx];
 }

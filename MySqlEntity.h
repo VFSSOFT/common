@@ -58,6 +58,8 @@ public:
         assert(m_Type == SqlDataType::tBlob);
         return &m_BlobValue;
     }
+    
+    void CopyFrom(MySqlValue* value);
 
 private:
     SqlDataType m_Type;
@@ -112,6 +114,8 @@ public:
     void SetRealValue(double val) { m_Value.SetRealValue(val); }
     MyStringA* TextValue() { return m_Value.TextValue(); }
     MyBuffer* BlobValue() { return m_Value.BlobValue(); }
+    
+    void CopyFrom(MySqlEntityField* field);
 
 private:
     SqlDataType m_Type;
@@ -145,6 +149,8 @@ public:
     
     INT64 GetInt(const char* sqlName);
     void SetInt(const char* sqlName, INT64 val);
+    
+    void CopyFrom(MySqlEntityBase* entity);
 
 protected:
     MyStringA m_TableName;

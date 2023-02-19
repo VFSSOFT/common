@@ -51,6 +51,8 @@ public:
     static int MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd);
     
     static void MyGetSystemInfo(MySystemInfo* sysInfo);
+    
+    static int MyGetAppDataFolder(const wchar_t* appName, MyStringW* ret);
 };
 
 class MyWinRegValue {

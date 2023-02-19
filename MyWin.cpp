@@ -6,6 +6,7 @@
 #include "MyWin.h"
 
 #include "sddl.h"
+#include "shlobj_core.h"
 
 int MyWin::GetSysLastErrorCode() {
   return (int)::GetLastError();
@@ -157,6 +158,20 @@ void MyWin::MyGetSystemInfo(MySystemInfo* sysInfo) {
     sysInfo->MachineId.SetUnicode(machineIdRegValue.strValue + 1, wcslen(machineIdRegValue.strValue) - 2);
 }
 
+int MyWin::MyGetAppDataFolder(const wchar_t* appName, MyStringW* ret) {
+    wchar_t path[MAX_PATH];
+    HRESULT result = SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, path);
+    if (SUCCEEDED(result)) {
+        ret->Set(path);
+        if (appName != NULL && wcslen(appName) > 0) {
+            MyStringW newPath;
+            MyStringW::JoinPath(ret->Deref(), ret->Length(), appName, wcslen(appName), &newPath);
+            ret->Set(newPath.Deref(), newPath.Length());
+        }
+        return 0;
+    }
+    return result;
+}
 
 MyWinReg::MyWinReg() {
     INIT_LAST_ERROR;

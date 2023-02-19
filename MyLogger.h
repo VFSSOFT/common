@@ -4,6 +4,8 @@
 #include "MyCoreDef.h"
 
 #include "MyCriticalSection.h"
+#include "MyStringW.h"
+#include "MyFile.h"
 
 class MyILogger {
 public:
@@ -26,6 +28,14 @@ public:
 
   MyLogLevel LogLevel() { return m_LogLevel; }
   void SetLogLevel(MyLogLevel val) { m_LogLevel = val; }
+
+  UINT64 LogRotateInterval() { return m_LogRotateInterval; }
+  void SetLogRotateInterval(UINT64 val) { m_LogRotateInterval = val; }
+  UINT64 MaxLogFileSize() { return m_MaxLogFileSize; }
+  void SetMaxLogFileSize(UINT64 val) { m_MaxLogFileSize = val; }
+
+  MyStringW* LogDirectory() { return &m_LogDirectory; }
+  int SetLogDirectory(const wchar_t* dir, int len);
 
   MyILogger* ILogger() { return m_ILogger; }
 
@@ -62,10 +72,19 @@ protected:
 private:
   int MakePrefix(MyLogLevel logLevel);
 
+  int OpenLogFileHandle();
+  int CloseLogFileHandle();
+  int RotateLogFile(MyStringW* file);
+
 private:
   MyILogger* m_ILogger;
 
   MyLogLevel m_LogLevel;
+
+  UINT64     m_LogRotateInterval;
+  UINT64     m_MaxLogFileSize;
+  MyStringW  m_LogDirectory;
+  MyFile     m_LogFile;
 
   char m_PrefixBuf[16];
   char m_SuffixBuf[16];
@@ -73,6 +92,8 @@ private:
   char m_LogLevelStrs[6][8];
 
   MyCriticalSection m_CriticalSection;
+
+  MY_LAST_ERROR_DECL;
 };
 
 #endif // _MY_LOGGER_H_

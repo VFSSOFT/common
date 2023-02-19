@@ -26,7 +26,7 @@ const char ASCII_VISIABLE_CHAR_MAP[] = {
   'x', 'y', 'z', '{', '|', '}', '~', '.',   /* 120-127:            */
 };
 
-MyLogger::MyLogger(MyILogger* logger) {
+MyLogger::MyLogger(MyILogger* logger) : m_LastErrorCode(0) {
   m_ILogger = logger;
   m_LogLevel = MyLogLevel::None;
 
@@ -44,8 +44,113 @@ MyLogger::MyLogger(MyILogger* logger) {
   m_PrefixBuf[0] = 0;
   m_SuffixBuf[0] = 0;
   m_LogBuf[0] = 0;
+
+  m_LogDirectory.Set(L"");
+  m_LogRotateInterval = 24 * 60 * 60 * 1000; // a day
+  m_MaxLogFileSize = 100 * MB; // 100 M
 }
-MyLogger::~MyLogger() { }
+MyLogger::~MyLogger() {
+    CloseLogFileHandle();
+}
+
+int MyLogger::SetLogDirectory(const wchar_t* dir, int len) {
+    int err = 0;
+    m_LogDirectory.Set(dir, len);
+
+    if (err = OpenLogFileHandle()) return err;
+    return 0;
+}
+int MyLogger::OpenLogFileHandle() {
+    int err = 0;
+    MyFile f;
+    MyArray<MyStringW> filenames;
+    MyValArray<UINT64> fileAttrs;
+    MyDate date;
+    MyStringA curTimeStr;
+    MyStringW logFilename, logFilePath;
+    UINT64 curFileSize = 0;
+    
+    if (err = f.ListDirectory(m_LogDirectory.Deref(), &filenames, &fileAttrs)) {
+        return LastError(err, f.LastErrorMessage());
+    }
+
+    MyDate::UtcNow(date);
+    if (err = date.Format("yyyy-MM-dd", curTimeStr)) return LastError(err, "Invalid date time format");
+
+    MyStringW prefixPart;
+    int maxLogFilePrefixNum = 0;
+    logFilename.SetUtf8(curTimeStr.Deref(), curTimeStr.Length());
+
+    for (int i = 0; i < filenames.Size(); i++) {
+        MyStringW* curFilename = filenames.Get(i);
+        if (curFilename->StartWith(logFilename.Deref())) {
+            prefixPart.Set(curFilename->Deref() + logFilename.Length() + 1);
+            int curnum = prefixPart.DerefAsInt();
+            if (curnum > maxLogFilePrefixNum) maxLogFilePrefixNum = curnum;
+        }
+    }
+
+    if (maxLogFilePrefixNum > 0) {
+        logFilename.AppendChar(L'-');
+        logFilename.AppendInt(maxLogFilePrefixNum);
+    }
+
+    // Close the possible opened log file
+    if (err = CloseLogFileHandle()) return err;
+
+    MyStringW::JoinPath(m_LogDirectory.Deref(), m_LogDirectory.Length(), logFilename.Deref(), logFilename.Length(), &logFilePath);
+    if (err = m_LogFile.Open(
+        logFilePath.Deref(), 
+        MY_FILE_CREATION_DISP_OPEN_ALWAYS, 
+        MY_FILE_DESIRED_ACCESS_ALL, 
+        MY_FILE_SHARE_MODE_SHARE_READ)
+    ) {
+        return LastError(err, m_LogFile.LastErrorMessage());
+    }
+
+    if (err = m_LogFile.Length(&curFileSize)) {
+        return LastError(err, m_LogFile.LastErrorMessage());
+    }
+
+    if (curFileSize >= m_MaxLogFileSize) {
+        logFilename.SetUtf8(curTimeStr.Deref(), curTimeStr.Length());
+        logFilename.AppendChar(L'-');
+        logFilename.AppendInt(maxLogFilePrefixNum + 1);
+
+        MyStringW::JoinPath(m_LogDirectory.Deref(), m_LogDirectory.Length(), logFilename.Deref(), logFilename.Length(), &logFilePath);
+        if (err = m_LogFile.Open(
+            logFilePath.Deref(), 
+            MY_FILE_CREATION_DISP_OPEN_ALWAYS, 
+            MY_FILE_DESIRED_ACCESS_ALL, 
+            MY_FILE_SHARE_MODE_SHARE_READ)
+        ) {
+            return LastError(err, m_LogFile.LastErrorMessage());
+        }
+    }
+    return 0;
+}
+int MyLogger::CloseLogFileHandle() {
+    if (m_LogFile.Opened()) {
+        m_LogFile.Close();
+    }
+    return 0;
+}
+int MyLogger::RotateLogFile(MyStringW* file) {
+    if (!m_LogFile.Opened()) // Log to file is not enabled, skip 
+        return 0;
+
+    int err = 0;
+    UINT64 curFileSize = 0;
+    if (err = m_LogFile.Length(&curFileSize)) {
+        return LastError(err, m_LogFile.LastErrorMessage());
+    }
+
+    if (curFileSize >= m_MaxLogFileSize) {
+        if (err = OpenLogFileHandle()) return err;
+    }
+
+    return 0;
+}
 
 void MyLogger::LogError(const char* fmt, ...) {
   if (m_LogLevel < MyLogLevel::Error) return;
@@ -124,6 +229,12 @@ void MyLogger::Log(MyLogLevel level, const char* fmt, va_list args) {
   m_CriticalSection.Acquire();
   int curLen = MakePrefix(level);
   curLen += vsprintf(&m_LogBuf[curLen], fmt, args);
+  if (m_LogDirectory.Length() > 0) {
+    m_LogBuf[curLen] = '\n';
+    m_LogBuf[curLen+1] = 0;
+    m_LogFile.Write(m_LogBuf, curLen + 1);
+    m_LogBuf[curLen] = 0;
+  }
   if (m_ILogger) {
     m_ILogger->OutoutLog(m_LogBuf);
   } else {

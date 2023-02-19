@@ -82,6 +82,41 @@ int MyStringW::AppendChar(WCHAR c) {
     m_Length++;
     return errCode;
 }
+int MyStringW::AppendInt(int intVal, int placeHolderLen) {
+    return AppendInt64(intVal, placeHolderLen);
+}
+int MyStringW::SetInt64(INT64 val, int placeHolderLen) {
+    Reset();
+    return AppendInt64(val, placeHolderLen);
+}
+int MyStringW::AppendInt64(INT64 intVal, int placeHolderLen) {
+    int err = 0;
+    wchar_t buf[32];
+    int numLen = 0;
+
+    memset(buf, 0, sizeof(wchar_t) * 32);
+
+    if (intVal < 0) {
+        if (err = AppendChar(L'-')) return err;
+        intVal *= -1;
+    }
+    do {
+        buf[numLen++] = (intVal % 10) + L'0';
+        intVal /= 10;
+    } while (intVal > 0);
+
+    if (placeHolderLen > 0) {
+        int zeroToAdd = placeHolderLen - numLen;
+        for (int i = 0; i < zeroToAdd; i++) {
+            if (err = AppendChar(L'0')) return err;
+        }
+    }
+
+    for (numLen--; numLen >= 0; numLen--) {
+        if (err = AppendChar(buf[numLen])) return err;
+    }
+    return 0;
+}
 
 int MyStringW::EnsureCap(int cap) {
   if (cap <= m_Cap) {
@@ -199,6 +234,21 @@ int MyStringW::Replace(const WCHAR* toReplace, const WCHAR* replaceWith) {
         index = (p - m_Buffer) + replaceWithLen;
     }
     return 0;
+}
+
+INT64 MyStringW::DerefAsInt64() {
+    INT64 val = 0;
+    bool negative = Length() > 0 && Deref()[0] == L'-';
+    int i = negative ? 1 : 0;
+    for (; i < Length(); i++) {
+        char c = Deref()[i] - L'0';
+        assert(c >= 0 && c <= 9);
+        val = val * 10 + c;
+    }
+    return negative ? -1 * val : val;
+}
+int MyStringW::DerefAsInt() {
+    return (int) DerefAsInt64();
 }
 
 BOOL MyStringW::StartWith(const WCHAR* str) {

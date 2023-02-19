@@ -17,6 +17,9 @@ public:
   int SetUtf8(const char* str, int len);
   int Append(const WCHAR* str, int len=-1);
   int AppendChar(WCHAR c);
+  int AppendInt(int intVal, int placeHolderLen=0);
+  int SetInt64(INT64 val, int placeHolderLen=0);
+  int AppendInt64(INT64 intVal, int placeHolderLen=0);
   int SetLength(int len); // set wstring length
   void Reset();
 
@@ -29,6 +32,8 @@ public:
 
   int RemoveLast() { return SetLength(m_Length - 1); }
 
+  INT64 DerefAsInt64();
+  int DerefAsInt(); 
   inline WCHAR* Deref(int off=0) { return m_Buffer + off; }
   inline int Length()   { return m_Length; }
 

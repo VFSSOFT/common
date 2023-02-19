@@ -153,6 +153,7 @@
     <ClInclude Include="..\MyFileAttributes.h" />
     <ClInclude Include="..\MyJSON.h" />
     <ClInclude Include="..\MyLock.h" />
+    <ClInclude Include="..\MyLogger.h" />
     <ClInclude Include="..\MyMutex.h" />
     <ClInclude Include="..\MySqlEntity.h" />
     <ClInclude Include="..\MySqlite.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="..\MyFileAttributes.cpp" />
     <ClCompile Include="..\MyJSON.cpp" />
     <ClCompile Include="..\MyLock.cpp" />
+    <ClCompile Include="..\MyLogger.cpp" />
     <ClCompile Include="..\MyMemPool.cpp" />
     <ClCompile Include="..\MyMutex.cpp" />
     <ClCompile Include="..\MySqlEntity.cpp" />

@@ -59,7 +59,7 @@ void MySqlEntityBase::CopyFrom(MySqlEntityBase* entity) {
     
     for (int i = 0; i < entity->m_Fields.Size(); i++) {
         MySqlEntityField* otherField = entity->m_Fields.Get(i);
-        MySqlEntityField* curField = m_Fields.AddNew();
+        MySqlEntityField* curField = m_Fields.Get(i);
         curField->CopyFrom(otherField);
     }
 }

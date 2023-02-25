@@ -5,6 +5,15 @@
 #include "MyStringA.h"
 #include "MyStringW.h"
 
+#define MY_SERVICE_STATUS_STOPPED          0x1
+#define MY_SERVICE_STATUS_START_PENDING    0x2
+#define MY_SERVICE_STATUS_STOP_PENDING     0x3
+#define MY_SERVICE_STATUS_RUNNING          0x4
+#define MY_SERVICE_STATUS_CONTINUE_PENDING 0x5
+#define MY_SERVICE_STATUS_PAUSE_PENDING    0x6
+#define MY_SERVICE_STATUS_PAUSED           0x7
+
+
 class MyWinServiceConfig {
 public:
     int       ServiceType;
@@ -35,6 +44,7 @@ public:
     int Start(const wchar_t* serviceName);
     int Stop(const wchar_t* serviceName);
     int Query(const wchar_t* serviceName, MyWinServiceConfig* retConfig);
+    int QueryServiceStatus(const wchar_t* serviceName, int* status);
     int Disable(const wchar_t* serviceName);
     int Enable(const wchar_t* serviceName);
     int UpdateDescription(const wchar_t* serviceName, const wchar_t* description);

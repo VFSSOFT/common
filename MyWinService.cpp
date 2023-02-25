@@ -320,6 +320,28 @@ done:
 
     return err;
 }
+int MyServiceManager::QueryServiceStatus(const wchar_t* serviceName, int* status) {
+    int err = 0;
+    SC_HANDLE scManager = NULL;
+    SC_HANDLE scService = NULL;
+    SERVICE_STATUS_PROCESS ssStatus;
+
+    if (err = MyOpenScManager(&scManager)) return err;
+    if (err = MyOpenService(scManager, serviceName, SERVICE_ALL_ACCESS, &scService)) goto done;
+
+    if (err = MyQueryServiceStatus(scService, &ssStatus)) goto done;
+    
+    *status = ssStatus.dwCurrentState;
+
+done:
+    if (scService) {
+        CloseServiceHandle(scService);
+    }
+    if (scManager) {
+        CloseServiceHandle(scManager);
+    }
+    return err;
+}
 int MyServiceManager::Disable(const wchar_t* serviceName) {
     return ChangeServiceStartType(serviceName, SERVICE_DISABLED);
 }

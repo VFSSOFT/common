@@ -87,6 +87,10 @@ int MyFile::Seek(UINT64 pos, int seekType) {
     dwMoveMethod = FILE_BEGIN;
   } else if (seekType == MY_FILE_SEEK_TYPE_CURRENT) {
     dwMoveMethod = FILE_CURRENT;
+  } else if (seekType == MY_FILE_SEEK_TYPE_END) {
+      dwMoveMethod = FILE_END;
+  } else {
+      assert(0);
   }
 
   distanceToMove = SetFilePointer(m_Handle, distanceToMove, &distanceToMoveHigh, dwMoveMethod);

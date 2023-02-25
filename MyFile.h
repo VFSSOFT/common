@@ -26,6 +26,7 @@
 
 #define MY_FILE_SEEK_TYPE_BEGIN                         1
 #define MY_FILE_SEEK_TYPE_CURRENT                       2
+#define MY_FILE_SEEK_TYPE_END                           3
 
 class MyFile {
 public:

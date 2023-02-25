@@ -127,6 +127,9 @@ int MyLogger::OpenLogFileHandle() {
             return LastError(err, m_LogFile.LastErrorMessage());
         }
     }
+    
+    m_LogFile.Seek(0, MY_FILE_SEEK_TYPE_END);
+    
     return 0;
 }
 int MyLogger::CloseLogFileHandle() {

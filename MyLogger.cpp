@@ -155,6 +155,12 @@ int MyLogger::RotateLogFile(MyStringW* file) {
     return 0;
 }
 
+void MyLogger::SetILogger(MyILogger* logger) {
+    m_CriticalSection.Acquire();
+    m_ILogger = logger;
+    m_CriticalSection.Release();
+}
+
 void MyLogger::LogError(const char* fmt, ...) {
   if (m_LogLevel < MyLogLevel::Error) return;
 
@@ -269,5 +275,35 @@ void MyLogger::CopyFrom(MyLogger* logger) {
   SetPrefix(logger->Prefix());
   SetSuffix(logger->Suffix());
 }
+
+void MyLogger::LogInfoEvent(const char* fmt, ...) {
+    // ignore log level
+    va_list args;
+    va_start(args, fmt);
+    LogEvent(MyLogLevel::Info, fmt, args);
+    va_end(args);
+}
+void MyLogger::LogErrorEvent(const char* fmt, ...) {
+    // ignore log level
+    va_list args;
+    va_start(args, fmt);
+    LogEvent(MyLogLevel::Error, fmt, args);
+    va_end(args);
+}
+void MyLogger::LogEvent(MyLogLevel level, const char* fmt, va_list args) {
+    if (m_ILogger == NULL) { return; }
+    m_CriticalSection.Acquire();
+    int curLen = MakePrefix(level);
+    curLen += vsprintf(&m_LogBuf[curLen], fmt, args);
+    if (m_LogDirectory.Length() > 0) {
+        m_LogBuf[curLen] = '\n';
+        m_LogBuf[curLen+1] = 0;
+        m_LogFile.Write(m_LogBuf, curLen + 1);
+        m_LogBuf[curLen] = 0;
+    }
+    m_ILogger->OutputEventLog(level, m_LogBuf);
+    m_CriticalSection.Release();
+}
+
 
 #endif // _MY_LOGGER_CPP_

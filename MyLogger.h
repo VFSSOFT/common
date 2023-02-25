@@ -7,11 +7,6 @@
 #include "MyStringW.h"
 #include "MyFile.h"
 
-class MyILogger {
-public:
-  virtual void OutoutLog(const char* msg) = 0;
-};
-
 enum class MyLogLevel {
   None       = 0,
   Error      = 1,
@@ -20,6 +15,13 @@ enum class MyLogLevel {
   Debug      = 4,
   DebugEx    = 5
 };
+
+class MyILogger {
+public:
+    virtual void OutoutLog(const char* msg) = 0;
+    virtual void OutputEventLog(MyLogLevel level, const char* msg) = 0;
+};
+
 
 class MyLogger {
 public:
@@ -38,6 +40,7 @@ public:
   int SetLogDirectory(const wchar_t* dir, int len);
 
   MyILogger* ILogger() { return m_ILogger; }
+  void SetILogger(MyILogger* logger);
 
   inline void SetPrefix(const char* prefix) {
     memset(m_PrefixBuf, 0, 16);
@@ -64,10 +67,14 @@ public:
   void LogDebugEx(const char* fmt, ...);
   void LogHexDump(const char* data, int len);
 
+  void LogInfoEvent(const char* fmt, ...);
+  void LogErrorEvent(const char* fmt, ...);
+
   void CopyFrom(MyLogger* logger);
 
 protected:
   virtual void Log(MyLogLevel level, const char* fmt, va_list args);
+  virtual void LogEvent(MyLogLevel level, const char* fmt, va_list args);
 
 private:
   int MakePrefix(MyLogLevel logLevel);

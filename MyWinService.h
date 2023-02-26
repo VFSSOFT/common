@@ -51,7 +51,7 @@ public:
     int Delete(const wchar_t* serviceName);
 
 private:
-    int MyOpenScManager(SC_HANDLE* retHandle);
+    int MyOpenScManager(DWORD desiredAccess, SC_HANDLE* retHandle);
     int MyOpenService(SC_HANDLE scManager, const wchar_t* serviceName, DWORD desiredAccess, SC_HANDLE* retHandle);
     int MyQueryServiceStatus(SC_HANDLE scService, SERVICE_STATUS_PROCESS* retStatus);
     int MyWaitServiceStatus(SC_HANDLE scService, DWORD expState);

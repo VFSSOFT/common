@@ -131,7 +131,7 @@ int MyServiceManager::Install(MyWinServiceConfig* config) {
     path.Append(config->BinaryPathName.Deref(), config->BinaryPathName.Length());
     path.Append(L"\"");
 
-    if (err = MyOpenScManager(&scManager)) return err;
+    if (err = MyOpenScManager(SC_MANAGER_ALL_ACCESS, &scManager)) return err;
 
     scService = CreateService(
         scManager,
@@ -170,7 +170,7 @@ int MyServiceManager::Start(const wchar_t* serviceName) {
     SC_HANDLE scService = NULL;
     SERVICE_STATUS_PROCESS ssStatus;
 
-    if (err = MyOpenScManager(&scManager)) return err;
+    if (err = MyOpenScManager(SC_MANAGER_ALL_ACCESS, &scManager)) return err;
     if (err = MyOpenService(scManager, serviceName, SERVICE_ALL_ACCESS, &scService)) goto done;
 
     // Check if the service is already running
@@ -217,7 +217,7 @@ int MyServiceManager::Stop(const wchar_t* serviceName) {
     SERVICE_STATUS_PROCESS ssStatus;
     DWORD desiredAccess = SERVICE_STOP | SERVICE_QUERY_STATUS | SERVICE_ENUMERATE_DEPENDENTS;
 
-    if (err = MyOpenScManager(&scManager)) goto done;
+    if (err = MyOpenScManager(SC_MANAGER_ALL_ACCESS, &scManager)) goto done;
     if (err = MyOpenService(scManager, serviceName, desiredAccess, &scService)) goto done;
 
     if (err = MyQueryServiceStatus(scService, &ssStatus)) goto done;
@@ -258,7 +258,7 @@ int MyServiceManager::Query(const wchar_t* serviceName, MyWinServiceConfig* retC
     LPSERVICE_DESCRIPTION lpsd = NULL;
     DWORD bytesNeeded, cbBufSize, dwError;
 
-    if (err = MyOpenScManager(&scManager)) goto done;
+    if (err = MyOpenScManager(SC_MANAGER_ALL_ACCESS, &scManager)) goto done;
     if (err = MyOpenService(scManager, serviceName, SERVICE_QUERY_CONFIG, &scService)) goto done;
 
     if (!QueryServiceConfig(scService, NULL, 0, &bytesNeeded)) {
@@ -326,8 +326,8 @@ int MyServiceManager::QueryServiceStatus(const wchar_t* serviceName, int* status
     SC_HANDLE scService = NULL;
     SERVICE_STATUS_PROCESS ssStatus;
 
-    if (err = MyOpenScManager(&scManager)) return err;
-    if (err = MyOpenService(scManager, serviceName, SERVICE_ALL_ACCESS, &scService)) goto done;
+    if (err = MyOpenScManager(GENERIC_READ, &scManager)) return err;
+    if (err = MyOpenService(scManager, serviceName, SERVICE_QUERY_STATUS, &scService)) goto done;
 
     if (err = MyQueryServiceStatus(scService, &ssStatus)) goto done;
     
@@ -354,7 +354,7 @@ int MyServiceManager::ChangeServiceStartType(const wchar_t* serviceName, DWORD s
     SC_HANDLE scService = NULL;
     BOOL suc = FALSE;
 
-    if (err = MyOpenScManager(&scManager)) goto done;
+    if (err = MyOpenScManager(SC_MANAGER_ALL_ACCESS, &scManager)) goto done;
     if (err = MyOpenService(scManager, serviceName, SERVICE_CHANGE_CONFIG, &scService)) goto done;
 
     suc = ChangeServiceConfig(
@@ -392,7 +392,7 @@ int MyServiceManager::UpdateDescription(const wchar_t* serviceName, const wchar_
     SERVICE_DESCRIPTION sd;
     BOOL suc = FALSE;
 
-    if (err = MyOpenScManager(&scManager)) goto done;
+    if (err = MyOpenScManager(SC_MANAGER_ALL_ACCESS, &scManager)) goto done;
     if (err = MyOpenService(scManager, serviceName, SERVICE_CHANGE_CONFIG, &scService)) goto done;
 
     sd.lpDescription = (LPWSTR)description;
@@ -422,7 +422,7 @@ int MyServiceManager::Delete(const wchar_t* serviceName) {
     SC_HANDLE scService = NULL;
     BOOL suc = FALSE;
 
-    if (err = MyOpenScManager(&scManager)) goto done;
+    if (err = MyOpenScManager(SC_MANAGER_ALL_ACCESS, &scManager)) goto done;
     if (err = MyOpenService(scManager, serviceName, DELETE, &scService)) goto done;
 
     suc = DeleteService(scService);
@@ -442,11 +442,11 @@ done:
     return err;
 }
 
-int MyServiceManager::MyOpenScManager(SC_HANDLE* retHandle) {
+int MyServiceManager::MyOpenScManager(DWORD desiredAccess, SC_HANDLE* retHandle) {
     SC_HANDLE scManager = OpenSCManager(
         NULL, // machine name
         NULL, // data base name
-        SC_MANAGER_ALL_ACCESS
+        desiredAccess
     );
 
     if (scManager == NULL) {

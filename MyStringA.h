@@ -26,7 +26,7 @@ public:
     else                 return strcmp(this->Deref(), str) == 0;
   }
 
-  int DerefAsInt64();
+  UINT64 DerefAsInt64();
   int DerefAsInt();
   int ToLower();
 

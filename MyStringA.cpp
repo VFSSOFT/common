@@ -31,30 +31,38 @@ int MyStringA::AppendInt(int intVal, int placeHolderLen) {
   return Append(buf);
 }
 int MyStringA::SetInt64(UINT64 val, int placeHolderLen) {
-  int retCode = 0;
-  char buf[32] = {0};
-  ltoa(val, buf, 10);
-  if (placeHolderLen > 0) {
-    assert(strlen(buf) <= placeHolderLen);
-    int zeroToAdd = placeHolderLen - strlen(buf);
-    for (int i = 0; i < zeroToAdd; i++) {
-      if (retCode = Append("0")) return retCode;
-    }
-  }
-  return Set(buf);
+    Reset();
+    return AppendInt64(val, placeHolderLen);
 }
 int MyStringA::AppendInt64(UINT64 intVal, int placeHolderLen) {
-  int retCode = 0;
-  char buf[32] = {0};
-  ltoa(intVal, buf, 10);
-  if (placeHolderLen > 0) {
-    assert(strlen(buf) <= placeHolderLen);
-    int zeroToAdd = placeHolderLen - strlen(buf);
-    for (int i = 0; i < zeroToAdd; i++) {
-      if (retCode = Append("0")) return retCode;
+    int err = 0;
+    char buf[32] = {0};
+    int numLen = 0;
+  
+    memset(buf, 0, 32);
+    
+    // Now it won't reach here, just keep it for future referrence
+    if (intVal < 0) {
+        if (err = AppendChar('-')) return err;
+        intVal *= -1;
     }
-  }
-  return Append(buf);
+    do {
+        buf[numLen++] = (intVal % 10) + '0';
+        intVal /= 10;
+    } while (intVal > 0);
+    
+    if (placeHolderLen > 0) {
+        int zeroToAdd = placeHolderLen - numLen;
+        for (int i = 0; i < zeroToAdd; i++) {
+            if (err = AppendChar('0')) return err;
+        }
+    }
+    
+    for (numLen--; numLen >= 0; numLen--) {
+        if (err = AppendChar(buf[numLen])) return err;
+    }
+    
+    return 0;
 }
 
 int MyStringA::SetWithFormat(const char* fmt, ...) {
@@ -78,7 +86,7 @@ int MyStringA::AppendWithFormat(const char* fmt, ...) {
     return this->Append(tmpBuf, formattedLen);
 }
 
-int MyStringA::DerefAsInt64() {
+UINT64 MyStringA::DerefAsInt64() {
     INT64 val = 0;
     bool negative = Length() > 0 && Deref()[0] == '-';
     int i = negative ? 1 : 0;

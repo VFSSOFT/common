@@ -40,6 +40,27 @@ void MyJsonValue::SetValueType(MyJsonValueType t) {
   m_ValueType = t;
 }
 
+int MyJsonValue::ChildrenCount() {
+    MyJsonValueType t = ValueType();
+    if (t == MyJsonValueType::objectValue) {
+        return m_ObjectValue->Values.Size();
+    } else if (t == MyJsonValueType::arrayValue) {
+        return m_ArrayValue->Values.Size();
+    } else {
+        return -1;
+    }
+}
+MyJsonValue* MyJsonValue::ChildAt(int index) {
+    MyJsonValueType t = ValueType();
+    if (t == MyJsonValueType::objectValue) {
+        return m_ObjectValue->Values.Get(index);
+    } else if (t == MyJsonValueType::arrayValue) {
+        return m_ArrayValue->Values.Get(index);
+    } else {
+        return NULL;
+    }
+}
+
 MyJsonValue* MyJsonValue::FindChildByName(const char* nodeName) {
   if (STR_IS_EMPTY(nodeName)) return NULL;
 

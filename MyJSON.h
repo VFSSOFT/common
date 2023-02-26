@@ -62,6 +62,8 @@ public:
   inline void MarkAsFalse() { m_BoolValue = 0; }
   inline bool BoolValue() { return m_BoolValue != 0; }
 
+  int          ChildrenCount();
+  MyJsonValue* ChildAt(int index);
   MyJsonValue* FindChildByName(const char* nodeName);
 
   MyJsonValue*  AddObjectChild(const char* name);

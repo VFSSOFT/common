@@ -82,6 +82,7 @@ public:
     static BOOL KeyExists(HKEY rootKey, LPCWSTR subKey);
     static HRESULT SetKeyValue(HKEY rootKey, LPCWSTR subKey, LPCWSTR valueName, DWORD type, void* value);
     static BOOL DeleteKeyTree(HKEY rootKey, LPCWSTR subKey);
+    static BOOL DeleteValue(HKEY rootKey, LPCWSTR subKey, LPCWSTR key);
     static HRESULT WalkSubKeys(HKEY rootKey, LPCWSTR subKey, void* context, HRESULT (*callback)(HKEY, MyStringW&, void*));
     static HRESULT GetKeyValue(HKEY rootKey, LPCWSTR subKey, LPCWSTR valueName, MyWinRegValue& value);
 

@@ -414,6 +414,23 @@ BOOL MyWinReg::DeleteKeyTree(HKEY rootKey, LPCWSTR subKey) {
   return result == ERROR_SUCCESS;
 }
 
+BOOL MyWinReg::DeleteValue(HKEY rootKey, LPCWSTR subKey, LPCWSTR key) {
+    HRESULT result = 0;
+    HKEY hKey;
+    REGSAM samDesired = DELETE | KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE | KEY_SET_VALUE | KEY_WOW64_64KEY;
+
+    result = RegOpenKeyEx(rootKey, subKey, 0, samDesired, &hKey);
+    if (result != ERROR_SUCCESS) {
+        return FALSE;
+    }
+
+    result = RegDeleteValue(hKey, key);
+
+    RegCloseKey(hKey);
+
+    return result == ERROR_SUCCESS;
+}
+
 HRESULT MyWinReg::WalkSubKeys(HKEY rootKey, LPCWSTR subKey, void* context, HRESULT (*callback)(HKEY, MyStringW&, void*)) {
   HRESULT result;
   HKEY    hKey;

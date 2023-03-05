@@ -33,6 +33,37 @@ int MySqlite::Close() {
     return 0;
 }
 
+bool MySqlite::TableExist(const char* tableName) {
+    int err = 0;
+    int stepRet = 0;
+    sqlite3_stmt* stmt = NULL;
+    MyStringA sql;
+    bool exists = false;
+
+    sql.SetWithFormat("SELECT name FROM sqlite_master WHERE type='table' AND name='%s';", tableName);
+    err = sqlite3_prepare_v2(m_Handle, sql.Deref(), sql.Length(), &stmt, NULL);
+    if (err) {
+        HandleSqliteError(err);
+        goto done;
+    }
+    
+    stepRet = sqlite3_step(stmt);
+    if (stepRet == SQLITE_DONE) {
+        exists = false;
+    } else if (stepRet == SQLITE_ROW) {
+        exists = true;
+    } else {
+        assert(false);
+    }
+
+done:
+    if (stmt) {
+        sqlite3_finalize(stmt);
+    }
+
+    return exists;
+}
+
 int MySqlite::CreateTable(MySqlEntityBase* ent, bool dropIfExists) {
     MyStringA sql;
     MyArray<MySqlEntityField>* fields = ent->Fields();

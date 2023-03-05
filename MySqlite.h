@@ -14,6 +14,7 @@ public:
     int Open();
     int Close();
 
+    bool TableExist(const char* tableName);
     int CreateTable(MySqlEntityBase* ent, bool dropIfExists);
     int DeleteTable(const char* tableName);
     int Insert(MySqlEntityBase* ent);

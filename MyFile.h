@@ -73,6 +73,8 @@ public:
 
   int ReadAllBytes(const wchar_t* path, MyBuffer* data);
 
+    int MyGetDiskFreeSpace(const wchar_t* path, UINT64* freeBytesAvailableToCaller, UINT64* totalNumberOfBytes, UINT64* totalNumberOfFreeBytes);
+
 private:
 #ifdef WIN32
   void* OpenFileHandle(const wchar_t* path, int openDisp, int desiredAccess, int shareMode);

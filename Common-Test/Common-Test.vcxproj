@@ -45,6 +45,7 @@
     <ClCompile Include="MyBufferTest.cpp" />
     <ClCompile Include="MyDataPacketTest.cpp" />
     <ClCompile Include="MyDateTest.cpp" />
+    <ClCompile Include="MyFileTest.cpp" />
     <ClCompile Include="MyJsonTest.cpp" />
     <ClCompile Include="MySqliteTest.cpp" />
     <ClCompile Include="MyStringWTest.cpp" />

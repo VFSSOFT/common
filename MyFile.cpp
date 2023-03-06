@@ -387,6 +387,25 @@ int MyFile::ReadAllBytes(const wchar_t* path, MyBuffer* data) {
     return err;
 }
 
+int MyFile::MyGetDiskFreeSpace(const wchar_t* path, UINT64* freeBytesAvailableToCaller, UINT64* totalNumberOfBytes, UINT64* totalNumberOfFreeBytes) {
+    BOOL result;
+    ULARGE_INTEGER freeBytesToCaller;
+    ULARGE_INTEGER totalBytes;
+    ULARGE_INTEGER totalFreeBytes;
+
+    result = GetDiskFreeSpaceEx(path, &freeBytesToCaller, &totalBytes, &totalFreeBytes);
+    if (!result) {
+        m_LastErrorCode = MyWin::GetSysLastErrorCode();
+        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
+        return m_LastErrorCode;
+    }
+
+    if (freeBytesAvailableToCaller) *freeBytesAvailableToCaller = freeBytesToCaller.QuadPart;
+    if (totalNumberOfBytes) *totalNumberOfBytes = totalBytes.QuadPart;
+    if (totalNumberOfFreeBytes) *totalNumberOfFreeBytes = totalFreeBytes.QuadPart;
+    return 0;
+}
+
 #endif
 
 

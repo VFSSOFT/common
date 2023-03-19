@@ -95,7 +95,7 @@ private:
 
   char m_PrefixBuf[16];
   char m_SuffixBuf[16];
-  char m_LogBuf[1024 + 256]; // 256 for log prefix
+  char* m_LogBuf; // 256 for log prefix
   char m_LogLevelStrs[6][8];
 
   MyCriticalSection m_CriticalSection;

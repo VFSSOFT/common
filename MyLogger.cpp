@@ -43,6 +43,7 @@ MyLogger::MyLogger(MyILogger* logger) : m_LastErrorCode(0) {
 
   m_PrefixBuf[0] = 0;
   m_SuffixBuf[0] = 0;
+  m_LogBuf = (char*) malloc(1024 * 1024 + 256);
   m_LogBuf[0] = 0;
 
   m_LogDirectory.Set(L"");
@@ -50,6 +51,10 @@ MyLogger::MyLogger(MyILogger* logger) : m_LastErrorCode(0) {
   m_MaxLogFileSize = 100 * MB; // 100 M
 }
 MyLogger::~MyLogger() {
+    if (m_LogBuf) {
+        free(m_LogBuf);
+        m_LogBuf = NULL;
+    }
     CloseLogFileHandle();
 }
 
@@ -247,7 +252,11 @@ void MyLogger::Log(MyLogLevel level, const char* fmt, va_list args) {
   if (m_ILogger) {
     m_ILogger->OutoutLog(m_LogBuf);
   } else {
-    printf("%s\n", m_LogBuf);
+#if _DEBUG
+    m_LogBuf[curLen] = '\n';
+    m_LogBuf[curLen+1] = 0;
+    OutputDebugStringA(m_LogBuf);
+#endif
   }
   m_CriticalSection.Release();
 }
@@ -259,9 +268,9 @@ int MyLogger::MakePrefix(MyLogLevel logLevel) {
   const char* levelStr = m_LogLevelStrs[(int)logLevel];
 
   if (m_PrefixBuf[0] != 0 && m_SuffixBuf[0] != 0) {
-    return sprintf(m_LogBuf, "[%s][%llu][%llu][%s][%s] ", m_PrefixBuf, timestamp, tid, levelStr, m_SuffixBuf);
+    return sprintf(m_LogBuf, "[%s][%llu][%08x][%s][%s] ", m_PrefixBuf, timestamp, (unsigned int)tid, levelStr, m_SuffixBuf);
   } else if (m_PrefixBuf[0] != 0) {
-    return sprintf(m_LogBuf, "[%s][%llu][%llu][%s] ", m_PrefixBuf, timestamp, tid, levelStr);
+    return sprintf(m_LogBuf, "[%s][%llu][%08x][%s] ", m_PrefixBuf, timestamp, (unsigned int)tid, levelStr);
   } else if (m_SuffixBuf[0] != 0) {
     return sprintf(m_LogBuf, "[%llu][%llu][%s][%s] ", timestamp, tid, levelStr, m_SuffixBuf);
   } else {

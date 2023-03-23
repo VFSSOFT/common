@@ -67,6 +67,7 @@ public:
 private:
     MyLock                               m_Lock;
     int                                  m_MaxThreadCount;
+    MyThreadState                        m_State;
     MyArray<MyThreadPoolItem>            m_Threads;
     UINT64                               m_NextTaskId;
     MyLinkList<MyThreadPoolTaskInfo>     m_PendingTasks;

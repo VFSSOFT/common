@@ -46,15 +46,18 @@ MyThreadPool::~MyThreadPool() {
 
 int MyThreadPool::Init(int maxThreadCount) {
     m_MaxThreadCount = maxThreadCount;
+    m_State.SetIdle();
     return 0;
 }
 int MyThreadPool::Destroy() {
     m_Lock.Acquire();
+    m_State.SetAborting();
     m_PendingTasks.Reset();
     for (int i = 0; i < m_Threads.Size(); i++) {
         MyThreadPoolItem* item = m_Threads.Get(i);
         item->Abort();
     }
+    m_State.SetIdle();
     m_Threads.Reset();
     m_Lock.Release();
     return 0;
@@ -64,6 +67,7 @@ bool MyThreadPool::IsFull() {
     bool isFull = true;
 
     m_Lock.Acquire();
+    if (m_State.IsAborting()) return true; // don't add more task here if we're aboring
     if (m_Threads.Size() < m_MaxThreadCount) {
         isFull = false;
     } else {

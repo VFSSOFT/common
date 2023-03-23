@@ -13,13 +13,13 @@ MyThread::MyThread() {
     INIT_LAST_ERROR;
     m_ThreadHandle = NULL;
     m_ThreadId = -1;
-    m_Aborted = false;
 }
 MyThread::~MyThread() {
     this->Abort();
 }
 
 int MyThread::Start() {
+    m_State.SetState(MY_THREAD_STATE_IDLE);
     HANDLE handle = CreateThread(
         NULL,
         0,
@@ -39,10 +39,12 @@ int MyThread::Start() {
     return 0;
 }
 int MyThread::Abort() {
-    m_Aborted = true;
+    m_State.SetAborting();
+
     if (m_ThreadHandle != NULL) {
         if (!WaitForExit(30 * 1000)) {
-            TerminateThread(m_ThreadHandle, 0);
+            //TerminateThread(m_ThreadHandle, 0);
+            assert(false); // all thread should be aborted gracefully
         }
         CloseHandle(m_ThreadHandle);
         m_ThreadHandle = NULL;
@@ -60,7 +62,17 @@ bool MyThread::WaitForExit(int millis) {
 }
 
 int MyThread::ThreadEntry() {
-    return this->Run();
+    if (m_State.IsIdle()) {
+        m_State.SetRunning();
+    } else if (m_State.IsRunning()) {
+        assert(false);
+    } else if (m_State.IsAborting()) {
+        m_State.SetIdle();
+        return 0;
+    }
+    int err = this->Run();
+    m_State.SetIdle();
+    return err;
 }
 
 #endif // _MY_THREAD_CPP_

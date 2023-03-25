@@ -20,8 +20,24 @@ public:
   int SetWithFormat(const char* fmt, ...);
   int AppendWithFormat(const char* fmt, ...);
 
+    bool Equals(const char* str, int len, bool caseInsensitive) {
+        if (this->Length() != len) return false;
+        if (len == 0 || this->Length() == 0) return false;
+
+        if (caseInsensitive) {
+            for (int i = 0; i < len; i++) {
+                if (tolower(str[i]) != tolower(this->Deref()[i])) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return strncmp(str, this->Deref(), len) == 0;
+        }
+    }
+
   BOOL Equals(const char* str, BOOL caseInsensitive=FALSE) {
-    if (this->Length() == 0) return str == NULL;
+    if (this->Length() == 0) return STR_IS_EMPTY(str);
     if (caseInsensitive) return strcmpi(this->Deref(), str) == 0;
     else                 return strcmp(this->Deref(), str) == 0;
   }

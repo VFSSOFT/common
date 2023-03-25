@@ -8,12 +8,18 @@ class MyAStrArray {
 public:
     MyAStrArray();
 
-    int Size();
-
     int Add(const char* str, int len=-1);
     int Add(MyStringA* str);
 
+    int Size();
     MyStringA* Get(int index);
+
+    int Index(const char* str, int len=-1);
+    int Index(MyStringA* str);
+    bool Contains(const char* str, int len=-1);
+    bool Contains(MyStringA* str);
+
+    void Reset() { m_Arr.Reset(); }
 
 private:
     MyArray<MyStringA> m_Arr;

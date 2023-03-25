@@ -28,5 +28,23 @@ MyStringA* MyAStrArray::Get(int index) {
     return m_Arr.Get(index);
 }
 
+int MyAStrArray::Index(const char* str, int len) {
+    for (int i = 0; i < m_Arr.Size(); i++) {
+        MyStringA* tmp = m_Arr.Get(i);
+        if (tmp->Equals(str, len, false)) {
+            return i;
+        }
+    }
+    return -1;
+}
+int MyAStrArray::Index(MyStringA* str) {
+    return Index(str->Deref(), str->Length());
+}
+bool MyAStrArray::Contains(const char* str, int len) {
+    return Index(str, len) >= 0;
+}
+bool MyAStrArray::Contains(MyStringA* str) {
+    return Contains(str->Deref(), str->Length());
+}
 
 #endif // _MY_ARRAYS_CPP_

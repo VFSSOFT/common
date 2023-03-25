@@ -75,4 +75,8 @@ int MyThread::ThreadEntry() {
     return err;
 }
 
+UINT64 MyThread::ThreadId() {
+    return GetCurrentThreadId();
+}
+
 #endif // _MY_THREAD_CPP_

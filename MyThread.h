@@ -42,6 +42,8 @@ public:
 
     int ThreadEntry();
 
+    UINT64 ThreadId();
+
 private:
     MyThreadState m_State;
     HANDLE m_ThreadHandle;

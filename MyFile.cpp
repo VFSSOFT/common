@@ -320,16 +320,16 @@ void* MyFile::OpenFileHandle(const wchar_t* path, int creationDisp, int desiredA
     dwDesiredAccess |= GENERIC_WRITE;
 
   if ((shareMode & MY_FILE_SHARE_MODE_SHARE_READ) != 0)
-    dwShareMode = FILE_SHARE_READ;
+    dwShareMode |= FILE_SHARE_READ;
   if ((shareMode & MY_FILE_SHARE_MODE_SHARE_WRITE) != 0)
-    dwShareMode = FILE_SHARE_WRITE;
+    dwShareMode |= FILE_SHARE_WRITE;
   if ((shareMode & MY_FILE_SHARE_MODE_SHARE_DELETE) != 0)
-    dwShareMode = FILE_SHARE_DELETE;
+    dwShareMode |= FILE_SHARE_DELETE;
 
   if ((creationDisp & MY_FILE_CREATION_DISP_CREATE_ALWAYS) != 0)
     dwCreationDisposition |= CREATE_ALWAYS;
   if ((creationDisp & MY_FILE_CREATION_DISP_CREATE_NEW) != 0)
-    creationDisp |= CREATE_NEW;
+    dwCreationDisposition |= CREATE_NEW;
   if ((creationDisp & MY_FILE_CREATION_DISP_OPEN_ALWAYS) != 0)
     dwCreationDisposition |= OPEN_ALWAYS;
   if ((creationDisp & MY_FILE_CREATION_DISP_OPEN_EXISTING) != 0)

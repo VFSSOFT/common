@@ -43,11 +43,13 @@ public:
     int ThreadEntry();
 
     UINT64 ThreadId();
+    MyStringA* ThreadName() { return &m_ThreadName; }
 
 private:
     MyThreadState m_State;
-    HANDLE m_ThreadHandle;
-    DWORD  m_ThreadId; // It helps debug, so keep it.
+    HANDLE        m_ThreadHandle;
+    DWORD         m_ThreadId; // It helps debug, so keep it.
+    MyStringA     m_ThreadName;
     MY_LAST_ERROR_DECL;
 };
 

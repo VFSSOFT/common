@@ -35,6 +35,12 @@ int MyThread::Start() {
         return m_LastErrorCode;
     }
 
+    if (m_ThreadName.Length() > 0) {
+        MyStringW wname;
+        wname.SetUtf8(m_ThreadName.Deref(), m_ThreadName.Length());
+        SetThreadDescription(handle, wname.Deref());
+    }
+
     m_ThreadHandle = handle;
     return 0;
 }

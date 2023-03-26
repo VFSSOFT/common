@@ -37,7 +37,7 @@ class MyThreadPoolItem : public MyThread {
 public:
     MyThreadPoolItem();
 
-    int Init(MyThreadPool* pool);
+    int Init(MyThreadPool* pool, const char* name="");
     bool IsBusy() { return m_IsBusy; }
 
     MyThreadPoolTaskInfo* CurrentTaskInfo();
@@ -59,7 +59,7 @@ public:
     int Destroy();
 
     bool IsFull();
-    int QueueTask(MyThreadPoolItemEntry threadEntry, void* param, UINT64* retTaskId);
+    int QueueTask(MyThreadPoolItemEntry threadEntry, void* param, UINT64* retTaskId, const char* tname="");
     int CancelTask(UINT64 taskId);
 
     PRIVATE_FUNCTION bool GetNextPendingTask(MyThreadPoolTaskInfo* retTaskInfo);

@@ -7,9 +7,10 @@ MyThreadPoolItem::MyThreadPoolItem() : MyThread() {
     m_IsBusy = false;
     m_ThreadPool = NULL;
 }
-int MyThreadPoolItem::Init(MyThreadPool* pool) {
+int MyThreadPoolItem::Init(MyThreadPool* pool, const char* name) {
     int err = 0;
     m_ThreadPool = pool;
+    ThreadName()->Set(name);
     if (err = Start()) return err;
     return 0;
 }
@@ -86,7 +87,7 @@ bool MyThreadPool::IsFull() {
     return isFull;
 }
 
-int MyThreadPool::QueueTask(MyThreadPoolItemEntry threadEntry, void* param, UINT64* retTaskId) {
+int MyThreadPool::QueueTask(MyThreadPoolItemEntry threadEntry, void* param, UINT64* retTaskId, const char* tname) {
     int err = 0;
 
     m_Lock.Acquire();
@@ -108,7 +109,7 @@ int MyThreadPool::QueueTask(MyThreadPoolItemEntry threadEntry, void* param, UINT
     // TODO: check the idle thread before add a new one
     if (m_Threads.Size() < m_MaxThreadCount) {
         MyThreadPoolItem* item = m_Threads.AddNew();
-        if (err = item->Init(this)) return LastError(err, item->LastErrorMessage());
+        if (err = item->Init(this, tname)) return LastError(err, item->LastErrorMessage());
     }
     m_Lock.Release();
 

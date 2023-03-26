@@ -272,9 +272,9 @@ int MyLogger::MakePrefix(MyLogLevel logLevel) {
   } else if (m_PrefixBuf[0] != 0) {
     return sprintf(m_LogBuf, "[%s][%llu][%08x][%s] ", m_PrefixBuf, timestamp, (unsigned int)tid, levelStr);
   } else if (m_SuffixBuf[0] != 0) {
-    return sprintf(m_LogBuf, "[%llu][%llu][%s][%s] ", timestamp, tid, levelStr, m_SuffixBuf);
+    return sprintf(m_LogBuf, "[%llu][%08x][%s][%s] ", timestamp, tid, levelStr, m_SuffixBuf);
   } else {
-    return sprintf(m_LogBuf, "[%llu][%llu][%s] ", timestamp, tid, levelStr);
+    return sprintf(m_LogBuf, "[%llu][%08x][%s] ", timestamp, tid, levelStr);
   }
 }
 

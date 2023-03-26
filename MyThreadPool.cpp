@@ -50,12 +50,15 @@ int MyThreadPool::Init(int maxThreadCount) {
     return 0;
 }
 int MyThreadPool::Destroy() {
+    int err = 0;
     m_Lock.Acquire();
     m_State.SetAborting();
-    m_PendingTasks.Reset();
+    m_PendingTasks.Reset(); // TODO: should we quit before processing pending tasks?
     for (int i = 0; i < m_Threads.Size(); i++) {
         MyThreadPoolItem* item = m_Threads.Get(i);
-        item->Abort();
+        if (err = item->Abort(&m_Lock, 30 * 1000)) {
+            return LastError(err, item->LastErrorMessage());
+        }
     }
     m_State.SetIdle();
     m_Threads.Reset();
@@ -87,6 +90,11 @@ int MyThreadPool::QueueTask(MyThreadPoolItemEntry threadEntry, void* param, UINT
     int err = 0;
 
     m_Lock.Acquire();
+
+    if (m_State.IsAborting()) {
+        m_Lock.Release();
+        return LastError(MY_ERR_INVALID_OPERATION, "Trying to add new tasks when the thread pool is aborted");
+    }
 
     *retTaskId = m_NextTaskId;
     m_NextTaskId++;

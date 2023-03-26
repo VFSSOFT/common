@@ -2,6 +2,7 @@
 #define _MY_THREAD_H_
 
 #include "MyStringA.h"
+#include "MyLock.h"
 
 #define MY_THREAD_STATE_IDLE     0
 #define MY_THREAD_STATE_RUNNING  1
@@ -37,6 +38,7 @@ public:
 
     int Start();
     virtual int Abort();
+    virtual int Abort(MyLock* l, int timeoutMS);
     bool WaitForExit(int millis);
     virtual int Run() = 0;
 

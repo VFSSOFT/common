@@ -45,17 +45,28 @@ int MyThread::Start() {
     return 0;
 }
 int MyThread::Abort() {
+    return Abort(NULL, 30 * 1000);
+}
+int MyThread::Abort(MyLock* l, int timeoutMS) {
     m_State.SetAborting();
 
     if (m_ThreadHandle != NULL) {
-        if (!WaitForExit(30 * 1000)) {
-            //TerminateThread(m_ThreadHandle, 0);
-            assert(false); // all thread should be aborted gracefully
+        if (l != NULL) l->Acquire();
+        UINT64 timeoutMarker = GetTickCount64() + timeoutMS;
+        while (GetTickCount64() < timeoutMarker) {
+            if (WaitForExit(20)) {
+                break;
+            }
+            if (l != NULL) l->Wait(20);
         }
-        CloseHandle(m_ThreadHandle);
-        m_ThreadHandle = NULL;
+        if (l != NULL) l->Release();
+        if (GetTickCount64() >= timeoutMarker) {
+            return LastError(MY_ERR_OP_TIMEOUT, "Abort Timeout");
+        } else {
+            CloseHandle(m_ThreadHandle);
+            m_ThreadHandle = NULL;
+        }
     }
-
     return 0;
 }
 

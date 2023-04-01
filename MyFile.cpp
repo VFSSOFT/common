@@ -23,7 +23,7 @@ int MyFile::Open(const wchar_t* path, int creationDisp, int desiredAccess, int s
     return m_LastErrorCode;
 
   m_Handle = h;
-  m_Path.Set((const char*)path, wcslen(path) * sizeof(wchar_t));
+  m_Path.Set(path, wcslen(path));
   return 0;
 }
 int MyFile::Close() {
@@ -41,9 +41,7 @@ int MyFile::Length(UINT64* len) {
   
   BOOL success = GetFileSizeEx(m_Handle, &fileSize);
   if (!success) {
-    m_LastErrorCode = MyWin::GetSysLastErrorCode();
-    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-    return m_LastErrorCode;
+      return HandleFSError(m_Path.Deref());
   }
   *len = (UINT64)fileSize.QuadPart;
   return 0;
@@ -58,9 +56,7 @@ int MyFile::SetLength(UINT64 len) {
   
   BOOL success = SetEndOfFile(m_Handle);
   if (!success) {
-    m_LastErrorCode = MyWin::GetSysLastErrorCode();
-    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-    return m_LastErrorCode;
+      return HandleFSError(m_Path.Deref());
   }
   return 0;
 }
@@ -71,9 +67,8 @@ UINT64 MyFile::CurrentPosition() {
 
   distanceToMove = SetFilePointer(m_Handle, 0, &distanceToMoveHigh, FILE_CURRENT);
   if (distanceToMove == INVALID_SET_FILE_POINTER) {
-    m_LastErrorCode = MyWin::GetSysLastErrorCode();
-    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-    return -1;
+      HandleFSError(m_Path.Deref());
+      return -1;
   }
   return ((UINT64)distanceToMoveHigh << 32L) | distanceToMove;
 }
@@ -95,9 +90,7 @@ int MyFile::Seek(UINT64 pos, int seekType) {
 
   distanceToMove = SetFilePointer(m_Handle, distanceToMove, &distanceToMoveHigh, dwMoveMethod);
   if (distanceToMove == INVALID_SET_FILE_POINTER) {
-    m_LastErrorCode = MyWin::GetSysLastErrorCode();
-    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-    return m_LastErrorCode;
+        return HandleFSError(m_Path.Deref());
   }
   // returns the position after seeking
   return ((UINT64)distanceToMoveHigh << 32L) | distanceToMove;
@@ -113,9 +106,7 @@ int MyFile::Write(const char* data, int len) {
                   NULL
                 );
   if (!success) {
-    m_LastErrorCode = MyWin::GetSysLastErrorCode();
-    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-    return m_LastErrorCode;
+      return HandleFSError(m_Path.Deref());
   }
   return 0;
 }
@@ -137,9 +128,7 @@ int MyFile::Read(const char* data, int* len) {
                   NULL
                 );
   if (!success) {
-    m_LastErrorCode = MyWin::GetSysLastErrorCode();
-    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-    return m_LastErrorCode;
+    return HandleFSError(m_Path.Deref());
   }
   *len = bytesRead;
   return 0;
@@ -192,9 +181,7 @@ int MyFile::ListDirectory(const wchar_t* path, MyArray<MyStringW>* filenames, My
         &findFileData
     );
     if (hFind == INVALID_HANDLE_VALUE) {
-        m_LastErrorCode = MyWin::GetSysLastErrorCode();
-        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-        return m_LastErrorCode;
+        return HandleFSError(path);
     }
 
     do {
@@ -215,9 +202,7 @@ int MyFile::CreateDirectory(const wchar_t* path) {
     if (!suc) {
         DWORD sysLastErr = GetLastError();
         if (sysLastErr != ERROR_ALREADY_EXISTS) {
-            m_LastErrorCode = sysLastErr;
-            MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, sysLastErr);
-            return m_LastErrorCode;
+            return HandleFSError(path);
         }
     }
     return 0;
@@ -226,9 +211,7 @@ int MyFile::CreateDirectory(const wchar_t* path) {
 int MyFile::DeleteDirectory(const wchar_t* path) {
     BOOL suc = ::RemoveDirectoryW(path);
     if (!suc) {
-        m_LastErrorCode = MyWin::GetSysLastErrorCode();
-        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-        return m_LastErrorCode;
+        return HandleFSError(path);
     }
     return 0;
 }
@@ -270,9 +253,7 @@ int MyFile::DeleteFile() {
 int MyFile::DeleteFile(const wchar_t* path) {
     BOOL suc = ::DeleteFileW(path);
     if (!suc) {
-        m_LastErrorCode = MyWin::GetSysLastErrorCode();
-        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-        return m_LastErrorCode;
+        return HandleFSError(path);
     }
     return 0;
 }
@@ -280,9 +261,7 @@ int MyFile::DeleteFile(const wchar_t* path) {
 int MyFile::Rename(const wchar_t* oldPath, const wchar_t* newPath) {
     BOOL suc = ::MoveFileExW(oldPath, newPath, MOVEFILE_COPY_ALLOWED);
     if (!suc) {
-        m_LastErrorCode = GetLastError();
-        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-        return m_LastErrorCode;
+        return HandleFSError(oldPath);
     }
     return 0;
 }
@@ -300,9 +279,7 @@ int MyFile::FullPath(const wchar_t* path, MyStringW* fullPath) {
     );
 
     if (usedLen == 0) {
-        m_LastErrorCode = GetLastError();
-        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-        return m_LastErrorCode;
+        return HandleFSError(path);
     }
 
     fullPath->Set(pathBuf, usedLen);
@@ -349,10 +326,22 @@ void* MyFile::OpenFileHandle(const wchar_t* path, int creationDisp, int desiredA
 
   if (h == INVALID_HANDLE_VALUE) {
     h = NULL;
-    m_LastErrorCode = MyWin::GetSysLastErrorCode();
-    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
+    HandleFSError(path);
   }
   return h;
+}
+int MyFile::HandleFSError(const wchar_t* path) {
+    m_LastErrorCode = GetLastError();
+    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
+
+    MyStringA utf8Path;
+    utf8Path.SetUnicode(path, wcslen(path));
+
+    m_LastErrorMessage.Append("(\"", 2);
+    m_LastErrorMessage.Append(utf8Path.Deref());
+    m_LastErrorMessage.Append("\")", 2);
+
+    return m_LastErrorCode;
 }
 
 int MyFile::ReadAllBytes(const wchar_t* path, MyBuffer* data) {
@@ -395,9 +384,7 @@ int MyFile::MyGetDiskFreeSpace(const wchar_t* path, UINT64* freeBytesAvailableTo
 
     result = GetDiskFreeSpaceEx(path, &freeBytesToCaller, &totalBytes, &totalFreeBytes);
     if (!result) {
-        m_LastErrorCode = MyWin::GetSysLastErrorCode();
-        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-        return m_LastErrorCode;
+        return HandleFSError(path);
     }
 
     if (freeBytesAvailableToCaller) *freeBytesAvailableToCaller = freeBytesToCaller.QuadPart;

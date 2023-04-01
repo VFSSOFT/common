@@ -33,16 +33,12 @@ public:
   MyFile();
   ~MyFile();
 
-#ifdef WIN32
   int Open(const wchar_t* path, int creationDisp, int desiredAccess=MY_FILE_DESIRED_ACCESS_ALL, int shareMode=MY_FILE_SHARE_MODE_SHARE_ALL);
   
   static BOOL FileExists(const wchar_t* path);
   static bool DirectoryExist(const wchar_t* path);
   static UINT64 FileAttributes(const wchar_t* path);
   static int SetFileAttributes(const wchar_t* path, UINT64 attr);
-#else
-  int Open(const char* path);
-#endif
 
     int CreateDirectory(const wchar_t* path);
     int DeleteDirectory(const wchar_t* path);
@@ -76,14 +72,11 @@ public:
     int MyGetDiskFreeSpace(const wchar_t* path, UINT64* freeBytesAvailableToCaller, UINT64* totalNumberOfBytes, UINT64* totalNumberOfFreeBytes);
 
 private:
-#ifdef WIN32
   void* OpenFileHandle(const wchar_t* path, int openDisp, int desiredAccess, int shareMode);
-#else
-  void* OpenFileHandle();
-#endif
+  int  HandleFSError(const wchar_t* path);
 
 private:
-  MyBuffer  m_Path;
+  MyStringW m_Path;
   void*     m_Handle;
 
   MY_LAST_ERROR_DECL;

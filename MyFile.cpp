@@ -143,7 +143,7 @@ int MyFile::Read(UINT64 pos, const char* data, int* len) {
 UINT64 MyFile::FileAttributes(const wchar_t* path) {
   DWORD dwAttr = GetFileAttributesW(path);
   if (dwAttr == INVALID_FILE_ATTRIBUTES) {
-    return MyWin::GetSysLastErrorCode();
+      return HandleFSError(path);
   }
   return dwAttr;
 }
@@ -151,7 +151,7 @@ UINT64 MyFile::FileAttributes(const wchar_t* path) {
 int MyFile::SetFileAttributes(const wchar_t* path, UINT64 attr) {
   BOOL sucess = ::SetFileAttributesW(path, (DWORD)attr);
   if (!sucess) {
-    return MyWin::GetSysLastErrorCode();
+    return HandleFSError(path);
   }
   return 0;
 }

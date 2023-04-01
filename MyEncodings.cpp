@@ -158,7 +158,7 @@ int MyEncodings::B64Decode(const char* encodedData, MyBuffer* decoded, bool remo
         int posOfChar1 = B64PosOfChar(data[pos + 1]);
         if (posOfChar1 == MY_ERR_BASE_ENCODING) return MY_ERR_BASE_ENCODING;
 
-        c = (posOfChar0 << 2) + (posOfChar1 & 0x30) >> 4;
+        c = (posOfChar0 << 2) + ((posOfChar1 & 0x30) >> 4);
         if (err = decoded->AppendChar(c)) return err;
 
         if ((pos + 2 < len)       && // Check for data that is not padded with equal signs (which is allowed by RFC 2045)

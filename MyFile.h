@@ -30,15 +30,15 @@
 
 class MyFile {
 public:
-  MyFile();
-  ~MyFile();
+    MyFile();
+    ~MyFile();
 
-  int Open(const wchar_t* path, int creationDisp, int desiredAccess=MY_FILE_DESIRED_ACCESS_ALL, int shareMode=MY_FILE_SHARE_MODE_SHARE_ALL);
+    int Open(const wchar_t* path, int creationDisp, int desiredAccess=MY_FILE_DESIRED_ACCESS_ALL, int shareMode=MY_FILE_SHARE_MODE_SHARE_ALL);
   
-  static BOOL FileExists(const wchar_t* path);
-  static bool DirectoryExist(const wchar_t* path);
-  static UINT64 FileAttributes(const wchar_t* path);
-  static int SetFileAttributes(const wchar_t* path, UINT64 attr);
+    static BOOL FileExists(const wchar_t* path);
+    static bool DirectoryExist(const wchar_t* path);
+    UINT64 FileAttributes(const wchar_t* path);
+    int SetFileAttributes(const wchar_t* path, UINT64 attr);
 
     int CreateDirectory(const wchar_t* path);
     int DeleteDirectory(const wchar_t* path);
@@ -54,32 +54,32 @@ public:
 
     HANDLE SysHandle() { return m_Handle; }
 
-  inline bool Opened() { return m_Handle != NULL; }
-  int Close();
+    inline bool Opened() { return m_Handle != NULL; }
+    int Close();
 
-  int Length(UINT64* len);
-  int SetLength(UINT64 len);
+    int Length(UINT64* len);
+    int SetLength(UINT64 len);
 
-  UINT64 CurrentPosition();
-  int Seek(UINT64 pos, int seekType);
-  int Write(const char* data, int len);
-  int Write(UINT64 pos, const char* data, int len);
-  int Read(const char* data, int* len);
-  int Read(UINT64 pos, const char* data, int* len);
+    UINT64 CurrentPosition();
+    int Seek(UINT64 pos, int seekType);
+    int Write(const char* data, int len);
+    int Write(UINT64 pos, const char* data, int len);
+    int Read(const char* data, int* len);
+    int Read(UINT64 pos, const char* data, int* len);
 
-  int ReadAllBytes(const wchar_t* path, MyBuffer* data);
+    int ReadAllBytes(const wchar_t* path, MyBuffer* data);
 
     int MyGetDiskFreeSpace(const wchar_t* path, UINT64* freeBytesAvailableToCaller, UINT64* totalNumberOfBytes, UINT64* totalNumberOfFreeBytes);
 
 private:
-  void* OpenFileHandle(const wchar_t* path, int openDisp, int desiredAccess, int shareMode);
-  int  HandleFSError(const wchar_t* path);
+    void* OpenFileHandle(const wchar_t* path, int openDisp, int desiredAccess, int shareMode);
+    int  HandleFSError(const wchar_t* path);
 
 private:
-  MyStringW m_Path;
-  void*     m_Handle;
+    MyStringW m_Path;
+    void*     m_Handle;
 
-  MY_LAST_ERROR_DECL;
+    MY_LAST_ERROR_DECL;
 };
 
 #endif // MY_FILE_H_

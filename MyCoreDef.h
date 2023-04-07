@@ -104,6 +104,7 @@
 #define MY_ERR_NOT_ENOUGH_DATA        (MY_ERR_BASE + 6)
 #define MY_ERR_INVALID_OPERATION      (MY_ERR_BASE + 7)
 #define MY_ERR_SOCKET_EOF             (MY_ERR_BASE + 8)
+#define MY_ERR_OP_ABORTED             (MY_ERR_BASE + 9)
 
 
 #define MY_ERR_BASE_FILE_PATH         (MY_ERR_BASE + 0x07000000)

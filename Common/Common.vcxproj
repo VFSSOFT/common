@@ -157,6 +157,7 @@
     <ClInclude Include="..\MyMutex.h" />
     <ClInclude Include="..\MySqlEntity.h" />
     <ClInclude Include="..\MySqlite.h" />
+    <ClInclude Include="..\MyStack.h" />
     <ClInclude Include="..\MyThread.h" />
     <ClInclude Include="..\MyThreadPool.h" />
     <ClInclude Include="..\MyValObjHashMap.h" />

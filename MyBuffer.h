@@ -33,9 +33,11 @@ public:
   int SetLength(int len);
   void Reset();
   int Delete(int start, int len);
+    int Sub(int startIndex);
   int Sub(int startIndex, int endIndex);
 
   inline char* Deref(int off=0) { return m_Length == 0 ? (char*)"" : m_Buffer + off; }
+  inline const char* DerefConst(int off=0) { return Deref(off); }
   inline int Length() { return m_Length; }
 
   int IndexOf(const char* ptr, int len, int startIndex=0);

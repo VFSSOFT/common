@@ -156,6 +156,9 @@ int MyBuffer::Delete(int start, int len) {
   return SetLength(m_Length - len);
 }
 
+int MyBuffer::Sub(int startIndex) {
+    return Sub(startIndex, m_Length);
+}
 int MyBuffer::Sub(int startIndex, int endIndex) {
   if (startIndex < 0 || startIndex > endIndex || endIndex > m_Length) 
     return MY_ERR_INDEX_OUT_OF_BOUNDARY;

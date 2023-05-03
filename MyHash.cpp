@@ -29,6 +29,13 @@ int MyHash::CalcHash(int hashAlg, const char* data, int dataLen, unsigned char**
     }
     break;
 
+  case MYHASH_ALG_MD5:
+      if (!(success = EVP_DigestInit_ex(mdctx, EVP_md5(), NULL))) {
+          errCode= MY_ERR_CRYPTO_ERROR;
+          goto done;
+      }
+      break;
+
   default:
     errCode = MY_ERR_CRYPTO_INVALID_HASH_ALG;
     goto done;

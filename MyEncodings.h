@@ -17,6 +17,9 @@ public:
     static int B64Encode(const char* data, int len, MyStringA* encoded, bool urlEncode=false, int lineLength=0);
     static int B64Decode(const char* encodedData, MyBuffer* decoded, bool removeLineBreaks=false);
 
+    static int HexEncode(const char* data, int len, MyStringA* encoded, bool uppercase=false);
+    static int HexDecode(const char* data, int len, MyBuffer* decoded);
+
 private:
     static int B64PosOfChar(const char c);
     static int B64InsertLineBreaks(MyStringA* str, int distance);

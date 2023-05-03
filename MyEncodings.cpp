@@ -204,5 +204,56 @@ int MyEncodings::B64InsertLineBreaks(MyStringA* str, int distance) {
     return 0;
 }
 
+
+int MyEncodings::HexEncode(const char* data, int len, MyStringA* encoded, bool uppercase) {
+    char const hex1[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b','c','d','e','f' };
+    char const hex2[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B','C','D','E','F' };
+
+    encoded->SetLength(len * 2);
+    for (int i = 0; i < len; i++) {
+        int v = data[i] & 0x0FF;
+        char c = uppercase ? hex2[(v & 0xF0) >> 4] : hex1[(v & 0xF0) >> 4];
+        encoded->SetCharAt(i * 2, c);
+        c = uppercase ? hex2[(v & 0x0F)] : hex1[(v & 0x0F)];
+        encoded->SetCharAt((i * 2) + 1, c);
+    }
+    return 0;
+}
+int MyEncodings::HexDecode(const char* data, int len, MyBuffer* decoded) {
+    if (len % 2 != 0) return -1;
+
+    decoded->SetLength(len / 2);
+    for (int i = 0; i < len; i += 2) {
+        char v1 = 0;
+        char c = data[i];
+
+        if (c >= '0' && c <= '9') {
+            v1 = c - '0';
+        } else if (c >= 'a' && c <= 'f') {
+            v1 = c - 'a' + 10;
+        } else if (c >= 'A' && c <= 'F') {
+            v1 = c - 'A' + 10;
+        } else {
+            return -1;
+        }
+
+        char v2 = 0;
+        c = data[i+1];
+        if (c >= '0' && c <= '9') {
+            v2 = c - '0';
+        } else if (c >= 'a' && c <= 'f') {
+            v2 = c - 'a' + 10;
+        } else if (c >= 'A' && c <= 'F') {
+            v2 = c - 'A' + 10;
+        } else {
+            return -1;
+        }
+
+        decoded->SetCharAt(i / 2, (v1 << 4) | v2);
+    }
+
+    return 0;
+}
+
 #endif // _MY_ENCODIGNS_CPP_
 

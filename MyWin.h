@@ -22,6 +22,7 @@ public:
     int       OSServicePackMinor;
     int       OSSuiteMask;
     int       OSProductType;
+    MyStringA OSProductTypeStr;
     MyStringA MachineId;
     
     MySystemInfo(): 
@@ -35,6 +36,27 @@ public:
         OSSuiteMask(-1),
         OSProductType(-1)
     {}
+
+    // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_osversioninfoexw
+    // https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions
+    bool IsServerOS();
+    bool IsWin11();
+    bool IsWin10();
+    bool IsWin81();
+    bool IsWin8();
+    bool IsWin7();
+    bool IsVista();
+    bool IsXP();
+    bool IsWinServer2022();
+    bool IsWinServer2019();
+    bool IsWinServer2016();
+    bool IsWinServer2012R2();
+    bool IsWinServer2012();
+    bool IsWinServer2008R2();
+    bool IsWinServer2008();
+    bool IsWinServer2003OrR2();
+    bool IsWinServer2000();
+
 };
 
 // Base class that wrap all windows utils functions

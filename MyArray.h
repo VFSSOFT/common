@@ -13,6 +13,7 @@ public:
   T*   AddNew();
   T*   Get(int idx);
   int  Delete(int idx);
+  int Delete2(T* val);
   void Reset();
 
   inline BOOL Empty() { return m_Size == 0; }
@@ -84,6 +85,16 @@ int MyArray<T>::Delete(int idx) {
   m_Array[m_Size] = NULL;
 
   return 0;
+}
+
+template <typename T>
+int MyArray<T>::Delete2(T* val) {
+    for (int i = 0; i < m_Size; i++) {
+        if (m_Array[i] == val) {
+            return Delete(i);
+        }
+    }
+    return -1;
 }
 
 template <typename T>

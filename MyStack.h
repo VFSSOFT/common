@@ -68,6 +68,8 @@ public:
     T    Pop();
     void Push(T val);
     T    Peek();
+    T    Bottom();
+    T    Top();
 
     bool Empty() { return m_Count == 0; }
     void Reset() { 
@@ -109,7 +111,16 @@ T MyValStack<T>::Peek() {
     return m_Elems.Get(m_Count - 1);
 }
 
+template <typename T>
+T MyValStack<T>::Bottom() {
+    assert(m_Count > 0);
+    return m_Elems.Get(0);
+}
 
+template <typename T>
+T MyValStack<T>::Top() {
+    return Peek();
+}
 
 
 

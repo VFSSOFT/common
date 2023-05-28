@@ -8,6 +8,59 @@
 #include "sddl.h"
 #include "shlobj_core.h"
 
+bool MySystemInfo::IsServerOS() {
+    return OSProductType != VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWin11() {
+    return OSMajorVersion == 10 && OSMinorVersion == 0 && OSProductType == VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWin10() {
+    return OSMajorVersion == 10 && OSMinorVersion == 0 && OSProductType == VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWin81() {
+    return OSMajorVersion == 6 && OSMinorVersion == 3 && OSProductType == VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWin8() {
+    return OSMajorVersion == 6 && OSMinorVersion == 2 && OSProductType == VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWin7() {
+    return OSMajorVersion == 6 && OSMinorVersion == 1 && OSProductType == VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsVista() {
+    return OSMajorVersion == 6 && OSMinorVersion == 0 && OSProductType == VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsXP() {
+    return OSMajorVersion == 5 && OSMinorVersion == 2;
+}
+bool MySystemInfo::IsWinServer2022() {
+    return OSMajorVersion == 10 && OSMinorVersion == 0 && OSProductType != VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWinServer2019() {
+    return OSMajorVersion == 10 && OSMinorVersion == 0 && OSProductType != VER_NT_WORKSTATION;
+}
+
+bool MySystemInfo::IsWinServer2016() {
+    return OSMajorVersion == 10 && OSMinorVersion == 0 && OSProductType != VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWinServer2012R2() {
+    return OSMajorVersion == 6 && OSMinorVersion == 3 && OSProductType != VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWinServer2012() {
+    return OSMajorVersion == 6 && OSMinorVersion == 2 && OSProductType != VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWinServer2008R2() {
+    return OSMajorVersion == 6 && OSMinorVersion == 1 && OSProductType != VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWinServer2008() {
+    return OSMajorVersion == 6 && OSMinorVersion == 0 && OSProductType != VER_NT_WORKSTATION;
+}
+bool MySystemInfo::IsWinServer2003OrR2() {
+    return OSMajorVersion == 5 && OSMinorVersion == 2;
+}
+bool MySystemInfo::IsWinServer2000() {
+    return OSMajorVersion == 5 && OSMinorVersion == 0;
+}
+
 int MyWin::GetSysLastErrorCode() {
   return (int)::GetLastError();
 }
@@ -152,6 +205,21 @@ void MyWin::MyGetSystemInfo(MySystemInfo* sysInfo) {
     sysInfo->OSServicePackMinor = osInfo.wServicePackMinor;
     sysInfo->OSSuiteMask        = osInfo.wSuiteMask;
     sysInfo->OSProductType      = osInfo.wProductType;
+
+    switch (sysInfo->OSProductType) {
+    case VER_NT_WORKSTATION: 
+        sysInfo->OSProductTypeStr.Set("WORKSTATION");
+        break;
+    case VER_NT_DOMAIN_CONTROLLER:
+        sysInfo->OSProductTypeStr.Set("DOMAIN CONTROLLER");
+        break;
+    case VER_NT_SERVER:
+        sysInfo->OSProductTypeStr.Set("SERVER");
+        break;
+    default:
+        sysInfo->OSProductTypeStr.Set("Unkonwn Product Type");
+        break;
+    }
     
     MyWinRegValue machineIdRegValue;
     MyWinReg::GetKeyValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\SQMClient", L"MachineId", machineIdRegValue);

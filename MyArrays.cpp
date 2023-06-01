@@ -47,4 +47,20 @@ bool MyAStrArray::Contains(MyStringA* str) {
     return Contains(str->Deref(), str->Length());
 }
 
+void MyAStrArray::Split(const char* str, const char* delimiter) {
+    MyStringA cur;
+    int startIndex = 0;
+    int endIndex = 0;
+    int delLen = strlen(delimiter);
+    cur.Set(str);
+    
+    while (startIndex < cur.Length()) {
+        endIndex = cur.IndexOf(delimiter, delLen, startIndex);
+        if (endIndex < 0) endIndex = cur.Length();
+
+        this->Add(cur.Deref(startIndex), endIndex - startIndex);
+        startIndex += endIndex + delLen;
+    }
+}
+
 #endif // _MY_ARRAYS_CPP_

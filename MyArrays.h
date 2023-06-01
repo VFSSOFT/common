@@ -19,6 +19,8 @@ public:
     bool Contains(const char* str, int len=-1);
     bool Contains(MyStringA* str);
 
+    void Split(const char* str, const char* delimiter);
+
     void Reset() { m_Arr.Reset(); }
 
 private:

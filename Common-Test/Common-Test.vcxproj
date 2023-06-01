@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MyArrayTest.cpp" />
+    <ClCompile Include="MyAsn1Test.cpp" />
     <ClCompile Include="MyAStrValHashMapTest.cpp" />
     <ClCompile Include="MyBufferTest.cpp" />
     <ClCompile Include="MyDataPacketTest.cpp" />

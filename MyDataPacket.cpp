@@ -37,6 +37,14 @@ const char* MyDataPacket::ReadLine(const char* delimiter) {
   return m_RetBuf.Deref();
 }
 
+int MyDataPacket::PeekByte(int* val) {
+    int err = 0;
+    if (this->Available() < 1) {
+        return LastError(MY_ERR_NOT_ENOUGH_DATA, "No so much data to read");
+    }
+    *val = *m_Buffer.Deref(m_ReadIndex);
+    return 0;
+}
 int MyDataPacket::ReadBytes(int len, MyBuffer* buf) {
     int err = 0;
     if (err = buf->SetLength(len)) return err;

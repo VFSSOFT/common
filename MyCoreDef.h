@@ -23,6 +23,10 @@
 #define NULL 0
 #endif
 
+#ifndef BYTE
+#define BYTE unsigned char
+#endif
+
 #ifndef UCHAR
 #define UCHAR short
 #endif

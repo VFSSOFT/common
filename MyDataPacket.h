@@ -16,7 +16,10 @@ public:
   const char* ReadLine(const char* delimiter="\r\n");
   
   inline int Available() { return m_Buffer.Length() - m_ReadIndex; }
-  int  ReadBytes(int len, MyBuffer* buf);
+  int ReadOffset() { return m_ReadIndex; }
+
+  int PeekByte(int* val);
+  int ReadBytes(int len, MyBuffer* buf);
   int ReadBytes(int len, char* buf);
   int ReadNum(int bytesLen, UINT64* val);
   int ReadInt8(int* val);

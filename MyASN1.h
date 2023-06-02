@@ -13,7 +13,7 @@
 #define MY_ASN1_TAG_BOOL                    0x01
 #define MY_ASN1_TAG_INTEGER                 0x02
 #define MY_ASN1_TAG_BIT_STRING              0x03
-#define MY_ASN1_TAG_OCTECT_STRING           0x04
+#define MY_ASN1_TAG_OCTET_STRING            0x04
 #define MY_ASN1_TAG_NULL                    0x05
 #define MY_ASN1_TAG_OID                     0x06
 #define MY_ASN1_TAG_OBJ_DESCRIPTOR          0x07
@@ -106,6 +106,49 @@ public:
     INT64 IntValue();
     MyBuffer* IntBytes() { return &m_Content; }
 };
+class MyAsn1BitString : public MyAsn1Node {
+public:
+    MyAsn1BitString(): MyAsn1Node(), m_UnusedBits(0) {}
+
+    MyBuffer* Bits() { return &m_Bits;  }
+    BYTE UnusedBits() { return m_UnusedBits; }
+    void SetUnusedBits(BYTE v) { m_UnusedBits = v; }
+
+private:
+    MyBuffer m_Bits;
+    BYTE     m_UnusedBits;
+};
+class MyAsn1OctetString : public MyAsn1Node {
+public:
+    MyBuffer* Octet() { return &m_Content; }
+};
+class MyAsn1Null : public MyAsn1Node {};
+class MyAsn1OID : public MyAsn1Node {
+public:
+    MyStringA* OID() { return &m_OID; }
+
+private:
+    MyStringA m_OID;
+};
+class MyAsn1UTF8String: public MyAsn1Node {
+public:
+    MyBuffer* String() { return &m_Content; }
+};
+class MyAsn1PrintableString: public MyAsn1Node {
+public:
+    MyBuffer* String() { return &m_Content; }
+};
+class MyAsn1IA5String : public MyAsn1Node {
+public:
+    MyBuffer* String() { return &m_Content; }
+};
+class MyAsn1BMPString : public MyAsn1Node {
+public:
+    MyStringW* String() { return &m_String; }
+
+private:
+    MyStringW m_String;
+};
 
 class MyAsn1 {
 public:
@@ -123,6 +166,14 @@ private:
 
     int DecodeBool(MyDataPacket* p, MyAsn1Node** node);
     int DecodeInteger(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeBitString(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeOctetString(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeNull(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeOID(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeUTF8String(MyDataPacket* p, MyAsn1Node** node);
+    int DecodePrintableString(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeIA5String(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeBMPString(MyDataPacket* p, MyAsn1Node** node);
 
     int DecodeIDLengthContent(MyDataPacket* p, MyAsn1Node* node);
 

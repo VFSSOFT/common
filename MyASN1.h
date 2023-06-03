@@ -144,6 +144,7 @@ public:
     BYTE        UnusedBits() { return m_UnusedBits; }
     void        SetUnusedBits(BYTE v) { m_UnusedBits = v; }
 
+    int Encode(MyDataPacket* p);
     int InitBool(bool val);
     int InitInteger(INT64 v);
     int InitInteger(const char* raw, int len);
@@ -159,6 +160,7 @@ public:
     int InitUTCTime(MyAsn1Time* time);
     int InitGeneralizedTime(MyAsn1Time* time);
     int InitBMPStrign(wchar_t* str, int len=-1);
+    int InitExplicit(BYTE tag);
 
     bool UseInfiniteLength() { return m_UseInfiniteLength; }
     void SetUseInfiniteLength(bool val) { m_UseInfiniteLength = val; }
@@ -173,6 +175,7 @@ public:
 
 private:
     int DecodeIDLengthContent(MyDataPacket* p);
+    int EncodeLength(int len, MyDataPacket* p);
 
 protected:
     BYTE                m_ID;

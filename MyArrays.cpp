@@ -59,7 +59,7 @@ void MyAStrArray::Split(const char* str, const char* delimiter) {
         if (endIndex < 0) endIndex = cur.Length();
 
         this->Add(cur.Deref(startIndex), endIndex - startIndex);
-        startIndex += endIndex + delLen;
+        startIndex = endIndex + delLen;
     }
 }
 

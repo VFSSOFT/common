@@ -3,6 +3,24 @@
 
 #include "MyASN1.h"
 
+int MyAsn1Node::Encode(MyDataPacket* p) {
+    int err = 0;
+    if (err = p->WriteInt8(m_ID)) return LastError(err, p->LastErrorMessage());
+
+    if (IsSequence() || IsSet() || IsConstructed()) {
+        MyDataPacket childPkt;
+        for (int i = 0; i < m_Children.Size(); i++) {
+            childPkt.Reset();
+            MyAsn1Node* child = m_Children.Get(i);
+            if (err = child->Encode(&childPkt)) return LastError(err, child->LastErrorMessage());
+            m_Content.Append(childPkt.Deref(), childPkt.DerefLength());
+        }
+    } 
+    if (err = EncodeLength(m_Content.Length(), p)) return err;
+    if (err = p->Write(m_Content.Deref(), m_Content.Length())) return LastError(err, p->LastErrorMessage());
+
+    return 0;
+}
 int MyAsn1Node::InitBool(bool val) {
     SetID(MY_ASN1_TAG_BOOL);
     m_Content.Reset();
@@ -122,11 +140,11 @@ int MyAsn1Node::InitUTF8String(const char* str, int len) {
     return 0;
 }
 int MyAsn1Node::InitSequence() {
-    SetID(MY_ASN1_TAG_SEQUENCE);
+    SetID(MY_ASN1_TAG_SEQUENCE | MY_ASN1_TAG_CLASS_CONSTRUCTED);
     return 0;
 }
 int MyAsn1Node::InitSet() {
-    SetID(MY_ASN1_TAG_SET);
+    SetID(MY_ASN1_TAG_SET | MY_ASN1_TAG_CLASS_CONSTRUCTED);
     return 0;
 }
 int MyAsn1Node::InitPrintableString(const char* str, int len) {
@@ -174,7 +192,7 @@ int MyAsn1Node::InitUTCTime(MyAsn1Time* time) {
 int MyAsn1Node::InitGeneralizedTime(MyAsn1Time* time) {
 
     MyStringA timestr;
-    SetID(MY_ASN1_TAG_UTC_TIME);
+    SetID(MY_ASN1_TAG_GENERALIZED_TIME);
     m_Time.CopyFrom(time);
 
     timestr.AppendInt(time->Year, 4);
@@ -218,6 +236,10 @@ int MyAsn1Node::InitBMPStrign(wchar_t* str, int len) {
 
     return 0;
 }
+int MyAsn1Node::InitExplicit(BYTE tag) {
+    SetID(tag);
+    return 0;
+}
 
 int MyAsn1::Decode(const char* data, int len) {
     int err = 0;
@@ -233,6 +255,13 @@ int MyAsn1::Decode(MyDataPacket* p) {
     if (err = m_Root.Decode(p)) return LastError(err, m_Root.LastErrorMessage());
     return 0;
 }
+int MyAsn1::Encode(MyBuffer* buf) {
+    int err = 0;
+    MyDataPacket p;
+    if (err = m_Root.Encode(&p)) return LastError(err, m_Root.LastErrorMessage());
+    return buf->Set(p.Deref(), p.DerefLength());
+}
+
 int MyAsn1Node::Decode(MyDataPacket* p) {
     int err = 0;
     int b = 0;
@@ -649,6 +678,24 @@ int MyAsn1Node::DecodeIDLengthContent(MyDataPacket* p) {
     int rawLen = p->ReadOffset() - startPos;
     if (err = m_Raw.Set(p->Deref() + startPos, rawLen)) return err;
 
+    return 0;
+}
+int MyAsn1Node::EncodeLength(int len, MyDataPacket* p) {
+    int err = 0;
+    if (len <= 127) {
+        if (err = p->WriteInt8(len)) return LastError(err, p->LastErrorMessage());
+    } else {
+        char bytes[9];
+        int pos = 8;
+
+        while (len > 0) {
+            bytes[pos] = (len & 0xFF);
+            len = len >> 8;
+            pos--;
+        }
+        bytes[pos] = 0x80 | (8 - pos);
+        if (err = p->Write(bytes + pos, 9 - pos)) return LastError(err, p->LastErrorMessage());
+    }
     return 0;
 }
 

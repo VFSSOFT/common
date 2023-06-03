@@ -11,9 +11,8 @@ TEST(MyASN1Test, DecodeBool) {
     ASSERT_EQ(err, 0);
 
     MyAsn1Node* node = d.Root();
-    ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_BOOL);
-    MyAsn1Bool* boolNode = (MyAsn1Bool*)node;
-    ASSERT_TRUE(boolNode->Value());
+    ASSERT_TRUE(node->IsBool());
+    ASSERT_TRUE(node->BoolValue());
 }
 
 TEST(MyASN1Test, DecodeInteger0) {
@@ -24,9 +23,8 @@ TEST(MyASN1Test, DecodeInteger0) {
     ASSERT_EQ(err, 0);
 
     MyAsn1Node* node = d.Root();
-    ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_INTEGER);
-    MyAsn1Integer* intNode = (MyAsn1Integer*)node;
-    ASSERT_EQ(intNode->IntValue(), 0);
+    ASSERT_TRUE(node->IsInteger());
+    ASSERT_EQ(node->IntValue(), 0);
 }
 
 TEST(MyASN1Test, DecodeInteger65537) {
@@ -37,9 +35,8 @@ TEST(MyASN1Test, DecodeInteger65537) {
     ASSERT_EQ(err, 0);
 
     MyAsn1Node* node = d.Root();
-    ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_INTEGER);
-    MyAsn1Integer* intNode = (MyAsn1Integer*)node;
-    ASSERT_EQ(intNode->IntValue(), 65537);
+    ASSERT_TRUE(node->IsInteger());
+    ASSERT_EQ(node->IntValue(), 65537);
 }
 TEST(MyASN1Test, DecodeIntegerLong) {
     int err = 0;
@@ -49,9 +46,8 @@ TEST(MyASN1Test, DecodeIntegerLong) {
     ASSERT_EQ(err, 0);
 
     MyAsn1Node* node = d.Root();
-    ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_INTEGER);
-    MyAsn1Integer* intNode = (MyAsn1Integer*)node;
-    ASSERT_EQ(intNode->IntBytes()->Length(), 16);
+    ASSERT_TRUE(node->IsInteger());
+    ASSERT_EQ(node->IntBytes()->Length(), 16);
 }
 
 TEST(MyASN1Test, DecodeBitString) {
@@ -63,10 +59,9 @@ TEST(MyASN1Test, DecodeBitString) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_BIT_STRING);
-    MyAsn1BitString* bitStringNode = (MyAsn1BitString*)node;
-    ASSERT_EQ(bitStringNode->UnusedBits(), 4);
-    ASSERT_EQ(bitStringNode->Bits()->Length(), 1);
-    ASSERT_EQ(bitStringNode->Bits()->CharAt(0) & 0xFF, 0xB0);
+    ASSERT_EQ(node->UnusedBits(), 4);
+    ASSERT_EQ(node->BitString()->Length(), 1);
+    ASSERT_EQ(node->BitString()->CharAt(0) & 0xFF, 0xB0);
 }
 
 TEST(MyASN1Test, DecodeOctetString) {
@@ -82,11 +77,10 @@ TEST(MyASN1Test, DecodeOctetString) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_OCTET_STRING);
-    MyAsn1OctetString* octetStringNode = (MyAsn1OctetString*)node;
-    ASSERT_EQ(octetStringNode->Octet()->Length(), 24);
-    ASSERT_EQ(octetStringNode->Octet()->CharAt(0) & 0xFF, 0x30);
-    ASSERT_EQ(octetStringNode->Octet()->CharAt(1) & 0xFF, 0x16);
-    ASSERT_EQ(octetStringNode->Octet()->CharAt(23) & 0xFF, 0xA9);
+    ASSERT_EQ(node->Octet()->Length(), 24);
+    ASSERT_EQ(node->Octet()->CharAt(0) & 0xFF, 0x30);
+    ASSERT_EQ(node->Octet()->CharAt(1) & 0xFF, 0x16);
+    ASSERT_EQ(node->Octet()->CharAt(23) & 0xFF, 0xA9);
 }
 
 TEST(MyASN1Test, DecodeNULL) {
@@ -109,8 +103,7 @@ TEST(MyASN1Test, DecodeOID) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_OID);
-    MyAsn1OID* oid = (MyAsn1OID*)node;
-    ASSERT_STREQ(oid->OID()->Deref(), "1.2.840.113549.1.1.10");
+    ASSERT_STREQ(node->OID()->Deref(), "1.2.840.113549.1.1.10");
 }
 TEST(MyASN1Test, DecodeOID2) {
     return; // KNOWN BUG
@@ -122,8 +115,7 @@ TEST(MyASN1Test, DecodeOID2) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_OID);
-    MyAsn1OID* oid = (MyAsn1OID*)node;
-    ASSERT_STREQ(oid->OID()->Deref(), "2.999.3");
+    ASSERT_STREQ(node->OID()->Deref(), "2.999.3");
 }
 
 TEST(MyASN1Test, DecodeUTF8String) {
@@ -142,8 +134,7 @@ TEST(MyASN1Test, DecodeUTF8String) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_UTF8_STRING);
-    MyAsn1UTF8String* str = (MyAsn1UTF8String*)node;
-    ASSERT_EQ(str->String()->Length(), 45);
+    ASSERT_EQ(node->String()->Length(), 45);
 }
 
 TEST(MyASN1Test, DecodePrintableString) {
@@ -155,9 +146,8 @@ TEST(MyASN1Test, DecodePrintableString) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_PRINTABLE_STRING);
-    MyAsn1PrintableString* str = (MyAsn1PrintableString*)node;
-    ASSERT_EQ(str->String()->Length(), 2);
-    ASSERT_STREQ(str->String()->Deref(), "NL");
+    ASSERT_EQ(node->String()->Length(), 2);
+    ASSERT_STREQ(node->String()->Deref(), "NL");
 }
 
 TEST(MyASN1Test, DecodeIA5String) {
@@ -169,9 +159,8 @@ TEST(MyASN1Test, DecodeIA5String) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_IA5_STRING);
-    MyAsn1IA5String* str = (MyAsn1IA5String*)node;
-    ASSERT_EQ(str->String()->Length(), 10);
-    ASSERT_STREQ(str->String()->Deref(), "6.0.5361.2");
+    ASSERT_EQ(node->String()->Length(), 10);
+    ASSERT_STREQ(node->String()->Deref(), "6.0.5361.2");
 }
 
 TEST(MyASN1Test, DecodeBMPString) {
@@ -183,12 +172,11 @@ TEST(MyASN1Test, DecodeBMPString) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_BMP_STRING);
-    MyAsn1BMPString* str = (MyAsn1BMPString*)node;
-    ASSERT_EQ(str->String()->Length(), 4);
-    ASSERT_EQ(str->String()->Deref()[0], L'U');
-    ASSERT_EQ(str->String()->Deref()[1], L's');
-    ASSERT_EQ(str->String()->Deref()[2], L'e');
-    ASSERT_EQ(str->String()->Deref()[3], L'r');
+    ASSERT_EQ(node->WString()->Length(), 4);
+    ASSERT_EQ(node->WString()->Deref()[0], L'U');
+    ASSERT_EQ(node->WString()->Deref()[1], L's');
+    ASSERT_EQ(node->WString()->Deref()[2], L'e');
+    ASSERT_EQ(node->WString()->Deref()[3], L'r');
 }
 
 TEST(MyASN1Test, DecodeUTCTime) {
@@ -200,7 +188,7 @@ TEST(MyASN1Test, DecodeUTCTime) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_UTC_TIME);
-    MyAsn1UTCTime* time = (MyAsn1UTCTime*)node;
+    MyAsn1Time* time = node->Time();
     ASSERT_EQ(time->Year, 2023);
     ASSERT_EQ(time->Month, 1);
     ASSERT_EQ(time->Day, 2);
@@ -220,7 +208,7 @@ TEST(MyASN1Test, DecodeUTCTime1) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_UTC_TIME);
-    MyAsn1UTCTime* time = (MyAsn1UTCTime*)node;
+    MyAsn1Time* time = node->Time();
     ASSERT_EQ(time->Year, 1991);
     ASSERT_EQ(time->Month, 5);
     ASSERT_EQ(time->Day, 6);
@@ -240,7 +228,7 @@ TEST(MyASN1Test, DecodeGeneralizedTime) {
 
     MyAsn1Node* node = d.Root();
     ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_GENERALIZED_TIME);
-    MyAsn1GeneralizedTime* time = (MyAsn1GeneralizedTime*)node;
+    MyAsn1Time* time = node->Time();
     ASSERT_EQ(time->Year, 2106);
     ASSERT_EQ(time->Month, 3);
     ASSERT_EQ(time->Day, 18);
@@ -308,7 +296,7 @@ TEST(MyASN1Test, DecodeExpclitTag) {
 
     node = d.Root();
     ASSERT_TRUE(node->IsInteger());
-    ASSERT_EQ(((MyAsn1Integer*)node)->IntValue(), 2);
+    ASSERT_EQ(node->IntValue(), 2);
 }
 
 TEST(MyASN1Test, DecodeImpclitTag) {

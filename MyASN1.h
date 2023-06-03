@@ -36,10 +36,25 @@
 #define MY_ASN1_TAG_CLASS_CONTEXT_SPECIFIC  0x80
 #define MY_ASN1_TAG_CLASS_PRIVATE           0xc0
 
+class MyAsn1Time {
+public:
+    MyAsn1Time(): Year(0), Month(0), Day(0), Hour(0), Minute(0),
+        Second(0), Millisecond(0), HourOffset(0), MinuteOffset(0) {}
+
+    int Year;
+    int Month;
+    int Day;
+    int Hour;
+    int Minute;
+    int Second;
+    int Millisecond;
+    int HourOffset;
+    int MinuteOffset;
+};
 
 class MyAsn1Node {
 public:
-    MyAsn1Node(): m_ID(0), m_UseInfiniteLength(false), m_Parent(NULL) {}
+    MyAsn1Node(): m_ID(0), m_UseInfiniteLength(false), m_Parent(NULL), m_UnusedBits(0) {}
     ~MyAsn1Node();
 
     BYTE ID() { return m_ID; }
@@ -83,6 +98,43 @@ public:
     bool IsGeneralizedTime() { return TagNum() == MY_ASN1_TAG_GENERALIZED_TIME; }
     bool IsBMPString() { return TagNum() == MY_ASN1_TAG_BMP_STRING; }
 
+    bool        BoolValue() { return m_Content.CharAt(0) != 0; }
+    INT64       IntValue() {
+        INT64 ret = 0;
+        for (int i = 0; i < m_Content.Length(); i++) {
+            char c = m_Content.CharAt(i);
+            ret += (c * (1 << (m_Content.Length() - 1 - i) * 8));
+        }
+        return ret;
+    }
+    MyBuffer*   IntBytes() { return &m_Content; }
+    MyBuffer*   Octet() { return &m_Content; }
+    MyStringA*  OID() { return &m_OID; }
+    MyBuffer*   String() { return &m_Content; }
+    MyStringW*  WString() { return &m_BMPString; }
+    MyAsn1Time* Time() { return &m_Time; }
+    MyBuffer*   BitString() { return &m_Bits; }
+    BYTE        UnusedBits() { return m_UnusedBits; }
+    void        SetUnusedBits(BYTE v) { m_UnusedBits = v; }
+
+    int InitBool(bool val);
+    int InitInteger(INT64 v);
+    int InitInteger(UINT64 v);
+    int InitInteger(const char* raw, int len);
+    int InitBitstring(const char* bits, int bitsLen);
+    int InitOctetString(const char* octet, int len);
+    int InitNull();
+    int InitOID(const char* oid, int len=-1);
+    int InitUTF8String(const char* str, int len=-1);
+    int InitSequence();
+    int InitSet();
+    int InitPrintableString(const char* str, int len=-1);
+    int InitIA5String(const char* str, int len=-1);
+    int InitUTCTime();
+    int InitGeneralizedTime();
+    int InitBMPStrign(wchar_t* str, int len=-1);
+    int InitRaw(const char* raw, int len);
+
     bool UseInfiniteLength() { return m_UseInfiniteLength; }
     void SetUseInfiniteLength(bool val) { m_UseInfiniteLength = val; }
     MyBuffer* Content() { return &m_Content; }
@@ -102,90 +154,14 @@ protected:
 
     MyAsn1Node*         m_Parent;
     MyValArray<MyAsn1Node*> m_Children;
-};
 
-class MyAsn1Bool : public MyAsn1Node {
-public:
-    bool Value() { return m_Content.CharAt(0) != 0; }
-};
-class MyAsn1Integer : public MyAsn1Node {
-public:
-    INT64 IntValue();
-    MyBuffer* IntBytes() { return &m_Content; }
-};
-class MyAsn1BitString : public MyAsn1Node {
-public:
-    MyAsn1BitString(): MyAsn1Node(), m_UnusedBits(0) {}
 
-    MyBuffer* Bits() { return &m_Bits;  }
-    BYTE UnusedBits() { return m_UnusedBits; }
-    void SetUnusedBits(BYTE v) { m_UnusedBits = v; }
-
-private:
-    MyBuffer m_Bits;
-    BYTE     m_UnusedBits;
-};
-class MyAsn1OctetString : public MyAsn1Node {
-public:
-    MyBuffer* Octet() { return &m_Content; }
-};
-class MyAsn1Null : public MyAsn1Node {};
-class MyAsn1OID : public MyAsn1Node {
-public:
-    MyStringA* OID() { return &m_OID; }
-
-private:
-    MyStringA m_OID;
-};
-class MyAsn1UTF8String: public MyAsn1Node {
-public:
-    MyBuffer* String() { return &m_Content; }
-};
-class MyAsn1PrintableString: public MyAsn1Node {
-public:
-    MyBuffer* String() { return &m_Content; }
-};
-class MyAsn1IA5String : public MyAsn1Node {
-public:
-    MyBuffer* String() { return &m_Content; }
-};
-class MyAsn1BMPString : public MyAsn1Node {
-public:
-    MyStringW* String() { return &m_String; }
-
-private:
-    MyStringW m_String;
-};
-class MyAsn1UTCTime : public MyAsn1Node {
-public:
-
-    MyAsn1UTCTime(): MyAsn1Node(), Year(0), Month(0), Day(0), Hour(0), Minute(0),
-        Second(0), HourOffset(0), MinuteOffset(0) {}
-
-    int Year;
-    int Month;
-    int Day;
-    int Hour;
-    int Minute;
-    int Second;
-    int HourOffset;
-    int MinuteOffset;
-};
-class MyAsn1GeneralizedTime : public MyAsn1Node {
-public:
-
-    MyAsn1GeneralizedTime(): MyAsn1Node(), Year(0), Month(0), Day(0), Hour(0), Minute(0),
-        Second(0), Millisecond(0), HourOffset(0), MinuteOffset(0) {}
-
-    int Year;
-    int Month;
-    int Day;
-    int Hour;
-    int Minute;
-    int Second;
-    int Millisecond;
-    int HourOffset;
-    int MinuteOffset;
+    // for specific ASN.1 types
+    MyStringA  m_OID;
+    MyStringW  m_BMPString;
+    MyBuffer   m_Bits;
+    BYTE       m_UnusedBits;
+    MyAsn1Time m_Time; // For UTCTime and GeneralizedTime
 };
 
 class MyAsn1 {
@@ -195,9 +171,11 @@ public:
 
     int Decode(const char* data, int len);
     int Decode(MyDataPacket* buf);
+    MyAsn1Node* Root() { return m_Root; } // For Decode
 
-    MyAsn1Node* Root() { return m_Root; }
-
+    // For Encode
+    MyAsn1Node* NewRoot();
+    int Encode(MyBuffer* buf);
 
 private:
     int Decode(MyDataPacket* p, MyAsn1Node** node);

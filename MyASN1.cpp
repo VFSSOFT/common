@@ -10,14 +10,56 @@ MyAsn1Node::~MyAsn1Node() {
     m_Children.Reset();
 }
 
-
-INT64 MyAsn1Integer::IntValue() {
-    INT64 ret = 0;
-    for (int i = 0; i < m_Content.Length(); i++) {
-        char c = m_Content.CharAt(i);
-        ret += (c * (1 << (m_Content.Length() - 1 - i) * 8));
-    }
-    return ret;
+int MyAsn1Node::InitBool(bool val) {
+    return 0;
+}
+int MyAsn1Node::InitInteger(INT64 v) {
+    return 0;
+}
+int MyAsn1Node::InitInteger(UINT64 v) {
+    return 0;
+}
+int MyAsn1Node::InitInteger(const char* raw, int len) {
+    return 0;
+}
+int MyAsn1Node::InitBitstring(const char* bits, int bitsLen) {
+    return 0;
+}
+int MyAsn1Node::InitOctetString(const char* octet, int len) {
+    return 0;
+}
+int MyAsn1Node::InitNull() {
+    return 0;
+}
+int MyAsn1Node::InitOID(const char* oid, int len) {
+    return 0;
+}
+int MyAsn1Node::InitUTF8String(const char* str, int len) {
+    return 0;
+}
+int MyAsn1Node::InitSequence() {
+    return 0;
+}
+int MyAsn1Node::InitSet() {
+    return 0;
+}
+int MyAsn1Node::InitPrintableString(const char* str, int len) {
+    return 0;
+}
+int MyAsn1Node::InitIA5String(const char* str, int len) {
+    return 0;
+}
+int MyAsn1Node::InitUTCTime() {
+    return 0;
+}
+int MyAsn1Node::InitGeneralizedTime() {
+    return 0;
+}
+int MyAsn1Node::InitBMPStrign(wchar_t* str, int len) {
+    return 0;
+}
+int MyAsn1Node::InitRaw(const char* raw, int len) {
+    return 0;
 }
 
 int MyAsn1::Decode(const char* data, int len) {
@@ -109,7 +151,7 @@ int MyAsn1::Decode(MyDataPacket* p, MyAsn1Node** node) {
 }
 int MyAsn1::DecodeBool(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1Bool* boolNode = new MyAsn1Bool();
+    MyAsn1Node* boolNode = new MyAsn1Node();
 
     if (err = DecodeIDLengthContent(p, boolNode)) goto done;
 
@@ -125,7 +167,7 @@ done:
 }
 int MyAsn1::DecodeInteger(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1Integer* intNode = new MyAsn1Integer();
+    MyAsn1Node* intNode = new MyAsn1Node();
 
     if (err = DecodeIDLengthContent(p, intNode)) goto done;
 
@@ -142,7 +184,7 @@ done:
 int MyAsn1::DecodeBitString(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
     BYTE b;
-    MyAsn1BitString* bitStringNode = new MyAsn1BitString();
+    MyAsn1Node* bitStringNode = new MyAsn1Node();
     
     if (err = DecodeIDLengthContent(p, bitStringNode)) goto done;
 
@@ -157,7 +199,7 @@ int MyAsn1::DecodeBitString(MyDataPacket* p, MyAsn1Node** node) {
         goto done;
     }
     bitStringNode->SetUnusedBits(b);
-    bitStringNode->Bits()->Set(bitStringNode->Content()->Deref(1), bitStringNode->Content()->Length() - 1);
+    bitStringNode->BitString()->Set(bitStringNode->Content()->Deref(1), bitStringNode->Content()->Length() - 1);
     *node = bitStringNode;
 
 done:
@@ -166,7 +208,7 @@ done:
 }
 int MyAsn1::DecodeOctetString(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1OctetString* octetStringNode = new MyAsn1OctetString();
+    MyAsn1Node* octetStringNode = new MyAsn1Node();
 
     if (err = DecodeIDLengthContent(p, octetStringNode)) goto done;
 
@@ -182,7 +224,7 @@ done:
 }
 int MyAsn1::DecodeNull(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1Null* nullNode = new MyAsn1Null();
+    MyAsn1Node* nullNode = new MyAsn1Node();
 
     if (err = DecodeIDLengthContent(p, nullNode)) goto done;
 
@@ -198,7 +240,7 @@ done:
 }
 int MyAsn1::DecodeOID(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1OID* oidNode = new MyAsn1OID();
+    MyAsn1Node* oidNode = new MyAsn1Node();
     MyBuffer* buf;
     int i = 0;
     int curComp;
@@ -247,7 +289,7 @@ done:
 
 int MyAsn1::DecodeUTF8String(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1UTF8String* strNode = new MyAsn1UTF8String();
+    MyAsn1Node* strNode = new MyAsn1Node();
 
     if (err = DecodeIDLengthContent(p, strNode)) goto done;
 
@@ -264,7 +306,7 @@ done:
 
 int MyAsn1::DecodePrintableString(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1PrintableString* strNode = new MyAsn1PrintableString();
+    MyAsn1Node* strNode = new MyAsn1Node();
 
     if (err = DecodeIDLengthContent(p, strNode)) goto done;
 
@@ -330,7 +372,7 @@ done:
 }
 int MyAsn1::DecodeIA5String(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1IA5String* strNode = new MyAsn1IA5String();
+    MyAsn1Node* strNode = new MyAsn1Node();
 
     if (err = DecodeIDLengthContent(p, strNode)) goto done;
 
@@ -346,7 +388,7 @@ done:
 }
 int MyAsn1::DecodeBMPString(MyDataPacket* p, MyAsn1Node** node) {
     int err = 0;
-    MyAsn1BMPString* strNode = new MyAsn1BMPString();
+    MyAsn1Node* strNode = new MyAsn1Node();
     int i = 0;
 
     if (err = DecodeIDLengthContent(p, strNode)) goto done;
@@ -356,7 +398,7 @@ int MyAsn1::DecodeBMPString(MyDataPacket* p, MyAsn1Node** node) {
         goto done;
     }
     for (int i = 0; i < strNode->Content()->Length(); i += 2) {
-        strNode->String()->AppendChar(strNode->Content()->CharAt(i+1) | (strNode->Content()->CharAt(i) << 8));
+        strNode->WString()->AppendChar(strNode->Content()->CharAt(i+1) | (strNode->Content()->CharAt(i) << 8));
     }
     *node = strNode;
 
@@ -375,7 +417,7 @@ int MyAsn1::DecodeUTCTime(MyDataPacket* p, MyAsn1Node** node) {
     */
 
     int err = 0;
-    MyAsn1UTCTime* timeNode = new MyAsn1UTCTime();
+    MyAsn1Node* timeNode = new MyAsn1Node();
     MyBuffer* buf = timeNode->Content();
     int i = 0;
     char c = 0;
@@ -391,30 +433,30 @@ int MyAsn1::DecodeUTCTime(MyDataPacket* p, MyAsn1Node** node) {
         goto done;
     }
 
-    timeNode->Year = MyStringA::ConvertToInt(buf->Deref(), 2) + 2000;
-    if (timeNode->Year > 2050) {
+    timeNode->Time()->Year = MyStringA::ConvertToInt(buf->Deref(), 2) + 2000;
+    if (timeNode->Time()->Year > 2050) {
         // UTCTime only encodes times prior to 2050. See https://tools.ietf.org/html/rfc5280#section-4.1.2.5.1
-        timeNode->Year -= 100;
+        timeNode->Time()->Year -= 100;
     }
-    timeNode->Month  = MyStringA::ConvertToInt(buf->Deref(2), 2);
-    timeNode->Day    = MyStringA::ConvertToInt(buf->Deref(4), 2);
-    timeNode->Hour   = MyStringA::ConvertToInt(buf->Deref(6), 2);
-    timeNode->Minute = MyStringA::ConvertToInt(buf->Deref(8), 2);
+    timeNode->Time()->Month  = MyStringA::ConvertToInt(buf->Deref(2), 2);
+    timeNode->Time()->Day    = MyStringA::ConvertToInt(buf->Deref(4), 2);
+    timeNode->Time()->Hour   = MyStringA::ConvertToInt(buf->Deref(6), 2);
+    timeNode->Time()->Minute = MyStringA::ConvertToInt(buf->Deref(8), 2);
 
     i = 10;
     c = buf->CharAt(i);
     if (c >= '0' && c <= '9') {
-        timeNode->Second = MyStringA::ConvertToInt(buf->Deref(i), 2);
+        timeNode->Time()->Second = MyStringA::ConvertToInt(buf->Deref(i), 2);
         i += 2;
     }
 
     c = buf->CharAt(i);
     if (c == '+' || c == '-') {
-        timeNode->HourOffset = MyStringA::ConvertToInt(buf->Deref(i + 1), 2);
-        timeNode->MinuteOffset = MyStringA::ConvertToInt(buf->Deref(i + 3), 2);
+        timeNode->Time()->HourOffset = MyStringA::ConvertToInt(buf->Deref(i + 1), 2);
+        timeNode->Time()->MinuteOffset = MyStringA::ConvertToInt(buf->Deref(i + 3), 2);
         if (c == '-') {
-            timeNode->HourOffset *= -1;
-            timeNode->MinuteOffset *= -1;
+            timeNode->Time()->HourOffset *= -1;
+            timeNode->Time()->MinuteOffset *= -1;
         }
     } else {
         if (c != 'z' && c != 'Z') {
@@ -438,7 +480,7 @@ int MyAsn1::DecodeGeneralizedTime(MyDataPacket* p, MyAsn1Node** node) {
      */
 
     int err = 0;
-    MyAsn1GeneralizedTime* timeNode = new MyAsn1GeneralizedTime();
+    MyAsn1Node* timeNode = new MyAsn1Node();
     MyBuffer* buf = timeNode->Content();
     int i = 0;
     char c = 0;
@@ -455,26 +497,26 @@ int MyAsn1::DecodeGeneralizedTime(MyDataPacket* p, MyAsn1Node** node) {
         goto done;
     }
 
-    timeNode->Year   = MyStringA::ConvertToInt(buf->Deref(), 4);
-    timeNode->Month  = MyStringA::ConvertToInt(buf->Deref(4), 2);
-    timeNode->Day    = MyStringA::ConvertToInt(buf->Deref(6), 2);
-    timeNode->Hour   = MyStringA::ConvertToInt(buf->Deref(8), 2);
+    timeNode->Time()->Year   = MyStringA::ConvertToInt(buf->Deref(), 4);
+    timeNode->Time()->Month  = MyStringA::ConvertToInt(buf->Deref(4), 2);
+    timeNode->Time()->Day    = MyStringA::ConvertToInt(buf->Deref(6), 2);
+    timeNode->Time()->Hour   = MyStringA::ConvertToInt(buf->Deref(8), 2);
 
     i = 10;
     // Possible: [MM[SS[.fff]]]
     if (buf->Length() >= i + 2 && (MyStringA::IsDigit(buf->CharAt(i)))) {
-        timeNode->Minute = MyStringA::ConvertToInt(buf->Deref(i), 2);
+        timeNode->Time()->Minute = MyStringA::ConvertToInt(buf->Deref(i), 2);
         i += 2;
 
         if (buf->Length() >= i + 2 && (MyStringA::IsDigit(buf->CharAt(i)))) {
-            timeNode->Second = MyStringA::ConvertToInt(buf->Deref(i), 2);
+            timeNode->Time()->Second = MyStringA::ConvertToInt(buf->Deref(i), 2);
             i += 2;
         }
         if (buf->Length() >= i + 2 && buf->CharAt(i) == '.') {
             while ((i + 1 + i) < buf->Length() && buf->CharAt(i + 1 + i) != '+' && buf->CharAt(i + 1 + i) != '-' && buf->CharAt(i + 1 + i) != 'Z') {
                 len++;
             }
-            timeNode->Millisecond = MyStringA::ConvertToInt(buf->Deref(i), len);
+            timeNode->Time()->Millisecond = MyStringA::ConvertToInt(buf->Deref(i), len);
             i += len;
         }
     }
@@ -486,11 +528,11 @@ int MyAsn1::DecodeGeneralizedTime(MyDataPacket* p, MyAsn1Node** node) {
 
     c = buf->CharAt(i);
     if (c == '+' || c == '-') {
-        timeNode->HourOffset = MyStringA::ConvertToInt(buf->Deref(i + 1), 2);
-        timeNode->MinuteOffset = MyStringA::ConvertToInt(buf->Deref(i + 3), 2);
+        timeNode->Time()->HourOffset = MyStringA::ConvertToInt(buf->Deref(i + 1), 2);
+        timeNode->Time()->MinuteOffset = MyStringA::ConvertToInt(buf->Deref(i + 3), 2);
         if (c == '-') {
-            timeNode->HourOffset *= -1;
-            timeNode->MinuteOffset *= -1;
+            timeNode->Time()->HourOffset *= -1;
+            timeNode->Time()->MinuteOffset *= -1;
         }
     } else {
         if (c != 'z' && c != 'Z') {

@@ -41,6 +41,17 @@ public:
     MyAsn1Time(): Year(0), Month(0), Day(0), Hour(0), Minute(0),
         Second(0), Millisecond(0), HourOffset(0), MinuteOffset(0) {}
 
+    void CopyFrom(MyAsn1Time* t) {
+        Year = t->Year;
+        Month = t->Month;
+        Day = t->Day;
+        Hour = t->Hour;
+        Minute = t->Minute;
+        Second = t->Second;
+        HourOffset = t->HourOffset;
+        MinuteOffset = t->MinuteOffset;
+    }
+
     int Year;
     int Month;
     int Day;
@@ -135,7 +146,6 @@ public:
 
     int InitBool(bool val);
     int InitInteger(INT64 v);
-    int InitInteger(UINT64 v);
     int InitInteger(const char* raw, int len);
     int InitBitstring(const char* bits, int bitsLen);
     int InitOctetString(const char* octet, int len);
@@ -146,10 +156,9 @@ public:
     int InitSet();
     int InitPrintableString(const char* str, int len=-1);
     int InitIA5String(const char* str, int len=-1);
-    int InitUTCTime();
-    int InitGeneralizedTime();
+    int InitUTCTime(MyAsn1Time* time);
+    int InitGeneralizedTime(MyAsn1Time* time);
     int InitBMPStrign(wchar_t* str, int len=-1);
-    int InitRaw(const char* raw, int len);
 
     bool UseInfiniteLength() { return m_UseInfiniteLength; }
     void SetUseInfiniteLength(bool val) { m_UseInfiniteLength = val; }

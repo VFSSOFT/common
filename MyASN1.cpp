@@ -4,54 +4,218 @@
 #include "MyASN1.h"
 
 int MyAsn1Node::InitBool(bool val) {
+    SetID(MY_ASN1_TAG_BOOL);
+    m_Content.Reset();
+    m_Content.AppendChar(val ? 0xFF : 0);
     return 0;
 }
 int MyAsn1Node::InitInteger(INT64 v) {
-    return 0;
-}
-int MyAsn1Node::InitInteger(UINT64 v) {
+    SetID(MY_ASN1_TAG_INTEGER);
+
+    char bytes[9];
+    if (v < 0) {
+        for (int i = 0; i < 8; i++) {
+            bytes[i] = ((v >> ((8-i-1) * 8))) & 0xFF;
+        }
+        int start = 0;
+        for (int i = 0; i < 7; i++) {
+            if (bytes[i] == 0xFF && (bytes[i + 1] & 0x80) == 0x80) {
+                start++;
+            } else {
+                break;
+            }
+        }
+        m_Content.Set(bytes + start, 8 - start);
+    } else {
+        if (v < 0x80) {
+            m_Content.Reset();
+            m_Content.AppendChar(v);
+        } else {
+            int pos = 8;
+            while (v > 0) {
+                bytes[pos] = v & 0xFF;
+                v >>= 8;
+                pos--;
+            }
+            // If the first byte >= 0x80, add a leading zero byte '0x00'
+            if ((bytes[pos + 1] & 0x80) != 0) {
+                bytes[pos] = 0;
+                pos--;
+            }
+            m_Content.Set(bytes + pos + 1, 9 - (pos + 1));
+        }
+    }
+
     return 0;
 }
 int MyAsn1Node::InitInteger(const char* raw, int len) {
+    SetID(MY_ASN1_TAG_INTEGER);
+    m_Content.Set(raw, len);
     return 0;
 }
 int MyAsn1Node::InitBitstring(const char* bits, int bitsLen) {
+    SetID(MY_ASN1_TAG_BIT_STRING);
+    if (bitsLen % 8 == 0) {
+        SetUnusedBits(0);
+    } else {
+        SetUnusedBits(8 - bitsLen % 8);
+    }
+    m_Bits.Set(bits, bitsLen);
+    m_Content.Reset();
+    m_Content.AppendChar(UnusedBits());
+    m_Content.Append(bits, (bitsLen + 8) / 8);
     return 0;
 }
 int MyAsn1Node::InitOctetString(const char* octet, int len) {
+    SetID(MY_ASN1_TAG_OCTET_STRING);
+    m_Content.Set(octet, len);
     return 0;
 }
 int MyAsn1Node::InitNull() {
+    SetID(MY_ASN1_TAG_NULL);
     return 0;
 }
 int MyAsn1Node::InitOID(const char* oid, int len) {
+    if (len < 0) len = strlen(oid);
+
+    SetID(MY_ASN1_TAG_OID);
+    m_OID.Set(oid, len);
+
+    MyAStrArray comps;
+    MyValArray<int> intComps;
+    comps.Split(m_OID.Deref(), ".");
+
+    if (comps.Size() < 2) 
+        return LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 OID");
+
+    for (int i = 0; i < comps.Size(); i++) {
+        int val = MyStringA::ConvertToInt(comps.Get(i)->Deref(), comps.Get(i)->Length());
+        intComps.Add(val);
+    }
+    
+    if (intComps.Get(0) != 0 && intComps.Get(0) != 1 && intComps.Get(0) != 2)
+        return LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 OID");
+
+    if (intComps.Get(1) <= 0 && intComps.Get(1) > 39)
+        return LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 OID");
+    
+    m_Content.Reset();
+    m_Content.AppendChar(intComps.Get(0) * 40 + intComps.Get(1));
+
+    for (int i = 2; i < intComps.Size(); i++) {
+        int val = intComps.Get(i);
+        while (val > 128) {
+            int unit = 128;
+            while (unit * 128 < val) { unit *= 128; }
+            int b = val / unit;
+            m_Content.AppendChar(b | 0x80);
+            val -= b * unit;
+        }
+        m_Content.AppendChar(val);
+    }
+
     return 0;
 }
 int MyAsn1Node::InitUTF8String(const char* str, int len) {
+    SetID(MY_ASN1_TAG_UTF8_STRING);
+    m_Content.Set(str, len < 0 ? strlen(str) : len);
     return 0;
 }
 int MyAsn1Node::InitSequence() {
+    SetID(MY_ASN1_TAG_SEQUENCE);
     return 0;
 }
 int MyAsn1Node::InitSet() {
+    SetID(MY_ASN1_TAG_SET);
     return 0;
 }
 int MyAsn1Node::InitPrintableString(const char* str, int len) {
+    SetID(MY_ASN1_TAG_PRINTABLE_STRING);
+    m_Content.Set(str, len < 0 ? strlen(str) : len);
     return 0;
 }
 int MyAsn1Node::InitIA5String(const char* str, int len) {
+    SetID(MY_ASN1_TAG_IA5_STRING);
+    m_Content.Set(str, len < 0 ? strlen(str) : len);
     return 0;
 }
-int MyAsn1Node::InitUTCTime() {
+int MyAsn1Node::InitUTCTime(MyAsn1Time* time) {
+
+    if (time->Year > 2050) 
+        return LastError(MY_ERR_BASE_ENCODING, "ASN.1 UTC Time Year is larger than 2050");
+
+    MyStringA timestr;
+    SetID(MY_ASN1_TAG_UTC_TIME);
+    m_Time.CopyFrom(time);
+
+    timestr.AppendInt(time->Year % 100, 2);
+    timestr.AppendInt(time->Month, 2);
+    timestr.AppendInt(time->Day, 2);
+    timestr.AppendInt(time->Hour, 2);
+    timestr.AppendInt(time->Minute, 2);
+    timestr.AppendInt(time->Second, 2);
+
+    if (time->HourOffset == 0 && time->MinuteOffset == 0) {
+        timestr.AppendChar('Z');
+    } else {
+        if (time->HourOffset < 0 || time->MinuteOffset < 0) {
+            timestr.AppendChar('-');
+            timestr.AppendInt(-1 * time->HourOffset, 2);
+            timestr.AppendInt(-1 * time->MinuteOffset, 2);
+        } else {
+            timestr.AppendChar('+');
+            timestr.AppendInt(time->HourOffset, 2);
+            timestr.AppendInt(time->MinuteOffset, 2);
+        }
+    }
+    m_Content.Set(timestr.Deref(), timestr.Length());
     return 0;
 }
-int MyAsn1Node::InitGeneralizedTime() {
+int MyAsn1Node::InitGeneralizedTime(MyAsn1Time* time) {
+
+    MyStringA timestr;
+    SetID(MY_ASN1_TAG_UTC_TIME);
+    m_Time.CopyFrom(time);
+
+    timestr.AppendInt(time->Year, 4);
+    timestr.AppendInt(time->Month, 2);
+    timestr.AppendInt(time->Day, 2);
+    timestr.AppendInt(time->Hour, 2);
+    timestr.AppendInt(time->Minute, 2);
+    timestr.AppendInt(time->Second, 2);
+
+    if (time->Millisecond > 0) {
+        timestr.AppendChar('.');
+        timestr.AppendInt(time->Millisecond);
+    }
+
+    if (time->HourOffset == 0 && time->MinuteOffset == 0) {
+        timestr.AppendChar('Z');
+    } else {
+        if (time->HourOffset < 0 || time->MinuteOffset < 0) {
+            timestr.AppendChar('-');
+            timestr.AppendInt(-1 * time->HourOffset, 2);
+            timestr.AppendInt(-1 * time->MinuteOffset, 2);
+        } else {
+            timestr.AppendChar('+');
+            timestr.AppendInt(time->HourOffset, 2);
+            timestr.AppendInt(time->MinuteOffset, 2);
+        }
+    }
+    m_Content.Set(timestr.Deref(), timestr.Length());
     return 0;
 }
 int MyAsn1Node::InitBMPStrign(wchar_t* str, int len) {
-    return 0;
-}
-int MyAsn1Node::InitRaw(const char* raw, int len) {
+    SetID(MY_ASN1_TAG_BMP_STRING);
+    m_BMPString.Set(str, len < 0 ? wcslen(str) : len);
+
+    m_Content.Reset();
+    for (int i = 0; i < m_BMPString.Length(); i++) {
+        wchar_t val = m_BMPString.Deref()[i];
+        m_Content.AppendChar((val & 0xFF00) >> 8);
+        m_Content.AppendChar(val & 0xFF);
+    }
+
     return 0;
 }
 

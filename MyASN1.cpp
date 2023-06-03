@@ -75,6 +75,14 @@ int MyAsn1::Decode(MyDataPacket* p, MyAsn1Node** node) {
     case MY_ASN1_TAG_BMP_STRING:
         if (err = DecodeBMPString(p, node)) return err;
         break;
+
+    case MY_ASN1_TAG_UTC_TIME:
+        if (err = DecodeUTCTime(p, node)) return err;
+        break;
+
+    case MY_ASN1_TAG_GENERALIZED_TIME:
+        if (err = DecodeGeneralizedTime(p, node)) return err;
+        break;
     }
 
     return 0;
@@ -284,6 +292,148 @@ int MyAsn1::DecodeBMPString(MyDataPacket* p, MyAsn1Node** node) {
 
 done:
     if (err) delete strNode;
+    return err;
+}
+int MyAsn1::DecodeUTCTime(MyDataPacket* p, MyAsn1Node** node) {
+    /*
+     * YYMMDDhhmmZ
+     * YYMMDDhhmm+hh'mm'
+     * YYMMDDhhmm-hh'mm'
+     * YYMMDDhhmmssZ
+     * YYMMDDhhmmss+hh'mm'
+     * YYMMDDhhmmss-hh'mm'
+    */
+
+    int err = 0;
+    MyAsn1UTCTime* timeNode = new MyAsn1UTCTime();
+    MyBuffer* buf = timeNode->Content();
+    int i = 0;
+    char c = 0;
+
+    if (err = DecodeIDLengthContent(p, timeNode)) goto done;
+
+    if (timeNode->TagNum() != MY_ASN1_TAG_UTC_TIME) {
+        err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 UTC Time encoding");
+        goto done;
+    }
+    if (buf->Length() < 11) {
+        err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 UTC Time encoding: too short");
+        goto done;
+    }
+
+    timeNode->Year = MyStringA::ConvertToInt(buf->Deref(), 2) + 2000;
+    if (timeNode->Year > 2050) {
+        // UTCTime only encodes times prior to 2050. See https://tools.ietf.org/html/rfc5280#section-4.1.2.5.1
+        timeNode->Year -= 100;
+    }
+    timeNode->Month  = MyStringA::ConvertToInt(buf->Deref(2), 2);
+    timeNode->Day    = MyStringA::ConvertToInt(buf->Deref(4), 2);
+    timeNode->Hour   = MyStringA::ConvertToInt(buf->Deref(6), 2);
+    timeNode->Minute = MyStringA::ConvertToInt(buf->Deref(8), 2);
+
+    i = 10;
+    c = buf->CharAt(i);
+    if (c >= '0' && c <= '9') {
+        timeNode->Second = MyStringA::ConvertToInt(buf->Deref(i), 2);
+        i += 2;
+    }
+
+    c = buf->CharAt(i);
+    if (c == '+' || c == '-') {
+        timeNode->HourOffset = MyStringA::ConvertToInt(buf->Deref(i + 1), 2);
+        timeNode->MinuteOffset = MyStringA::ConvertToInt(buf->Deref(i + 3), 2);
+        if (c == '-') {
+            timeNode->HourOffset *= -1;
+            timeNode->MinuteOffset *= -1;
+        }
+    } else {
+        if (c != 'z' && c != 'Z') {
+            err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 UTC Time encoding: should end with 'Z'");
+            goto done;
+        }
+    }
+
+    *node = timeNode;
+
+done:
+    if (err) delete timeNode;
+    return err;
+}
+int MyAsn1::DecodeGeneralizedTime(MyDataPacket* p, MyAsn1Node** node) {
+    /*
+     *  ref: https://obj-sys.com/asn1tutorial/node14.html
+     * 1.Local time only. ``YYYYMMDDHH[MM[SS[.fff]]]'', where the optional fff is accurate to three decimal places.
+     * 2. Universal time (UTC time) only. ``YYYYMMDDHH[MM[SS[.fff]]]Z''.
+     * 3. Difference between local and UTC times. ``YYYYMMDDHH[MM[SS[.fff]]]+-HHMM''.
+     */
+
+    int err = 0;
+    MyAsn1GeneralizedTime* timeNode = new MyAsn1GeneralizedTime();
+    MyBuffer* buf = timeNode->Content();
+    int i = 0;
+    char c = 0;
+    int len = 0;
+
+    if (err = DecodeIDLengthContent(p, timeNode)) goto done;
+
+    if (timeNode->TagNum() != MY_ASN1_TAG_GENERALIZED_TIME) {
+        err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 GENERALIZED Time encoding");
+        goto done;
+    }
+    if (buf->Length() < 10) {
+        err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 UTC GENERALIZED encoding: too short");
+        goto done;
+    }
+
+    timeNode->Year   = MyStringA::ConvertToInt(buf->Deref(), 4);
+    timeNode->Month  = MyStringA::ConvertToInt(buf->Deref(4), 2);
+    timeNode->Day    = MyStringA::ConvertToInt(buf->Deref(6), 2);
+    timeNode->Hour   = MyStringA::ConvertToInt(buf->Deref(8), 2);
+
+    i = 10;
+    // Possible: [MM[SS[.fff]]]
+    if (buf->Length() >= i + 2 && (MyStringA::IsDigit(buf->CharAt(i)))) {
+        timeNode->Minute = MyStringA::ConvertToInt(buf->Deref(i), 2);
+        i += 2;
+
+        if (buf->Length() >= i + 2 && (MyStringA::IsDigit(buf->CharAt(i)))) {
+            timeNode->Second = MyStringA::ConvertToInt(buf->Deref(i), 2);
+            i += 2;
+        }
+        if (buf->Length() >= i + 2 && buf->CharAt(i) == '.') {
+            while ((i + 1 + i) < buf->Length() && buf->CharAt(i + 1 + i) != '+' && buf->CharAt(i + 1 + i) != '-' && buf->CharAt(i + 1 + i) != 'Z') {
+                len++;
+            }
+            timeNode->Millisecond = MyStringA::ConvertToInt(buf->Deref(i), len);
+            i += len;
+        }
+    }
+
+    if (i >= buf->Length()) {
+        err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 UTC GENERALIZED encoding: too short");
+        goto done;
+    }
+
+    c = buf->CharAt(i);
+    if (c == '+' || c == '-') {
+        timeNode->HourOffset = MyStringA::ConvertToInt(buf->Deref(i + 1), 2);
+        timeNode->MinuteOffset = MyStringA::ConvertToInt(buf->Deref(i + 3), 2);
+        if (c == '-') {
+            timeNode->HourOffset *= -1;
+            timeNode->MinuteOffset *= -1;
+        }
+    } else {
+        if (c != 'z' && c != 'Z') {
+            err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 GENERALIZED Time encoding: should end with 'Z'");
+            goto done;
+        }
+    }
+
+
+    *node = timeNode;
+
+done:
+    if (err) delete timeNode;
     return err;
 }
 

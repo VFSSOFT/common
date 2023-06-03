@@ -48,6 +48,9 @@ public:
 
   int HashCode();
 
+    static int ConvertToInt(const char* str, int len) { return ConvertToInt64(str, len); }
+    static INT64 ConvertToInt64(const char* str, int len);
+
     static bool IsLowercaseLetter(const char c);
     static bool IsUppercaseLetter(const char c);
     static bool IsLetter(const char c);

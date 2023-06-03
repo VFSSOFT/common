@@ -87,15 +87,7 @@ int MyStringA::AppendWithFormat(const char* fmt, ...) {
 }
 
 UINT64 MyStringA::DerefAsInt64() {
-    INT64 val = 0;
-    bool negative = Length() > 0 && Deref()[0] == '-';
-    int i = negative ? 1 : 0;
-    for (; i < Length(); i++) {
-        char c = Deref()[i] - '0';
-        assert(c >= 0 && c <= 9);
-        val = val * 10 + c;
-    }
-    return negative ? -1 * val : val;
+    return ConvertToInt64(Deref(), Length());
 }
 int MyStringA::DerefAsInt() {
     return (int)DerefAsInt64();
@@ -130,6 +122,19 @@ int MyStringA::HashCode() {
     }
 
     return hash1 + (hash2 * 1566083941);
+}
+
+INT64 MyStringA::ConvertToInt64(const char* str, int len) {
+    INT64 val = 0;
+    if (len < 0) len = strlen(str);
+    bool negative = len > 0 && str[0] == '-';
+    int i = negative ? 1 : 0;
+    for (; i < len; i++) {
+        char c = str[i] - '0';
+        assert(c >= 0 && c <= 9);
+        val = val * 10 + c;
+    }
+    return negative ? -1 * val : val;
 }
 
 bool MyStringA::IsLowercaseLetter(const char c) {

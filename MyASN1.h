@@ -16,25 +16,15 @@
 #define MY_ASN1_TAG_OCTET_STRING            0x04
 #define MY_ASN1_TAG_NULL                    0x05
 #define MY_ASN1_TAG_OID                     0x06
-#define MY_ASN1_TAG_OBJ_DESCRIPTOR          0x07
-#define MY_ASN1_TAG_EXTERNAL                0x08
-#define MY_ASN1_TAG_REAL                    0x09
 #define MY_ASN1_TAG_ENUMERATED              0x0a
 #define MY_ASN1_TAG_UTF8_STRING             0x0c
-#define MY_ASN1_TAG_RELTIVE_OID             0x0d
 #define MY_ASN1_TAG_SEQUENCE                0x10
 #define MY_ASN1_TAG_SET                     0x11
-#define MY_ASN1_TAG_NUMBERIC_STRING         0x12
 #define MY_ASN1_TAG_PRINTABLE_STRING        0x13
 #define MY_ASN1_TAG_T16_STRING              0x14
-#define MY_ASN1_TAG_VIDEOTEXT_STRING        0x15
 #define MY_ASN1_TAG_IA5_STRING              0x16
 #define MY_ASN1_TAG_UTC_TIME                0x17
 #define MY_ASN1_TAG_GENERALIZED_TIME        0x18
-#define MY_ASN1_TAG_GRAPHIC_STRING          0x19
-#define MY_ASN1_TAG_VISIBLE_STRINg          0x1a
-#define MY_ASN1_TAG_GENERAL_STRING          0x1b
-#define MY_ASN1_TAG_UNIVERSAL_STRING        0x1c
 #define MY_ASN1_TAG_BMP_STRING              0x1e
 
 // ASN.1 tag class
@@ -149,6 +139,37 @@ public:
 private:
     MyStringW m_String;
 };
+class MyAsn1UTCTime : public MyAsn1Node {
+public:
+
+    MyAsn1UTCTime(): MyAsn1Node(), Year(0), Month(0), Day(0), Hour(0), Minute(0),
+        Second(0), HourOffset(0), MinuteOffset(0) {}
+
+    int Year;
+    int Month;
+    int Day;
+    int Hour;
+    int Minute;
+    int Second;
+    int HourOffset;
+    int MinuteOffset;
+};
+class MyAsn1GeneralizedTime : public MyAsn1Node {
+public:
+
+    MyAsn1GeneralizedTime(): MyAsn1Node(), Year(0), Month(0), Day(0), Hour(0), Minute(0),
+        Second(0), Millisecond(0), HourOffset(0), MinuteOffset(0) {}
+
+    int Year;
+    int Month;
+    int Day;
+    int Hour;
+    int Minute;
+    int Second;
+    int Millisecond;
+    int HourOffset;
+    int MinuteOffset;
+};
 
 class MyAsn1 {
 public:
@@ -174,6 +195,8 @@ private:
     int DecodePrintableString(MyDataPacket* p, MyAsn1Node** node);
     int DecodeIA5String(MyDataPacket* p, MyAsn1Node** node);
     int DecodeBMPString(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeUTCTime(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeGeneralizedTime(MyDataPacket* p, MyAsn1Node** node);
 
     int DecodeIDLengthContent(MyDataPacket* p, MyAsn1Node* node);
 

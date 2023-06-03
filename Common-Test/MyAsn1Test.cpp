@@ -191,5 +191,71 @@ TEST(MyASN1Test, DecodeBMPString) {
     ASSERT_EQ(str->String()->Deref()[3], L'r');
 }
 
+TEST(MyASN1Test, DecodeUTCTime) {
+    int err = 0;
+    MyAsn1 d;
+    char bytes[] = { 0x17, 0x0D, 0x32, 0x33, 0x30, 0x31, 0x30, 0x32, 0x31, 0x33, 0x30, 0x35, 0x32, 0x36, 0x5A  };
+    err = d.Decode(bytes, 15);
+    ASSERT_EQ(err, 0);
+
+    MyAsn1Node* node = d.Root();
+    ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_UTC_TIME);
+    MyAsn1UTCTime* time = (MyAsn1UTCTime*)node;
+    ASSERT_EQ(time->Year, 2023);
+    ASSERT_EQ(time->Month, 1);
+    ASSERT_EQ(time->Day, 2);
+    ASSERT_EQ(time->Hour, 13);
+    ASSERT_EQ(time->Minute, 5);
+    ASSERT_EQ(time->Second, 26);
+    ASSERT_EQ(time->HourOffset, 0);
+    ASSERT_EQ(time->MinuteOffset, 0);
+}
+
+TEST(MyASN1Test, DecodeUTCTime1) {
+    int err = 0;
+    MyAsn1 d;
+    char bytes[] = { 0x17, 0x11, 0x39, 0x31, 0x30, 0x35, 0x30, 0x36, 0x31, 0x36, 0x34, 0x35, 0x34, 0x30, 0x2D, 0x30, 0x37, 0x30, 0x30  };
+    err = d.Decode(bytes, 19);
+    ASSERT_EQ(err, 0);
+
+    MyAsn1Node* node = d.Root();
+    ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_UTC_TIME);
+    MyAsn1UTCTime* time = (MyAsn1UTCTime*)node;
+    ASSERT_EQ(time->Year, 1991);
+    ASSERT_EQ(time->Month, 5);
+    ASSERT_EQ(time->Day, 6);
+    ASSERT_EQ(time->Hour, 16);
+    ASSERT_EQ(time->Minute, 45);
+    ASSERT_EQ(time->Second, 40);
+    ASSERT_EQ(time->HourOffset, -7);
+    ASSERT_EQ(time->MinuteOffset, 0);
+}
+
+TEST(MyASN1Test, DecodeGeneralizedTime) {
+    int err = 0;
+    MyAsn1 d;
+    char bytes[] = { 0x18, 0x0F, 0x32, 0x31, 0x30, 0x36, 0x30, 0x33, 0x31, 0x38, 0x31, 0x34, 0x30, 0x32, 0x33, 0x36, 0x5A  };
+    err = d.Decode(bytes, 17);
+    ASSERT_EQ(err, 0);
+
+    MyAsn1Node* node = d.Root();
+    ASSERT_EQ(node->TagNum(), MY_ASN1_TAG_GENERALIZED_TIME);
+    MyAsn1GeneralizedTime* time = (MyAsn1GeneralizedTime*)node;
+    ASSERT_EQ(time->Year, 2106);
+    ASSERT_EQ(time->Month, 3);
+    ASSERT_EQ(time->Day, 18);
+    ASSERT_EQ(time->Hour, 14);
+    ASSERT_EQ(time->Minute, 2);
+    ASSERT_EQ(time->Second, 36);
+    ASSERT_EQ(time->Millisecond, 0);
+    ASSERT_EQ(time->HourOffset, 0);
+    ASSERT_EQ(time->MinuteOffset, 0);
+}
+
+
+
+
+
+
 
 

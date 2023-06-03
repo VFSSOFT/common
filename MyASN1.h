@@ -54,8 +54,7 @@ public:
 
 class MyAsn1Node {
 public:
-    MyAsn1Node(): m_ID(0), m_UseInfiniteLength(false), m_Parent(NULL), m_UnusedBits(0) {}
-    ~MyAsn1Node();
+    MyAsn1Node(): m_ID(0), m_UseInfiniteLength(false), m_Parent(NULL), m_UnusedBits(0), m_LastErrorCode(0) {}
 
     BYTE ID() { return m_ID; }
     void SetID(BYTE v) { m_ID = v; }
@@ -97,6 +96,23 @@ public:
     bool IsUTCTime() { return TagNum() == MY_ASN1_TAG_UTC_TIME; }
     bool IsGeneralizedTime() { return TagNum() == MY_ASN1_TAG_GENERALIZED_TIME; }
     bool IsBMPString() { return TagNum() == MY_ASN1_TAG_BMP_STRING; }
+
+    int Decode(MyDataPacket* p);
+    int DecodeBool(MyDataPacket* p);
+    int DecodeInteger(MyDataPacket* p);
+    int DecodeBitString(MyDataPacket* p);
+    int DecodeOctetString(MyDataPacket* p);
+    int DecodeNull(MyDataPacket* p);
+    int DecodeOID(MyDataPacket* p);
+    int DecodeUTF8String(MyDataPacket* p);
+    int DecodePrintableString(MyDataPacket* p);
+    int DecodeSequence(MyDataPacket* p);
+    int DecodeSet(MyDataPacket* p);
+    int DecodeIA5String(MyDataPacket* p);
+    int DecodeBMPString(MyDataPacket* p);
+    int DecodeUTCTime(MyDataPacket* p);
+    int DecodeGeneralizedTime(MyDataPacket* p);
+    int DecodeRaw(MyDataPacket* p);
 
     bool        BoolValue() { return m_Content.CharAt(0) != 0; }
     INT64       IntValue() {
@@ -144,7 +160,10 @@ public:
     void SetParent(MyAsn1Node* p) { m_Parent = p; }
     int ChildCount() { return m_Children.Size(); }
     MyAsn1Node* Child(int index) { return m_Children.Get(index); }
-    void AddChild(MyAsn1Node* val) { m_Children.Add(val); }
+    MyAsn1Node* AddChild() { return m_Children.AddNew(); }
+
+private:
+    int DecodeIDLengthContent(MyDataPacket* p);
 
 protected:
     BYTE                m_ID;
@@ -153,7 +172,7 @@ protected:
     MyBuffer            m_Raw; // raw asn.1 encoding of current node
 
     MyAsn1Node*         m_Parent;
-    MyValArray<MyAsn1Node*> m_Children;
+    MyArray<MyAsn1Node> m_Children;
 
 
     // for specific ASN.1 types
@@ -162,44 +181,23 @@ protected:
     MyBuffer   m_Bits;
     BYTE       m_UnusedBits;
     MyAsn1Time m_Time; // For UTCTime and GeneralizedTime
+
+    MY_LAST_ERROR_DECL;
 };
 
 class MyAsn1 {
 public:
-    MyAsn1(): m_Root(NULL), m_LastErrorCode(0) {}
+    MyAsn1(): m_LastErrorCode(0) {}
     ~MyAsn1() {}
 
     int Decode(const char* data, int len);
     int Decode(MyDataPacket* buf);
-    MyAsn1Node* Root() { return m_Root; } // For Decode
+    MyAsn1Node* Root() { return &m_Root; } // For Decode
 
-    // For Encode
-    MyAsn1Node* NewRoot();
     int Encode(MyBuffer* buf);
 
 private:
-    int Decode(MyDataPacket* p, MyAsn1Node** node);
-
-    int DecodeBool(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeInteger(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeBitString(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeOctetString(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeNull(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeOID(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeUTF8String(MyDataPacket* p, MyAsn1Node** node);
-    int DecodePrintableString(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeSequence(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeSet(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeIA5String(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeBMPString(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeUTCTime(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeGeneralizedTime(MyDataPacket* p, MyAsn1Node** node);
-    int DecodeRaw(MyDataPacket* p, MyAsn1Node** node);
-
-    int DecodeIDLengthContent(MyDataPacket* p, MyAsn1Node* node);
-
-private:
-    MyAsn1Node* m_Root;
+    MyAsn1Node m_Root;
 
     MY_LAST_ERROR_DECL;
 };

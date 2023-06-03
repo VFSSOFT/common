@@ -252,6 +252,87 @@ TEST(MyASN1Test, DecodeGeneralizedTime) {
     ASSERT_EQ(time->MinuteOffset, 0);
 }
 
+TEST(MyASN1Test, DecodeSequence) {
+    int err = 0;
+    MyAsn1 d;
+    char bytes[] = { 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x05, 0x05, 0x00 };
+    err = d.Decode(bytes, 15);
+    ASSERT_EQ(err, 0);
+
+    MyAsn1Node* node = d.Root();
+    ASSERT_TRUE(node->IsSequence());
+    ASSERT_EQ(node->ChildCount(), 2);
+    ASSERT_TRUE(node->Child(0)->IsOID());
+    ASSERT_TRUE(node->Child(1)->IsNull());
+}
+
+TEST(MyASN1Test, DecodeSet) {
+    int err = 0;
+    MyAsn1 d;
+    char bytes[] = { 
+        0x31, 0x2D, 0x30, 0x2B, 0x06, 0x03, 0x55, 0x04, 0x0B, 0x13, 0x24, 0x45, 0x71, 0x75, 0x69,
+        0x66, 0x61, 0x78, 0x20, 0x53, 0x65, 0x63, 0x75, 0x72, 0x65, 0x20, 0x43, 0x65, 0x72, 0x74,
+        0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x20, 0x41, 0x75, 0x74, 0x68, 0x6F, 0x72, 0x69,
+        0x74, 0x79
+    };
+    err = d.Decode(bytes, 47);
+    ASSERT_EQ(err, 0);
+
+    MyAsn1Node* node = d.Root();
+    ASSERT_TRUE(node->IsSet());
+    ASSERT_EQ(node->ChildCount(), 1);
+    ASSERT_TRUE(node->Child(0)->IsSequence());
+
+    node = node->Child(0);
+    ASSERT_TRUE(node->IsSequence());
+    ASSERT_EQ(node->ChildCount(), 2);
+    ASSERT_TRUE(node->Child(0)->IsOID());
+    ASSERT_TRUE(node->Child(1)->IsPrintableString());
+}
+
+TEST(MyASN1Test, DecodeExpclitTag) {
+    int err = 0;
+    MyAsn1 d;
+    char bytes[] = { 0xA0, 0x03, 0x02, 0x01, 0x02 };
+    err = d.Decode(bytes, 5);
+    ASSERT_EQ(err, 0);
+
+    MyAsn1Node* node = d.Root();
+    ASSERT_EQ(node->TagNum(), 0);
+    ASSERT_TRUE(node->IsConstructed());
+
+    MyBuffer raw;
+    raw.Set(node->Content()->Deref(), node->Content()->Length());
+    err = d.Decode(raw.Deref(), raw.Length());
+    ASSERT_EQ(err, 0);
+
+    node = d.Root();
+    ASSERT_TRUE(node->IsInteger());
+    ASSERT_EQ(((MyAsn1Integer*)node)->IntValue(), 2);
+}
+
+TEST(MyASN1Test, DecodeImpclitTag) {
+    int err = 0;
+    MyAsn1 d;
+    char bytes[] = { 
+        0x86, 0x29, 0x68, 0x74, 0x74, 0x70, 0x3A, 0x2F, 0x2F, 0x63, 0x72, 0x6C, 0x2E, 0x67, 0x65, 0x6F, 0x74, 0x72, 0x75, 0x73, 0x74, 0x2E,
+        0x63, 0x6F, 0x6D, 0x2F, 0x63, 0x72, 0x6C, 0x73, 0x2F, 0x73, 0x65, 0x63, 0x75, 0x72, 0x65, 0x63, 0x61, 0x2E, 0x63, 0x72, 0x6C
+    };
+    err = d.Decode(bytes, 43);
+    ASSERT_EQ(err, 0);
+
+    MyAsn1Node* node = d.Root();
+    ASSERT_EQ(node->TagNum(), 6);
+    ASSERT_FALSE(node->IsConstructed());
+    ASSERT_STREQ(node->Content()->Deref(), "http://crl.geotrust.com/crls/secureca.crl");
+}
+
+
+
+
+
+
+
 
 
 

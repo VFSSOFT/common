@@ -3,6 +3,12 @@
 
 #include "MyASN1.h"
 
+MyAsn1Node::~MyAsn1Node() {
+    for (int i = 0; i < m_Children.Size(); i++) {
+        delete m_Children.Get(i);
+    }
+    m_Children.Reset();
+}
 
 
 INT64 MyAsn1Integer::IntValue() {
@@ -24,6 +30,7 @@ int MyAsn1::Decode(const char* data, int len) {
 }
 
 int MyAsn1::Decode(MyDataPacket* p) {
+    if (m_Root) delete m_Root;
     return Decode(p, &m_Root);
     
 }
@@ -64,6 +71,14 @@ int MyAsn1::Decode(MyDataPacket* p, MyAsn1Node** node) {
         if (err = DecodeUTF8String(p, node)) return err;
         break;
 
+    case MY_ASN1_TAG_SEQUENCE:
+        if (err = DecodeSequence(p, node)) return err;
+        break;
+
+    case MY_ASN1_TAG_SET:
+        if (err = DecodeSet(p, node)) return err;
+        break;
+
     case MY_ASN1_TAG_PRINTABLE_STRING:
         if (err = DecodePrintableString(p, node)) return err;
         break;
@@ -82,6 +97,11 @@ int MyAsn1::Decode(MyDataPacket* p, MyAsn1Node** node) {
 
     case MY_ASN1_TAG_GENERALIZED_TIME:
         if (err = DecodeGeneralizedTime(p, node)) return err;
+        break;
+
+    default:
+        // unkonwn tag: may be explict/implicit tag
+        if (err = DecodeRaw(p, node)) return err;
         break;
     }
 
@@ -256,6 +276,56 @@ int MyAsn1::DecodePrintableString(MyDataPacket* p, MyAsn1Node** node) {
 
 done:
     if (err) delete strNode;
+    return err;
+}
+int MyAsn1::DecodeSequence(MyDataPacket* p, MyAsn1Node** node) {
+    int err = 0;
+    MyAsn1Node* seq = new MyAsn1Node();
+    MyDataPacket pkt;
+    MyAsn1Node* child = NULL;
+
+    if (err = DecodeIDLengthContent(p, seq)) goto done;
+
+    if (seq->TagNum() != MY_ASN1_TAG_SEQUENCE) {
+        err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 SEQUENCE encoding");
+        goto done;
+    }
+
+    if (err = pkt.Write(seq->Content()->Deref(), seq->Content()->Length())) goto done;
+    while (pkt.Available() > 0) {
+        if (err = Decode(&pkt, &child)) goto done;
+        seq->AddChild(child);
+    }
+
+    *node = seq;
+
+done:
+    if (err) delete seq;
+    return err;
+}
+int MyAsn1::DecodeSet(MyDataPacket* p, MyAsn1Node** node) {
+    int err = 0;
+    MyAsn1Node* set = new MyAsn1Node();
+    MyDataPacket pkt;
+    MyAsn1Node* child = NULL;
+
+    if (err = DecodeIDLengthContent(p, set)) goto done;
+
+    if (set->TagNum() != MY_ASN1_TAG_SET) {
+        err = LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 SET encoding");
+        goto done;
+    }
+
+    if (err = pkt.Write(set->Content()->Deref(), set->Content()->Length())) goto done;
+    while (pkt.Available() > 0) {
+        if (err = Decode(&pkt, &child)) goto done;
+        set->AddChild(child);
+    }
+
+    *node = set;
+
+done:
+    if (err) delete set;
     return err;
 }
 int MyAsn1::DecodeIA5String(MyDataPacket* p, MyAsn1Node** node) {
@@ -434,6 +504,19 @@ int MyAsn1::DecodeGeneralizedTime(MyDataPacket* p, MyAsn1Node** node) {
 
 done:
     if (err) delete timeNode;
+    return err;
+}
+
+int MyAsn1::DecodeRaw(MyDataPacket* p, MyAsn1Node** node) {
+    int err = 0;
+    MyAsn1Node* curNode = new MyAsn1Node();
+
+    if (err = DecodeIDLengthContent(p, curNode)) goto done;
+
+    *node = curNode;
+
+done:
+    if (err) delete curNode;
     return err;
 }
 

@@ -4,6 +4,7 @@
 #include "MyBuffer.h"
 #include "MyStringA.h"
 #include "MyArray.h"
+#include "MyValArray.h"
 #include "MyArrays.h"
 #include "MyDataPacket.h"
 
@@ -39,6 +40,7 @@
 class MyAsn1Node {
 public:
     MyAsn1Node(): m_ID(0), m_UseInfiniteLength(false), m_Parent(NULL) {}
+    ~MyAsn1Node();
 
     BYTE ID() { return m_ID; }
     void SetID(BYTE v) { m_ID = v; }
@@ -66,6 +68,21 @@ public:
         m_ID |= v;
     }
 
+    bool IsBool() { return TagNum() == MY_ASN1_TAG_BOOL; }
+    bool IsInteger() { return TagNum() == MY_ASN1_TAG_INTEGER; }
+    bool IsBitstring() { return TagNum() == MY_ASN1_TAG_BIT_STRING; }
+    bool IsOctetString() { return TagNum() == MY_ASN1_TAG_OCTET_STRING; }
+    bool IsNull() { return TagNum() == MY_ASN1_TAG_NULL; }
+    bool IsOID() { return TagNum() == MY_ASN1_TAG_OID; }
+    bool IsUTF8String() { return TagNum() == MY_ASN1_TAG_UTF8_STRING; }
+    bool IsSequence() { return TagNum() == MY_ASN1_TAG_SEQUENCE; }
+    bool IsSet() { return TagNum() == MY_ASN1_TAG_SET; }
+    bool IsPrintableString() { return TagNum() == MY_ASN1_TAG_PRINTABLE_STRING; }
+    bool IsIA5String() { return TagNum() == MY_ASN1_TAG_IA5_STRING; }
+    bool IsUTCTime() { return TagNum() == MY_ASN1_TAG_UTC_TIME; }
+    bool IsGeneralizedTime() { return TagNum() == MY_ASN1_TAG_GENERALIZED_TIME; }
+    bool IsBMPString() { return TagNum() == MY_ASN1_TAG_BMP_STRING; }
+
     bool UseInfiniteLength() { return m_UseInfiniteLength; }
     void SetUseInfiniteLength(bool val) { m_UseInfiniteLength = val; }
     MyBuffer* Content() { return &m_Content; }
@@ -75,7 +92,7 @@ public:
     void SetParent(MyAsn1Node* p) { m_Parent = p; }
     int ChildCount() { return m_Children.Size(); }
     MyAsn1Node* Child(int index) { return m_Children.Get(index); }
-    MyAsn1Node* AddChild() { return m_Children.AddNew(); }
+    void AddChild(MyAsn1Node* val) { m_Children.Add(val); }
 
 protected:
     BYTE                m_ID;
@@ -84,7 +101,7 @@ protected:
     MyBuffer            m_Raw; // raw asn.1 encoding of current node
 
     MyAsn1Node*         m_Parent;
-    MyArray<MyAsn1Node> m_Children;
+    MyValArray<MyAsn1Node*> m_Children;
 };
 
 class MyAsn1Bool : public MyAsn1Node {
@@ -193,10 +210,13 @@ private:
     int DecodeOID(MyDataPacket* p, MyAsn1Node** node);
     int DecodeUTF8String(MyDataPacket* p, MyAsn1Node** node);
     int DecodePrintableString(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeSequence(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeSet(MyDataPacket* p, MyAsn1Node** node);
     int DecodeIA5String(MyDataPacket* p, MyAsn1Node** node);
     int DecodeBMPString(MyDataPacket* p, MyAsn1Node** node);
     int DecodeUTCTime(MyDataPacket* p, MyAsn1Node** node);
     int DecodeGeneralizedTime(MyDataPacket* p, MyAsn1Node** node);
+    int DecodeRaw(MyDataPacket* p, MyAsn1Node** node);
 
     int DecodeIDLengthContent(MyDataPacket* p, MyAsn1Node* node);
 

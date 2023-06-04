@@ -262,6 +262,7 @@ int MyAsn1::Decode(const char* data, int len) {
 
 int MyAsn1::Decode(MyDataPacket* p) {
     int err = 0;
+    Reset();
     if (err = m_Root.Decode(p)) return LastError(err, m_Root.LastErrorMessage());
     return 0;
 }

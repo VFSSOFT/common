@@ -114,6 +114,7 @@ public:
     bool IsGeneralString() { return TagNum() == MY_ASN1_TAG_GENERAL_STRING; }
     bool IsBMPString() { return TagNum() == MY_ASN1_TAG_BMP_STRING; }
     bool IsExplicit() { return TagClass() == MY_ASN1_TAG_CLASS_CONTEXT_SPECIFIC && IsConstructed(); }
+    bool IsExplicit(BYTE tag) { return IsExplicit() && TagNum() == tag; }
 
     int Decode(MyDataPacket* p);
     int DecodeBool(MyDataPacket* p);
@@ -184,6 +185,18 @@ public:
     MyAsn1Node* Child(int index) { return m_Children.Get(index); }
     MyAsn1Node* AddChild() { return m_Children.AddNew(); }
 
+    void Reset() {
+        m_ID = 0;
+        m_UseInfiniteLength = false;
+        m_Content.Reset();
+        m_Raw.Reset();
+        m_Parent = NULL;
+        m_Children.Reset();
+        m_OID.Reset();
+        m_BMPString.Reset();
+        m_UnusedBits = 0;
+    }
+
 private:
     int DecodeIDLengthContent(MyDataPacket* p);
     int EncodeLength(int len, MyDataPacket* p);
@@ -218,6 +231,8 @@ public:
     MyAsn1Node* Root() { return &m_Root; } // For Decode
 
     int Encode(MyBuffer* buf);
+
+    void Reset() { m_Root.Reset(); }
 
 private:
     MyAsn1Node m_Root;

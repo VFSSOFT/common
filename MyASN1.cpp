@@ -78,10 +78,10 @@ int MyAsn1Node::InitBitstring(const char* bits, int bitsLen) {
     } else {
         SetUnusedBits(8 - bitsLen % 8);
     }
-    m_Bits.Set(bits, bitsLen);
+    m_Bits.Set(bits, (bitsLen + 7) / 8);
     m_Content.Reset();
     m_Content.AppendChar(UnusedBits());
-    m_Content.Append(bits, (bitsLen + 8) / 8);
+    m_Content.Append(bits, (bitsLen + 7) / 8);
     return 0;
 }
 int MyAsn1Node::InitOctetString(const char* octet, int len) {
@@ -223,6 +223,11 @@ int MyAsn1Node::InitGeneralizedTime(MyAsn1Time* time) {
     m_Content.Set(timestr.Deref(), timestr.Length());
     return 0;
 }
+int MyAsn1Node::InitGeneralString(const char* str, int len) {
+    SetID(MY_ASN1_TAG_GENERAL_STRING);
+    m_Content.Set(str, len < 0 ? strlen(str) : len);
+    return 0;
+}
 int MyAsn1Node::InitBMPStrign(wchar_t* str, int len) {
     SetID(MY_ASN1_TAG_BMP_STRING);
     m_BMPString.Set(str, len < 0 ? wcslen(str) : len);
@@ -238,6 +243,11 @@ int MyAsn1Node::InitBMPStrign(wchar_t* str, int len) {
 }
 int MyAsn1Node::InitExplicit(BYTE tag) {
     SetID(tag);
+    return 0;
+}
+int MyAsn1Node::InitNormalExplicit(BYTE tag) {
+    SetTagClass(MY_ASN1_TAG_CLASS_CONTEXT_SPECIFIC | MY_ASN1_TAG_CLASS_CONSTRUCTED);
+    SetTagNum(tag);
     return 0;
 }
 
@@ -268,7 +278,15 @@ int MyAsn1Node::Decode(MyDataPacket* p) {
 
     if (err = p->PeekByte(&b)) return LastError(err, p->LastErrorMessage());
     
+    BYTE tagClass = b & MY_ASN1_TAG_CLASS_MASK;
+    bool isConstructed = b & MY_ASN1_TAG_CLASS_CONSTRUCTED;
     BYTE tagNum = b & MY_ASN1_TAG_MASK;
+
+    if (isConstructed && (tagNum != MY_ASN1_TAG_SEQUENCE && tagNum != MY_ASN1_TAG_SET)) {
+        if (err = DecodeOtherConstructed(p)) return err;
+        return 0;
+    }
+
     switch (tagNum) {
     
     case MY_ASN1_TAG_BOOL:
@@ -505,6 +523,16 @@ int MyAsn1Node::DecodeIA5String(MyDataPacket* p) {
     }
     return err;
 }
+int MyAsn1Node::DecodeGeneralString(MyDataPacket* p) {
+    int err = 0;
+
+    if (err = DecodeIDLengthContent(p)) return err;
+
+    if (TagNum() != MY_ASN1_TAG_GENERAL_STRING) {
+        return LastError(MY_ERR_BASE_ENCODING, "Invalid ASN.1 GENERAL STRING encoding");
+    }
+    return err;
+}
 int MyAsn1Node::DecodeBMPString(MyDataPacket* p) {
     int err = 0;
     int i = 0;
@@ -646,6 +674,19 @@ int MyAsn1Node::DecodeGeneralizedTime(MyDataPacket* p) {
 int MyAsn1Node::DecodeRaw(MyDataPacket* p) {
     return DecodeIDLengthContent(p);
 }
+int MyAsn1Node::DecodeOtherConstructed(MyDataPacket* p) {
+    int err = 0;
+    MyDataPacket pkt;
+
+    if (err = DecodeIDLengthContent(p)) return err;
+
+    if (err = pkt.Write(Content()->Deref(), Content()->Length())) return err;
+
+    MyAsn1Node* child = AddChild();
+    if (err = child->Decode(&pkt)) return LastError(err, child->LastErrorMessage());
+
+    return err;
+}
 
 int MyAsn1Node::DecodeIDLengthContent(MyDataPacket* p) {
     int err = 0;
@@ -668,7 +709,7 @@ int MyAsn1Node::DecodeIDLengthContent(MyDataPacket* p) {
         char bytes[8];
         if (err = p->ReadBytes(bytesCnt, bytes)) return LastError(err, p->LastErrorMessage());
         for (int i = 0; i < bytesCnt; i++) {
-            length += (bytes[i] * (1 << (bytesCnt * 8)));
+            length += ((bytes[i] & 0xFF) * (1 << (i * 8)));
         }
     }
 

@@ -26,6 +26,7 @@
 #define MY_ASN1_TAG_IA5_STRING              0x16
 #define MY_ASN1_TAG_UTC_TIME                0x17
 #define MY_ASN1_TAG_GENERALIZED_TIME        0x18
+#define MY_ASN1_TAG_GENERAL_STRING          0x1b
 #define MY_ASN1_TAG_BMP_STRING              0x1e
 
 // ASN.1 tag class
@@ -40,6 +41,10 @@ class MyAsn1Time {
 public:
     MyAsn1Time(): Year(0), Month(0), Day(0), Hour(0), Minute(0),
         Second(0), Millisecond(0), HourOffset(0), MinuteOffset(0) {}
+
+    bool Empty() {
+        return Year <= 0 && Month <= 0 && Day <= 0 && Hour <= 0 && Second <= 0 && Millisecond <= 0 && HourOffset <= 0 && MinuteOffset <= 0;
+    }
 
     void CopyFrom(MyAsn1Time* t) {
         Year = t->Year;
@@ -106,7 +111,9 @@ public:
     bool IsIA5String() { return TagNum() == MY_ASN1_TAG_IA5_STRING; }
     bool IsUTCTime() { return TagNum() == MY_ASN1_TAG_UTC_TIME; }
     bool IsGeneralizedTime() { return TagNum() == MY_ASN1_TAG_GENERALIZED_TIME; }
+    bool IsGeneralString() { return TagNum() == MY_ASN1_TAG_GENERAL_STRING; }
     bool IsBMPString() { return TagNum() == MY_ASN1_TAG_BMP_STRING; }
+    bool IsExplicit() { return TagClass() == MY_ASN1_TAG_CLASS_CONTEXT_SPECIFIC && IsConstructed(); }
 
     int Decode(MyDataPacket* p);
     int DecodeBool(MyDataPacket* p);
@@ -120,10 +127,12 @@ public:
     int DecodeSequence(MyDataPacket* p);
     int DecodeSet(MyDataPacket* p);
     int DecodeIA5String(MyDataPacket* p);
+    int DecodeGeneralString(MyDataPacket* p);
     int DecodeBMPString(MyDataPacket* p);
     int DecodeUTCTime(MyDataPacket* p);
     int DecodeGeneralizedTime(MyDataPacket* p);
     int DecodeRaw(MyDataPacket* p);
+    int DecodeOtherConstructed(MyDataPacket* p);
 
     bool        BoolValue() { return m_Content.CharAt(0) != 0; }
     INT64       IntValue() {
@@ -159,8 +168,10 @@ public:
     int InitIA5String(const char* str, int len=-1);
     int InitUTCTime(MyAsn1Time* time);
     int InitGeneralizedTime(MyAsn1Time* time);
+    int InitGeneralString(const char* str, int len=-1);
     int InitBMPStrign(wchar_t* str, int len=-1);
     int InitExplicit(BYTE tag);
+    int InitNormalExplicit(BYTE tag);
 
     bool UseInfiniteLength() { return m_UseInfiniteLength; }
     void SetUseInfiniteLength(bool val) { m_UseInfiniteLength = val; }

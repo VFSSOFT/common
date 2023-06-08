@@ -255,5 +255,24 @@ int MyEncodings::HexDecode(const char* data, int len, MyBuffer* decoded) {
     return 0;
 }
 
+void MyEncodings::IntToBytesBigEndian(UINT64 val, int bytesLen, MyBuffer* buf) {
+    buf->SetLength(bytesLen);
+    IntToBytesBigEndian(val, bytesLen, buf->Deref());
+}
+void MyEncodings::IntToBytesBigEndian(UINT64 val, int bytesLen, char* buf) {
+    char bytes[8];
+
+    bytes[0] = (val & 0xFF00000000000000) >> 56;
+    bytes[1] = (val & 0x00FF000000000000) >> 48;
+    bytes[2] = (val & 0x0000FF0000000000) >> 40;
+    bytes[3] = (val & 0x0000FF0000000000) >> 32;
+    bytes[4] = (val & 0x0000FF0000000000) >> 24;
+    bytes[5] = (val & 0x0000FF0000000000) >> 16;
+    bytes[6] = (val & 0x0000FF0000000000) >> 8 ;
+    bytes[7] = (val & 0x0000FF0000000000)      ;
+
+    memcpy(buf, bytes + (8 - bytesLen), bytesLen);
+}
+
 #endif // _MY_ENCODIGNS_CPP_
 

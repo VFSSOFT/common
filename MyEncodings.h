@@ -20,6 +20,9 @@ public:
     static int HexEncode(const char* data, int len, MyStringA* encoded, bool uppercase=false);
     static int HexDecode(const char* data, int len, MyBuffer* decoded);
 
+    static void IntToBytesBigEndian(UINT64 val, int bytesLen, MyBuffer* buf);
+    static void IntToBytesBigEndian(UINT64 val, int bytesLen, char* buf);
+
 private:
     static int B64PosOfChar(const char c);
     static int B64InsertLineBreaks(MyStringA* str, int distance);

@@ -22,6 +22,7 @@ public:
 
     static void IntToBytesBigEndian(UINT64 val, int bytesLen, MyBuffer* buf);
     static void IntToBytesBigEndian(UINT64 val, int bytesLen, char* buf);
+    static UINT64 BytesToIntBigEndian(const char* b, int bLen);
 
 private:
     static int B64PosOfChar(const char c);

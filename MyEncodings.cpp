@@ -273,6 +273,13 @@ void MyEncodings::IntToBytesBigEndian(UINT64 val, int bytesLen, char* buf) {
 
     memcpy(buf, bytes + (8 - bytesLen), bytesLen);
 }
+UINT64 MyEncodings::BytesToIntBigEndian(const char* b, int bLen) {
+    UINT64 ret = 0;
+    for (int i = 0; i < bLen; i++) {
+        ret += (b[i] & 0xFF) * (1 << (i * 8));
+    }
+    return ret;
+}
 
 #endif // _MY_ENCODIGNS_CPP_
 

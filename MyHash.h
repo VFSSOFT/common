@@ -10,6 +10,7 @@
 #define MYHASH_ALG_SHA1   2
 #define MYHASH_ALG_MD5    3
 #define MYHASH_ALG_MD4    4
+#define MYHASH_ALG_SHA512384 5
 
 class MyHash {
 public:

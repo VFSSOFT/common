@@ -20,9 +20,11 @@ public:
   int Init(int alg);
   int Update(const char* b, int bLen);
   int Finish();
+  
+  int QuickCalc(int alg, const char* b, int bLen);
+
   MyBuffer* Result() { return &m_HashValue; }
 
-  static int CalcHash(int hashAlg, const char* data, int dataLen, unsigned char** out, unsigned int* outLen);
 
   static int GetHashSize(int hashAlg);
 

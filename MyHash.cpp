@@ -38,6 +38,12 @@ int MyHash::Init(int alg) {
           }
           break;
 
+      case MYHASH_ALG_MD4:
+          if (!(success = EVP_DigestInit_ex(m_Ctx, EVP_md4(), NULL))) {
+              return LastError(MY_ERR_CRYPTO_ERROR, "Init MD5 failed");
+          }
+          break;
+
     default:
         return LastError(MY_ERR_CRYPTO_INVALID_HASH_ALG, "Unsupported hash algorithm");
     }
@@ -87,6 +93,13 @@ int MyHash::CalcHash(int hashAlg, const char* data, int dataLen, unsigned char**
 
   case MYHASH_ALG_MD5:
       if (!(success = EVP_DigestInit_ex(mdctx, EVP_md5(), NULL))) {
+          errCode= MY_ERR_CRYPTO_ERROR;
+          goto done;
+      }
+      break;
+
+  case MYHASH_ALG_MD4:
+      if (!(success = EVP_DigestInit_ex(mdctx, EVP_md4(), NULL))) {
           errCode= MY_ERR_CRYPTO_ERROR;
           goto done;
       }

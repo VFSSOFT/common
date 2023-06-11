@@ -23,6 +23,7 @@ public:
 
   static int CalcHash(int hashAlg, const char* data, int dataLen, unsigned char** out, unsigned int* outLen);
 
+  static int GetHashSize(int hashAlg);
 
 private:
     EVP_MD_CTX* m_Ctx;

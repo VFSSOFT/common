@@ -125,3 +125,13 @@ done:
   return errCode;
   
 }
+
+int MyHash::GetHashSize(int hashAlg) {
+    switch (hashAlg) {
+    case MYHASH_ALG_MD4: return 16;
+    case MYHASH_ALG_MD5: return 16;
+    case MYHASH_ALG_SHA1: return 20;
+    case MYHASH_ALG_SHA256: return 32;
+    }
+    return 0;
+}

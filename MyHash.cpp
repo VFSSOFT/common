@@ -16,37 +16,18 @@ int MyHash::Init(int alg) {
     int success = 0; 
 
     m_Ctx = EVP_MD_CTX_new();
-    if (m_Ctx == NULL)
-        return LastError(MY_ERR_OUT_OF_MEMORY, "Out of memory");
+    const EVP_MD* md = GetEvpMD(alg);
 
-    switch (alg) {
-    case MYHASH_ALG_SHA1:
-        if (!(success = EVP_DigestInit_ex(m_Ctx, EVP_sha1(), NULL))) {
-            return LastError(MY_ERR_CRYPTO_ERROR, "Init SHA1 failed");
-        }
-        break;
-
-    case MYHASH_ALG_SHA256:
-        if (!(success = EVP_DigestInit_ex(m_Ctx, EVP_sha256(), NULL))) {
-          return LastError(MY_ERR_CRYPTO_ERROR, "Init SHA256 failed");
-        }
-        break;
-
-    case MYHASH_ALG_MD5:
-          if (!(success = EVP_DigestInit_ex(m_Ctx, EVP_md5(), NULL))) {
-              return LastError(MY_ERR_CRYPTO_ERROR, "Init MD5 failed");
-          }
-          break;
-
-      case MYHASH_ALG_MD4:
-          if (!(success = EVP_DigestInit_ex(m_Ctx, EVP_md4(), NULL))) {
-              return LastError(MY_ERR_CRYPTO_ERROR, "Init MD5 failed");
-          }
-          break;
-
-    default:
-        return LastError(MY_ERR_CRYPTO_INVALID_HASH_ALG, "Unsupported hash algorithm");
+    if (md == NULL) {
+        m_LastErrorMessage.SetWithFormat("Init Hash failed: unkonwn algorithm(%d)", alg);
+        m_LastErrorCode = MY_ERR_CRYPTO_INVALID_HASH_ALG;
+        return m_LastErrorCode;
     }
+
+    if (!EVP_DigestInit_ex(m_Ctx, md, NULL)) {
+        return LastError(MY_ERR_CRYPTO_ERROR, "Init Hash failed");
+    }
+
     return 0;
 }
 int MyHash::Update(const char* b, int bLen) {
@@ -84,3 +65,18 @@ int MyHash::GetHashSize(int hashAlg) {
     }
     return 0;
 }
+
+const EVP_MD* MyHash::GetEvpMD(int hashAlg) {
+    switch (hashAlg) {
+    case MYHASH_ALG_MD4:     return EVP_md4();
+    case MYHASH_ALG_MD5:     return EVP_md5();
+    case MYHASH_ALG_SHA1:    return EVP_sha1();
+    case MYHASH_ALG_SHA224:  return EVP_sha224();
+    case MYHASH_ALG_SHA256:  return EVP_sha256();
+    case MYHASH_ALG_SHA384:  return EVP_sha384();
+    case MYHASH_ALG_SHA512:  return EVP_sha512();
+    case MYHASH_ALG_SHA3384: return EVP_sha3_384();
+    }
+    return NULL;
+}
+

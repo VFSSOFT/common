@@ -6,11 +6,15 @@
 #include "MyStringA.h"
 #include "MyBuffer.h"
 
-#define MYHASH_ALG_SHA256 1
-#define MYHASH_ALG_SHA1   2
-#define MYHASH_ALG_MD5    3
-#define MYHASH_ALG_MD4    4
-#define MYHASH_ALG_SHA512384 5
+#define MYHASH_ALG_MD4       0
+#define MYHASH_ALG_MD5       1
+#define MYHASH_ALG_SHA1      2
+#define MYHASH_ALG_SHA224    3
+#define MYHASH_ALG_SHA256    4
+#define MYHASH_ALG_SHA384    5
+#define MYHASH_ALG_SHA512    6
+#define MYHASH_ALG_SHA3384   7
+
 
 class MyHash {
 public:
@@ -27,6 +31,7 @@ public:
 
 
   static int GetHashSize(int hashAlg);
+  static const EVP_MD* GetEvpMD(int hashAlg);
 
 private:
     EVP_MD_CTX* m_Ctx;

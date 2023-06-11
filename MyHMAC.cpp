@@ -1,88 +1,58 @@
 #include "MyHMAC.h"
 
-#include <openssl/ossl_typ.h>
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-
-#include "../common/MyCoreDef.h"
-
-int MyHmac::CalcHmac(int alg, const char* key, int keyLen, const char* data, int dataLen, unsigned char** out, unsigned int* outLen) {
-  DECLARE_ERRCODE
-  BOOL success = FALSE;
-  HMAC_CTX* ctx;
-
-  ctx = HMAC_CTX_new();
-  if (ctx == NULL)
-    return MY_ERR_OUT_OF_MEMORY;
-
-  switch (alg) {
-
-  case MY_HMAC_ALG_MD4:
-    if (!(success = HMAC_Init_ex(ctx, key, keyLen, EVP_md4(), NULL))) {
-      errCode = MY_ERR_CRYPTO_ERROR;
-      goto done;
-    }
-    break;
-
-  case MY_HMAC_ALG_MD5:
-    if (!(success = HMAC_Init_ex(ctx, key, keyLen, EVP_md5(), NULL))) {
-      errCode = MY_ERR_CRYPTO_ERROR;
-      goto done;
-    }
-    break;
-
-  case MY_HMAC_ALG_SHA1:
-    if (!(success = HMAC_Init_ex(ctx, key, keyLen, EVP_sha1(), NULL))) {
-      errCode = MY_ERR_CRYPTO_ERROR;
-      goto done;
-    }
-    break;
-
-  case MY_HMAC_ALG_SHA224:
-    if (!(success = HMAC_Init_ex(ctx, key, keyLen, EVP_sha224(), NULL))) {
-      errCode = MY_ERR_CRYPTO_ERROR;
-      goto done;
-    }
-    break;
-
-	case MY_HMAC_ALG_SHA256:
-    if (!(success = HMAC_Init_ex(ctx, key, keyLen, EVP_sha256(), NULL))) {
-      errCode = MY_ERR_CRYPTO_ERROR;
-      goto done;
-    }
-    break;
-
-  case MY_HMAC_ALG_SHA384:
-    if (!(success = HMAC_Init_ex(ctx, key, keyLen, EVP_sha384(), NULL))) {
-      errCode = MY_ERR_CRYPTO_ERROR;
-      goto done;
-    }
-    break;
-
-  case MY_HMAC_ALG_SHA512:
-    if (!(success = HMAC_Init_ex(ctx, key, keyLen, EVP_sha512(), NULL))) {
-      errCode = MY_ERR_CRYPTO_ERROR;
-      goto done;
-    }
-    break;
-
-  default:
-    errCode = MY_ERR_CRYPTO_INVALID_HMAC_ALG;
-    goto done;
-  }
-
-  if (!(success = HMAC_Update(ctx, (const unsigned char*)data, dataLen))) {
-    errCode = MY_ERR_CRYPTO_ERROR;
-    goto done;
-  }
-
-  if (!(success = HMAC_Final(ctx, *out, outLen))) {
-    errCode = MY_ERR_CRYPTO_ERROR;
-    goto done;
-  }
-
-done:
-  HMAC_CTX_free(ctx);
-  return errCode;
+MyHmac::MyHmac(): m_Ctx(NULL) {
 
 }
+MyHmac::~MyHmac() {
+    Reset();
+}
+
+int MyHmac::Init(int alg, const char* key, int keyLen) {
+    int err = 0;
+
+    Reset();
+    m_Ctx = HMAC_CTX_new();
+    const EVP_MD* md = MyHash::GetEvpMD(alg);
+
+    if (md == NULL) {
+        m_LastErrorMessage.SetWithFormat("Invalid hmac algorithm: %d", alg);
+        m_LastErrorCode = MY_ERR_CRYPTO_INVALID_HMAC_ALG;
+        return m_LastErrorCode;
+    }
+
+    if (!HMAC_Init_ex(m_Ctx, key, keyLen, md, NULL)) {
+        return LastError(MY_ERR_CRYPTO_ERROR, "Failed to init HMAC");
+    }
+
+    return 0;
+}
+int MyHmac::Update(const char* data, int dataLen) {
+    if (!HMAC_Update(m_Ctx, (const unsigned char*)data, dataLen)) {
+        return LastError(MY_ERR_CRYPTO_ERROR, "Failed to calc HMAC");
+    }
+    return 0;
+}
+int MyHmac::Final() {
+    unsigned int hmacSize = HMAC_size(m_Ctx);
+    m_Result.SetLength(hmacSize);
+    if (!HMAC_Final(m_Ctx, (unsigned char*)m_Result.Deref(), &hmacSize)) {
+        return LastError(MY_ERR_CRYPTO_ERROR, "Failed to calc HMAC");
+    }
+    return 0;
+}
+void MyHmac::Reset() {
+    m_Result.Reset();
+    if (m_Ctx) {
+        HMAC_CTX_free(m_Ctx);
+    }
+    m_Ctx = NULL;
+}
+
+int MyHmac::QuickCalc(int alg, const char* key, int keyLen, const char* data, int dataLen) {
+    int err = 0;
+    if (err = Init(alg, key, keyLen)) return err;
+    if (err = Update(data, dataLen)) return err;
+    if (err = Final()) return err;
+    return 0;
+}
+

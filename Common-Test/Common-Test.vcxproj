@@ -33,8 +33,8 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\Dev\fs\thirdpart\release\winx64\sqlite_release\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Dev\fs\thirdpart\release\winx64\sqlite_release\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Dev\fs\thirdpart\release\winx64\openssl_release\include;D:\Dev\fs\thirdpart\release\winx64\sqlite_release\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Dev\fs\thirdpart\release\winx64\openssl_release\lib;D:\Dev\fs\thirdpart\release\winx64\sqlite_release\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -47,6 +47,7 @@
     <ClCompile Include="MyDataPacketTest.cpp" />
     <ClCompile Include="MyDateTest.cpp" />
     <ClCompile Include="MyFileTest.cpp" />
+    <ClCompile Include="MyHashTest.cpp" />
     <ClCompile Include="MyJsonTest.cpp" />
     <ClCompile Include="MySqliteTest.cpp" />
     <ClCompile Include="MyStackTest.cpp" />
@@ -104,7 +105,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>sqlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sqlite.lib;libcrypto_static.lib;liblegacy.lib;Ws2_32.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

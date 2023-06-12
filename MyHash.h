@@ -3,6 +3,8 @@
 
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
+#include <openssl/md4.h>
+
 #include "MyStringA.h"
 #include "MyBuffer.h"
 
@@ -35,6 +37,7 @@ public:
 
 private:
     EVP_MD_CTX* m_Ctx;
+    MD4_CTX     m_MD4Ctx;
     MyBuffer    m_HashValue;
 
     MY_LAST_ERROR_DECL;

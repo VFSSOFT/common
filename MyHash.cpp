@@ -3,7 +3,7 @@
 
 
 MyHash::MyHash(): m_Ctx(NULL) {
-
+    memset(&m_MD4Ctx, 0, sizeof(MD4_CTX));
 }
 MyHash::~MyHash() {
     if (m_Ctx) {
@@ -15,33 +15,48 @@ int MyHash::Init(int alg) {
     int err = 0;
     int success = 0; 
 
-    m_Ctx = EVP_MD_CTX_new();
-    const EVP_MD* md = GetEvpMD(alg);
+    if (alg == MYHASH_ALG_MD4) {
+        MD4_Init(&m_MD4Ctx);
+    } else {
+        m_Ctx = EVP_MD_CTX_new();
+        const EVP_MD* md = GetEvpMD(alg);
 
-    if (md == NULL) {
-        m_LastErrorMessage.SetWithFormat("Init Hash failed: unkonwn algorithm(%d)", alg);
-        m_LastErrorCode = MY_ERR_CRYPTO_INVALID_HASH_ALG;
-        return m_LastErrorCode;
-    }
+        if (md == NULL) {
+            m_LastErrorMessage.SetWithFormat("Init Hash failed: unkonwn algorithm(%d)", alg);
+            m_LastErrorCode = MY_ERR_CRYPTO_INVALID_HASH_ALG;
+            return m_LastErrorCode;
+        }
 
-    if (!EVP_DigestInit_ex(m_Ctx, md, NULL)) {
-        return LastError(MY_ERR_CRYPTO_ERROR, "Init Hash failed");
+        if (!EVP_DigestInit_ex(m_Ctx, md, NULL)) {
+            ERR_print_errors_fp(stderr);
+            return LastError(MY_ERR_CRYPTO_ERROR, "Init Hash failed");
+        }
     }
 
     return 0;
 }
 int MyHash::Update(const char* b, int bLen) {
-    int success = EVP_DigestUpdate(m_Ctx, b, bLen);
+    int success = 0;
+    if (m_MD4Ctx.A > 0) {
+        success = MD4_Update(&m_MD4Ctx, b, bLen);
+    } else {
+        success = EVP_DigestUpdate(m_Ctx, b, bLen);
+    }
     if (!success) {
         return LastError(MY_ERR_CRYPTO_ERROR, "Failed to calculate hash");
     }
     return 0;
 }
 int MyHash::Finish() {
-    unsigned int size = EVP_MD_CTX_get_size(m_Ctx);
-    m_HashValue.SetLength(size);
+    int success;
 
-    int success = EVP_DigestFinal(m_Ctx, (unsigned char*)m_HashValue.Deref(), &size);
+    if (m_MD4Ctx.A > 0) {
+        m_HashValue.SetLength(16);
+        success = MD4_Final((unsigned char*)m_HashValue.Deref(), &m_MD4Ctx);
+    } else {
+        unsigned int size = EVP_MD_CTX_get_size(m_Ctx);
+        success = EVP_DigestFinal(m_Ctx, (unsigned char*)m_HashValue.Deref(), &size);
+    }
     if (!success) {
         return LastError(MY_ERR_CRYPTO_ERROR, "Failed to calculate hash");
     }

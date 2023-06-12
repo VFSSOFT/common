@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\Dev\fs\thirdpart\release\winx64\sqlite_release\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Dev\fs\thirdpart\release\winx64\openssl_release\include;D:\Dev\fs\thirdpart\release\winx64\sqlite_release\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -152,6 +152,7 @@
     <ClInclude Include="..\MyEncodings.h" />
     <ClInclude Include="..\MyFile.h" />
     <ClInclude Include="..\MyFileAttributes.h" />
+    <ClInclude Include="..\MyHash.h" />
     <ClInclude Include="..\MyJSON.h" />
     <ClInclude Include="..\MyLock.h" />
     <ClInclude Include="..\MyLogger.h" />
@@ -183,6 +184,7 @@
     <ClCompile Include="..\MyEncodings.cpp" />
     <ClCompile Include="..\MyFile.cpp" />
     <ClCompile Include="..\MyFileAttributes.cpp" />
+    <ClCompile Include="..\MyHash.cpp" />
     <ClCompile Include="..\MyJSON.cpp" />
     <ClCompile Include="..\MyLock.cpp" />
     <ClCompile Include="..\MyLogger.cpp" />

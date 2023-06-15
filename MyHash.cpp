@@ -28,7 +28,7 @@ int MyHash::Init(int alg) {
         }
 
         if (!EVP_DigestInit_ex(m_Ctx, md, NULL)) {
-            ERR_print_errors_fp(stderr);
+            //ERR_print_errors_fp(stderr);
             return LastError(MY_ERR_CRYPTO_ERROR, "Init Hash failed");
         }
     }
@@ -55,6 +55,7 @@ int MyHash::Finish() {
         success = MD4_Final((unsigned char*)m_HashValue.Deref(), &m_MD4Ctx);
     } else {
         unsigned int size = EVP_MD_CTX_get_size(m_Ctx);
+        m_HashValue.SetLength(size);
         success = EVP_DigestFinal(m_Ctx, (unsigned char*)m_HashValue.Deref(), &size);
     }
     if (!success) {
@@ -83,14 +84,19 @@ int MyHash::GetHashSize(int hashAlg) {
 
 const EVP_MD* MyHash::GetEvpMD(int hashAlg) {
     switch (hashAlg) {
-    case MYHASH_ALG_MD4:     return EVP_md4();
-    case MYHASH_ALG_MD5:     return EVP_md5();
-    case MYHASH_ALG_SHA1:    return EVP_sha1();
-    case MYHASH_ALG_SHA224:  return EVP_sha224();
-    case MYHASH_ALG_SHA256:  return EVP_sha256();
-    case MYHASH_ALG_SHA384:  return EVP_sha384();
-    case MYHASH_ALG_SHA512:  return EVP_sha512();
-    case MYHASH_ALG_SHA3384: return EVP_sha3_384();
+    case MYHASH_ALG_MD4:       return EVP_md4();
+    case MYHASH_ALG_MD5:       return EVP_md5();
+    case MYHASH_ALG_SHA1:      return EVP_sha1();
+    case MYHASH_ALG_SHA224:    return EVP_sha224();
+    case MYHASH_ALG_SHA256:    return EVP_sha256();
+    case MYHASH_ALG_SHA384:    return EVP_sha384();
+    case MYHASH_ALG_SHA512:    return EVP_sha512();
+    case MYHASH_ALG_SHA3224:   return EVP_sha3_224();
+    case MYHASH_ALG_SHA3256:   return EVP_sha3_256();
+    case MYHASH_ALG_SHA3384:   return EVP_sha3_384();
+    case MYHASH_ALG_SHA3512:   return EVP_sha3_512();
+    case MYHASH_ALG_SHA512224: return EVP_sha512_224();
+    case MYHASH_ALG_SHA512256: return EVP_sha512_256();
     }
     return NULL;
 }

@@ -40,6 +40,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MyAesTest.cpp" />
     <ClCompile Include="MyArrayTest.cpp" />
     <ClCompile Include="MyAsn1Test.cpp" />
     <ClCompile Include="MyAStrValHashMapTest.cpp" />

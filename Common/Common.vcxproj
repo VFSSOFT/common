@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\MyAes.h" />
     <ClInclude Include="..\MyArray.h" />
     <ClInclude Include="..\MyArrays.h" />
     <ClInclude Include="..\MyASN1.h" />
@@ -177,6 +178,7 @@
     <ClInclude Include="..\MyWStrValHashMap.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\MyAes.cpp" />
     <ClCompile Include="..\MyArrays.cpp" />
     <ClCompile Include="..\MyASN1.cpp" />
     <ClCompile Include="..\MyBuffer.cpp" />

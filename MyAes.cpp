@@ -30,7 +30,7 @@ int MyAes::Init(int alg, const char* key, const char* iv, bool enc) {
         pParams = NULL;
     }
 
-    if (!EVP_CipherInit_ex2(m_Ctx, cipher, (const unsigned char*)key, (const unsigned char*)iv, enc ? AES_ENCRYPT : AES_DECRYPT, params)) {
+    if (!EVP_CipherInit_ex2(m_Ctx, cipher, (const unsigned char*)key, (const unsigned char*)iv, enc ? AES_ENCRYPT : AES_DECRYPT, pParams)) {
         return LastError(MY_ERR_CRYPTO_ERROR, "Failed to init AES algorithm");
     }
 

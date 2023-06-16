@@ -114,6 +114,9 @@
     <ClInclude Include="..\MyHash.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\MyHMAC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\MyBuffer.cpp">
@@ -189,6 +192,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\MyHash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MyHMAC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MyDes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

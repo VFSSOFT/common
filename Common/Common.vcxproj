@@ -153,6 +153,7 @@
     <ClInclude Include="..\MyFile.h" />
     <ClInclude Include="..\MyFileAttributes.h" />
     <ClInclude Include="..\MyHash.h" />
+    <ClInclude Include="..\MyHMAC.h" />
     <ClInclude Include="..\MyJSON.h" />
     <ClInclude Include="..\MyLock.h" />
     <ClInclude Include="..\MyLogger.h" />
@@ -181,10 +182,12 @@
     <ClCompile Include="..\MyBuffer.cpp" />
     <ClCompile Include="..\MyDataPacket.cpp" />
     <ClCompile Include="..\MyDate.cpp" />
+    <ClCompile Include="..\MyDes.cpp" />
     <ClCompile Include="..\MyEncodings.cpp" />
     <ClCompile Include="..\MyFile.cpp" />
     <ClCompile Include="..\MyFileAttributes.cpp" />
     <ClCompile Include="..\MyHash.cpp" />
+    <ClCompile Include="..\MyHMAC.cpp" />
     <ClCompile Include="..\MyJSON.cpp" />
     <ClCompile Include="..\MyLock.cpp" />
     <ClCompile Include="..\MyLogger.cpp" />

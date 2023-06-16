@@ -303,3 +303,14 @@ bool MyBuffer::Contains(const char* ptr, int len) {
     }
     return false;
 }
+
+
+bool MyBuffer::Equals(const char* b1, int b1Len, const char* b2, int b2Len) {
+    if (b1Len != b2Len) return false;
+
+    for (int i = 0; i < b1Len; i++) {
+        if (b1[i] != b2[i]) return false;
+    }
+
+    return true;
+}

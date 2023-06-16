@@ -8,7 +8,7 @@ int MyDes::InitDES3(const char* iv, const char* key, int keyLen) {
     memcpy(&m_Des3CBs[1], key + 8, 8);
     memcpy(&m_Des3CBs[2], key + 16, 8);
 
-    DES_set_odd_parity(&m_IV);
+    //DES_set_odd_parity(&m_IV);
 
     err = DES_set_key(&m_Des3CBs[0], &m_Des3KSs[0]);
     err = DES_set_key(&m_Des3CBs[1], &m_Des3KSs[1]);

@@ -7,6 +7,7 @@
 #include "MyValArray.h"
 #include "MyArrays.h"
 #include "MyDataPacket.h"
+#include "MyEncodings.h"
 
 
 // ASN.1 Tags

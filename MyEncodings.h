@@ -1,4 +1,4 @@
-#ifndef _MY_ENOCDINGS_H_
+#ifndef _MY_ENCODINGS_H_
 #define _MY_ENCODINGS_H_
 
 #include "MyBuffer.h"

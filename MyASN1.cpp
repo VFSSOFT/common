@@ -709,9 +709,7 @@ int MyAsn1Node::DecodeIDLengthContent(MyDataPacket* p) {
 
         char bytes[8];
         if (err = p->ReadBytes(bytesCnt, bytes)) return LastError(err, p->LastErrorMessage());
-        for (int i = 0; i < bytesCnt; i++) {
-            length += ((bytes[i] & 0xFF) * (1 << (i * 8)));
-        }
+        length = MyEncodings::BytesToIntBigEndian(bytes, bytesCnt);
     }
 
     if (err = m_Content.SetLength(length)) return err;

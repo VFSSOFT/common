@@ -265,18 +265,19 @@ void MyEncodings::IntToBytesBigEndian(UINT64 val, int bytesLen, char* buf) {
     bytes[0] = (val & 0xFF00000000000000) >> 56;
     bytes[1] = (val & 0x00FF000000000000) >> 48;
     bytes[2] = (val & 0x0000FF0000000000) >> 40;
-    bytes[3] = (val & 0x0000FF0000000000) >> 32;
-    bytes[4] = (val & 0x0000FF0000000000) >> 24;
-    bytes[5] = (val & 0x0000FF0000000000) >> 16;
-    bytes[6] = (val & 0x0000FF0000000000) >> 8 ;
-    bytes[7] = (val & 0x0000FF0000000000)      ;
+    bytes[3] = (val & 0x000000FF00000000) >> 32;
+    bytes[4] = (val & 0x00000000FF000000) >> 24;
+    bytes[5] = (val & 0x0000000000FF0000) >> 16;
+    bytes[6] = (val & 0x000000000000FF00) >> 8 ;
+    bytes[7] = (val & 0x00000000000000FF)      ;
 
     memcpy(buf, bytes + (8 - bytesLen), bytesLen);
 }
 UINT64 MyEncodings::BytesToIntBigEndian(const char* b, int bLen) {
     UINT64 ret = 0;
     for (int i = 0; i < bLen; i++) {
-        ret += (b[i] & 0xFF) * (1 << (i * 8));
+        int base = 1 << (bLen - 1 - i) * 8;
+        ret += (b[i] & 0xFF) * base;
     }
     return ret;
 }

@@ -144,6 +144,7 @@ void MyBuffer::Reset() {
     free(m_Buffer);
   }
   m_Buffer = m_StackBuf;
+  memset(m_StackBuf, 0, 64);
   m_Cap = 62;
   m_Length = 0;
 }

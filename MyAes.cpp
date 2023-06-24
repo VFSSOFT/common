@@ -8,7 +8,7 @@ MyAes::~MyAes() {
     Reset();
 }
 
-int MyAes::Init(int alg, const char* key, const char* iv, bool enc) {
+int MyAes::Init(int alg, const char* key, const char* iv, bool enc, int paddingMode) {
     int err = 0;
     const EVP_CIPHER* cipher;
     OSSL_PARAM params[2];
@@ -32,6 +32,10 @@ int MyAes::Init(int alg, const char* key, const char* iv, bool enc) {
 
     if (!EVP_CipherInit_ex2(m_Ctx, cipher, (const unsigned char*)key, (const unsigned char*)iv, enc ? AES_ENCRYPT : AES_DECRYPT, pParams)) {
         return LastError(MY_ERR_CRYPTO_ERROR, "Failed to init AES algorithm");
+    }
+
+    if (paddingMode != MY_PADDING_MODE_NONE) {
+        EVP_CIPHER_CTX_set_padding(m_Ctx, paddingMode);
     }
 
     return 0;

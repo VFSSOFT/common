@@ -76,15 +76,19 @@
 #define MY_AES_128_CBC_CTS_CS3     101
 #define MY_AES_256_CBC_CTS_CS3     102
 
-
-
+#define MY_PADDING_MODE_NONE       0
+#define MY_PADDING_MODE_PKCS7      1
+#define MY_PADDING_MODE_ISO7816    2
+#define MY_PADDING_MODE_ANSI923    3
+#define MY_PADDING_MODE_ISO10126   4
+#define MY_PADDING_MODE_ZERO       5
 
 class MyAes {
 public:
     MyAes();
     ~MyAes();
 
-    int Init(int alg, const char* key, const char* iv, bool enc);
+    int Init(int alg, const char* key, const char* iv, bool enc, int paddingMode);
     int Update(const char* data, int dataLen);
     int Final();
     MyBuffer* Result() { return &m_Result; }

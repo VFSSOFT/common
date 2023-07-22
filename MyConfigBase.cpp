@@ -121,5 +121,10 @@ int MyConfigBase::ParseIntChild(MyJsonValue* jsonVal, int* val) {
     *val = retStr->DerefAsInt();
     return 0;
 }
+int MyConfigBase::UnknownKeyVal(MyJsonValue* jsonVal) {
+    MyStringA errMsg;
+    errMsg.SetWithFormat("Unknown object key: \"%s\"", jsonVal->Key()->Deref());
+    return LastError(MY_ERR_ENCODING_JSON, errMsg.Deref());
+}
 
 #endif // _MY_CONFIG_BASE_CPP_

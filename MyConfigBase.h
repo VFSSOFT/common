@@ -30,6 +30,8 @@ public:
     int ParseBoolChild(MyJsonValue* jsonVal, bool* val);
     int ParseIntChild(MyJsonValue* jsonVal, int* val);
 
+    int UnknownKeyVal(MyJsonValue* jsonVal);
+
 protected:
 
     MyStringW m_ConfigFilePath;

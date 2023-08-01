@@ -71,10 +71,13 @@ public:
     static HRESULT RetrieveWindowsSid(MyStringW& sid);
     
     static int MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd);
+    static int MyShellExecuteEx(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd, INT timeoutMS);
     
     static void MyGetSystemInfo(MySystemInfo* sysInfo);
     
     static int MyGetAppDataFolder(const wchar_t* appName, MyStringW* ret);
+    static int GetAppDataSubFolder(MyStringW* subFolder, MyStringW* subSub, bool createIfNotExist, MyStringW* ret, MyStringA* errMsg);
+    static int EnsureFolderExist(MyStringW* path, MyStringA* errMsg);
 };
 
 class MyWinRegValue {

@@ -4,6 +4,7 @@
 #ifdef _WIN32
 
 #include "MyWin.h"
+#include "MyFile.h"
 
 #include "sddl.h"
 #include "shlobj_core.h"
@@ -147,6 +148,39 @@ int MyWin::MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameter
     }
     return ret;
 }
+int MyWin::MyShellExecuteEx(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd, INT timeoutMS) {
+    int err = 0;
+
+    SHELLEXECUTEINFO info;
+    memset(&info, 0, sizeof(SHELLEXECUTEINFO));
+    info.cbSize = sizeof(SHELLEXECUTEINFO);
+    info.fMask = SEE_MASK_NOCLOSEPROCESS;
+    info.hwnd = hwnd;
+    info.lpVerb = op;
+    info.lpFile = file;
+    info.lpParameters = parameters;
+    info.nShow = showCmd;
+    info.hInstApp = NULL;
+    BOOL suc = ShellExecuteEx(&info);
+    if (!suc) {
+        err = ::GetLastError();
+        return err;
+    }
+
+    DWORD waitRet = WaitForSingleObject(info.hProcess, timeoutMS);
+    if (waitRet == WAIT_OBJECT_0) {
+        DWORD exitCode = (DWORD)(info.hInstApp);
+        if (exitCode < 32) return exitCode;
+        GetExitCodeProcess(info.hProcess, &exitCode);
+        return exitCode;
+    } else if (waitRet == WAIT_TIMEOUT) {
+        return -1;
+    } else if (waitRet == WAIT_FAILED) {
+        return -1;
+    } else {
+        return -1;
+    }
+}
 
 void MyWin::MyGetSystemInfo(MySystemInfo* sysInfo) {
     WCHAR computerNameBuffer[MAX_COMPUTERNAME_LENGTH + 1];
@@ -239,6 +273,41 @@ int MyWin::MyGetAppDataFolder(const wchar_t* appName, MyStringW* ret) {
         return 0;
     }
     return result;
+}
+int MyWin::GetAppDataSubFolder(MyStringW* subFolder, MyStringW* subSub, bool createIfNotExist, MyStringW* ret, MyStringA* errMsg) {
+    int err = 0;
+    MyStringW tmp;
+
+    MyGetAppDataFolder(subFolder->Deref(), ret);
+    if (createIfNotExist) {
+        if (err = EnsureFolderExist(ret, errMsg)) {
+            return err;
+        }
+    }
+    if (subSub == NULL || subSub->Length() == 0) {
+        return err;
+    }
+    tmp.Set(ret->Deref(), ret->Length());
+    MyStringW::JoinPath(tmp.Deref(), tmp.Length(), subSub->Deref(), subSub->Length(), ret);
+    if (createIfNotExist) {
+        if (err = EnsureFolderExist(ret, errMsg)) {
+            return err;
+        }
+    }
+    return 0;
+}
+int MyWin::EnsureFolderExist(MyStringW* path, MyStringA* errMsg) {
+    int err = 0;
+    if (!MyFile::DirectoryExist(path->Deref())) {
+        MyFile f;
+        if (err = f.CreateDirectory(path->Deref())) {
+            if (errMsg) {
+                errMsg->Set(f.LastErrorMessage());
+            }
+            return err;
+        }
+    }
+    return 0;
 }
 
 MyWinReg::MyWinReg() {

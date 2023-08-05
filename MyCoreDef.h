@@ -75,6 +75,7 @@
   public:                                                                  \
     inline int LastErrorCode() { return m_LastErrorCode; }                 \
     inline MyStringA* LastErrorMessage() { return &m_LastErrorMessage;}    \
+    inline MyStringA* LastError() { return LastErrorMessage();}            \
                                                                            \
   protected:                                                               \
     inline int LastError(int errCode, const char* errMsg) {                \

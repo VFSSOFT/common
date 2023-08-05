@@ -61,6 +61,7 @@ public:
     static bool IsDigit(const char* str, int len);
 
 #ifdef _WIN32
+    int SetUnicode(const wchar_t* unistr) { return SetUnicode(unistr, wcslen(unistr)); }
   int SetUnicode(const wchar_t* uniStr, int len);
   int Append(const wchar_t* uniStr, int len);
 #endif 

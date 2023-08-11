@@ -170,7 +170,7 @@ int MyStringW::IndexOf(const WCHAR* str, int startIndex) {
 
   LPCWSTR curStr = m_Buffer + startIndex;
   LPCWSTR p = wcsstr(curStr, str);
-  return  p == NULL ? -1 : (int)(p - curStr);
+  return  p == NULL ? -1 : (int)(p - m_Buffer);
 }
 int MyStringW::LastIndexOf(const WCHAR* str) {
   int index    = -1;

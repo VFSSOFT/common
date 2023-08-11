@@ -122,6 +122,28 @@ TEST(MyStringWTest, LastIndexTest) {
     EXPECT_EQ(index, 19);
 }
 
+TEST(MyStringWTest, IndexTest2) {
+    int errCode = 0;
+    MyStringW str;
+
+    errCode = str.Set(L"/s3fs/dontdelete");
+    EXPECT_EQ(errCode, 0);
+
+    int index = str.IndexOf(L"/", 1);
+    EXPECT_EQ(index, 5);
+}
+
+TEST(MyStringWTest, LastIndexTest2) {
+    int errCode = 0;
+    MyStringW str;
+
+    errCode = str.Set(L"/s3fs/dontdelete");
+    EXPECT_EQ(errCode, 0);
+
+    int index = str.LastIndexOf(L"/");
+    EXPECT_EQ(index, 5);
+}
+
 TEST(MyStringWTest, ChinsesTest) {
     int err = 0;
     MyStringW str;

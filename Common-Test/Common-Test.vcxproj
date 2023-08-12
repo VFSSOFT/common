@@ -55,6 +55,7 @@
     <ClCompile Include="MySqliteTest.cpp" />
     <ClCompile Include="MyStackTest.cpp" />
     <ClCompile Include="MyStringWTest.cpp" />
+    <ClCompile Include="MyValArrayTest.cpp" />
     <ClCompile Include="MyValObjHashMapTest.cpp" />
     <ClCompile Include="MyLinkListTest.cpp" />
     <ClCompile Include="MyMemPoolTest.cpp" />

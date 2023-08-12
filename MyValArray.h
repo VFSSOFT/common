@@ -87,7 +87,7 @@ int MyValArray<T>::Insert(int idx, T item) {
   }
 
   // m_Size + 1 is the last element in the Array after EnsureSize(m_Size + 1)
-  for (int i = m_Size - 1; i > idx; i--) {
+  for (int i = m_Size - 1; i >= idx; i--) {
     m_Array[i + 1] = m_Array[i];
   }
   m_Array[idx] = item;

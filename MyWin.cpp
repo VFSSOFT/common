@@ -93,6 +93,19 @@ LARGE_INTEGER MyWin::LongLong2LargeInteger(const UINT64 val) {
     return largeInteger;
 }
 
+bool MyWin::IsFilePlaceholder(LPCWSTR path) {
+    // ref: https://learn.microsoft.com/en-us/windows/win32/w8cookbook/placeholder-files
+    bool isPlaceholder = false;
+    WIN32_FIND_DATA findData;
+    HANDLE hFind = FindFirstFile(path, &findData);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        isPlaceholder = (findData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) &&
+                        (findData.dwReserved0 == IO_REPARSE_TAG_FILE_PLACEHOLDER);
+        FindClose(hFind);
+    }
+    return isPlaceholder;
+}
+
 
 HRESULT MyWin::RetrieveWindowsSid(MyStringW &sid) {
   
@@ -259,6 +272,32 @@ void MyWin::MyGetSystemInfo(MySystemInfo* sysInfo) {
     MyWinReg::GetKeyValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\SQMClient", L"MachineId", machineIdRegValue);
     sysInfo->MachineId.SetUnicode(machineIdRegValue.strValue + 1, wcslen(machineIdRegValue.strValue) - 2);
 }
+
+void MyWin::MyGetFileSystemName(const wchar_t* rootName, MyStringW* ret) {
+    wchar_t buf[MAX_PATH+1];
+    BOOL suc = GetVolumeInformation(
+        rootName,
+        NULL, 0,
+        NULL,
+        NULL,
+        NULL,
+        buf, MAX_PATH
+    );
+    if (suc) {
+        ret->Set(buf);
+    }
+}
+void MyWin::MyGetFileSystemFlags(const wchar_t* rootName, DWORD* ret) {
+     GetVolumeInformation(
+        rootName,
+        NULL, 0,
+        NULL,
+        NULL,
+        ret,
+        NULL, 0
+    );
+}
+
 
 int MyWin::MyGetAppDataFolder(const wchar_t* appName, MyStringW* ret) {
     wchar_t path[MAX_PATH];

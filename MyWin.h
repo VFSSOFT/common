@@ -67,6 +67,7 @@ public:
 
     static void Milliseconds2LargeIntergerTime(INT64 ms, LARGE_INTEGER* largeInteger);
     static LARGE_INTEGER LongLong2LargeInteger(const UINT64 val);
+    static bool IsFilePlaceholder(LPCWSTR path);
 
     static HRESULT RetrieveWindowsSid(MyStringW& sid);
     
@@ -74,6 +75,8 @@ public:
     static int MyShellExecuteEx(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd, INT timeoutMS);
     
     static void MyGetSystemInfo(MySystemInfo* sysInfo);
+    static void MyGetFileSystemName(const wchar_t* rootName, MyStringW* ret);
+    static void MyGetFileSystemFlags(const wchar_t* rootName, DWORD* ret);
     
     static int MyGetAppDataFolder(const wchar_t* appName, MyStringW* ret);
     static int GetAppDataSubFolder(MyStringW* subFolder, MyStringW* subSub, bool createIfNotExist, MyStringW* ret, MyStringA* errMsg);

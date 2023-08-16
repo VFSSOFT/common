@@ -349,6 +349,27 @@ int MyWin::EnsureFolderExist(MyStringW* path, MyStringA* errMsg) {
     return 0;
 }
 
+bool MyWin::SetAutoStartAtStartup(const wchar_t* name, const wchar_t* binaryPath, bool enable) {
+    if (enable) {
+        MyWinReg reg;
+        int err = reg.Open(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Run", KEY_ALL_ACCESS);
+        if (err) return false;
+        err = reg.AddKeyValueString(name, binaryPath, wcslen(binaryPath));
+        reg.Close();
+        return err == 0;
+    } else {
+        MyStringW key;
+        key.Set(L"Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
+        key.Append(name);
+
+        if (!MyWinReg::KeyExists(HKEY_CURRENT_USER, key.Deref())) {
+            return TRUE; // doesn't exist, consider it as delete successfully
+        }
+
+        return MyWinReg::DeleteValue(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Run", name) != 0;
+    }
+}
+
 MyWinReg::MyWinReg() {
     INIT_LAST_ERROR;
     m_HKey = NULL;

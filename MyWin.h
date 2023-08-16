@@ -81,6 +81,8 @@ public:
     static int MyGetAppDataFolder(const wchar_t* appName, MyStringW* ret);
     static int GetAppDataSubFolder(MyStringW* subFolder, MyStringW* subSub, bool createIfNotExist, MyStringW* ret, MyStringA* errMsg);
     static int EnsureFolderExist(MyStringW* path, MyStringA* errMsg);
+
+    static bool SetAutoStartAtStartup(const wchar_t* name, const wchar_t* binaryPath, bool enable);
 };
 
 class MyWinRegValue {

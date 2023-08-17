@@ -100,7 +100,25 @@ bool MyWin::IsFilePlaceholder(LPCWSTR path) {
     HANDLE hFind = FindFirstFile(path, &findData);
     if (hFind != INVALID_HANDLE_VALUE) {
         isPlaceholder = (findData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) &&
-                        (findData.dwReserved0 == IO_REPARSE_TAG_FILE_PLACEHOLDER);
+                        (
+                            findData.dwReserved0 == IO_REPARSE_TAG_FILE_PLACEHOLDER ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD   ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_1 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_2 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_3 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_4 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_5 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_6 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_7 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_8 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_9 ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_A ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_B ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_C ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_D ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_E ||
+                            findData.dwReserved0 == IO_REPARSE_TAG_CLOUD_F
+                       );
         FindClose(hFind);
     }
     return isPlaceholder;

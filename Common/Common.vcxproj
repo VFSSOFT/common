@@ -147,6 +147,7 @@
     <ClInclude Include="..\MyASN1.h" />
     <ClInclude Include="..\MyAStrValHashMap.h" />
     <ClInclude Include="..\MyBuffer.h" />
+    <ClInclude Include="..\MyChangeJournal.h" />
     <ClInclude Include="..\MyCoreDef.h" />
     <ClInclude Include="..\MyDataPacket.h" />
     <ClInclude Include="..\MyDate.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="..\MyArrays.cpp" />
     <ClCompile Include="..\MyASN1.cpp" />
     <ClCompile Include="..\MyBuffer.cpp" />
+    <ClCompile Include="..\MyChangeJournal.cpp" />
     <ClCompile Include="..\MyDataPacket.cpp" />
     <ClCompile Include="..\MyDate.cpp" />
     <ClCompile Include="..\MyDes.cpp" />

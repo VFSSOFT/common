@@ -45,6 +45,7 @@
     <ClCompile Include="MyAsn1Test.cpp" />
     <ClCompile Include="MyAStrValHashMapTest.cpp" />
     <ClCompile Include="MyBufferTest.cpp" />
+    <ClCompile Include="MyChangeJournalTest.cpp" />
     <ClCompile Include="MyDataPacketTest.cpp" />
     <ClCompile Include="MyDateTest.cpp" />
     <ClCompile Include="MyDesTest.cpp" />

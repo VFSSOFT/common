@@ -11,8 +11,8 @@ TEST(MyChangeJournalTest, ReadChangeJournal) {
     err = journal.Open(L'D');
     ASSERT_EQ(err, 0);
 
-    USN_JOURNAL_DATA journalData;
-    memset(&journalData, 0, sizeof(USN_JOURNAL_DATA));
+    USN_JOURNAL_DATA_V2 journalData;
+    memset(&journalData, 0, sizeof(USN_JOURNAL_DATA_V2));
     err = journal.Query(&journalData);
     ASSERT_EQ(err, 0);
 

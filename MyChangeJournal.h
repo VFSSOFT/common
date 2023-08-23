@@ -48,7 +48,7 @@ public:
     int Open(wchar_t volName);
     int Close();
 
-    int Query(USN_JOURNAL_DATA* journalData);
+    int Query(USN_JOURNAL_DATA_V2* journalData);
     int Read(READ_USN_JOURNAL_DATA* readData, MyArray<MyUsnRecord>* records, USN* nextUsn);
     int Enum(MFT_ENUM_DATA* enumData, MyArray<MyUsnRecord>* records, DWORDLONG* nextStartFileReferenceNumber);
 

@@ -100,7 +100,7 @@ int MyChangeJournal::Close() {
 }
 
 
-int MyChangeJournal::Query(USN_JOURNAL_DATA* journalData) {
+int MyChangeJournal::Query(USN_JOURNAL_DATA_V2* journalData) {
     int err = 0;
     DWORD dwBytes;
 
@@ -110,7 +110,7 @@ int MyChangeJournal::Query(USN_JOURNAL_DATA* journalData) {
         NULL,
         0,
         journalData,
-        sizeof(USN_JOURNAL_DATA),
+        sizeof(USN_JOURNAL_DATA_V2),
         &dwBytes,
         NULL
     );

@@ -14,6 +14,7 @@ public:
   int Set(int idx, T item);
   int Insert(int idx, T item);
   T   Get(int idx);
+  T   Last();
   int IndexOf(T tiem);
   int Delete(int idx);
   int Delete2(T val);
@@ -100,6 +101,12 @@ template <typename T>
 T MyValArray<T>::Get(int idx) {
   assert(idx >= 0 && idx < m_Size);
   return m_Array[idx];
+}
+
+template <typename T>
+T MyValArray<T>::Last() {
+    assert(Size() > 0);
+    return m_Array[m_Size-1];
 }
 
 template <typename T>

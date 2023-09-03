@@ -16,6 +16,7 @@ public:
   int Set(MyStringW* wstr);
   int SetUtf8(const char* str, int len);
   int Append(const WCHAR* str, int len=-1);
+  int Append(const char* utf8str, int len=-1);
   int AppendChar(WCHAR c);
   int AppendInt(int intVal, int placeHolderLen=0);
   int SetInt64(INT64 val, int placeHolderLen=0);

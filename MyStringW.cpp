@@ -60,6 +60,12 @@ int MyStringW::SetUtf8(const char* str, int len) {
   );
   return errCode == 0 ? -1 : 0;
 }
+int MyStringW::Append(const char* utf8str, int len) {
+    int err = 0;
+    MyStringW wstr;
+    if (err = wstr.SetUtf8(utf8str, len)) { return err; }
+    return Append(wstr.Deref(), wstr.Length());
+}
 int MyStringW::Append(const WCHAR* str, int len) {
   int errCode = 0;
   if (len < 0) len = (int)wcslen(str);

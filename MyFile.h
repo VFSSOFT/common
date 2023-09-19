@@ -70,7 +70,8 @@ public:
     int ReadAllBytes(const wchar_t* path, MyBuffer* data);
 
     int MyGetDiskFreeSpace(const wchar_t* path, UINT64* freeBytesAvailableToCaller, UINT64* totalNumberOfBytes, UINT64* totalNumberOfFreeBytes);
-
+    int GrantEveryoneRWPermission(const wchar_t* path); // DON'T USE
+    int GrantUserFullControlACL(const wchar_t* path, bool isDir);
 private:
     void* OpenFileHandle(const wchar_t* path, int openDisp, int desiredAccess, int shareMode);
     int  HandleFSError(const wchar_t* path);

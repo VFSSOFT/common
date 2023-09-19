@@ -9,6 +9,8 @@
 #include "MyStringUtf16.h"
 
 #include <fileapi.h>
+#include <Accctrl.h>
+#include <aclapi.h>
 
 MyFile::MyFile(): m_LastErrorCode(0), m_Handle(NULL) {
 
@@ -391,6 +393,157 @@ int MyFile::MyGetDiskFreeSpace(const wchar_t* path, UINT64* freeBytesAvailableTo
     if (totalNumberOfBytes) *totalNumberOfBytes = totalBytes.QuadPart;
     if (totalNumberOfFreeBytes) *totalNumberOfFreeBytes = totalFreeBytes.QuadPart;
     return 0;
+}
+
+int MyFile::GrantEveryoneRWPermission(const wchar_t* path) {
+    int err = 0;
+    PSID everyoneSID = NULL;
+    PACL acl = NULL;
+    EXPLICIT_ACCESS ea[1];
+    SID_IDENTIFIER_AUTHORITY sidAuthWorld = SECURITY_WORLD_SID_AUTHORITY;
+    PSECURITY_DESCRIPTOR sd = NULL;
+
+    // Create a well-known sid for the everyone group
+    BOOL ret = AllocateAndInitializeSid(
+        &sidAuthWorld,
+        1, 
+        SECURITY_WORLD_RID,
+        0, 0, 0, 0, 0, 0, 0,
+        &everyoneSID
+    );
+    if (!ret) {
+        err = HandleFSError(path);
+        goto done;
+    }
+
+    // Initialize an EXPLICIT_ACCESS structure for an ACE.
+    ZeroMemory(&ea, 1 * sizeof(EXPLICIT_ACCESS));
+    ea[0].grfAccessPermissions = SPECIFIC_RIGHTS_ALL | STANDARD_RIGHTS_ALL;
+    ea[0].grfAccessMode = GRANT_ACCESS;
+    ea[0].grfInheritance = NO_INHERITANCE;
+    ea[0].Trustee.TrusteeForm = TRUSTEE_IS_SID;
+    ea[0].Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
+    ea[0].Trustee.ptstrName = (LPTSTR) everyoneSID;
+
+    // Create the new ACL that contains the new ACEs
+    SetEntriesInAcl(1, ea, NULL, &acl);
+
+    // Initialize a security descriptor.  
+    sd = (PSECURITY_DESCRIPTOR) LocalAlloc(LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH);
+    if (sd == NULL) {
+        err = MY_ERR_OUT_OF_MEMORY;
+        goto done;
+    }
+    if (!InitializeSecurityDescriptor(sd, SECURITY_DESCRIPTOR_REVISION)) {
+        err = HandleFSError(path);
+        goto done;
+    }
+
+    // Add the ACL to the security descriptor. 
+    ret = SetSecurityDescriptorDacl(
+        sd,
+        TRUE, // bDaclPresent flag
+        acl,
+        FALSE
+    );
+    if (!ret) {
+        err = HandleFSError(path);
+        goto done;
+    }
+
+    // Change the security attributes
+    if (!SetFileSecurity(path, DACL_SECURITY_INFORMATION, sd)) {
+        err = HandleFSError(path);
+        goto done;
+    }
+
+done:
+    if (everyoneSID) {
+        FreeSid(everyoneSID);
+    }
+    if (acl) {
+        LocalFree(acl);
+    }
+    if (sd) {
+        LocalFree(sd);
+    }
+
+    return err;
+}
+
+int MyFile::GrantUserFullControlACL(const wchar_t* path, bool isDir) {
+    int err = 0;
+
+    ACL* oldDacl = NULL;
+    ACL* newDacl = NULL;
+    SECURITY_DESCRIPTOR* sd = NULL;
+    PSID sid = NULL;
+    SID_IDENTIFIER_AUTHORITY authNt = SECURITY_NT_AUTHORITY;
+    EXPLICIT_ACCESS ea = { 0 };
+
+    HANDLE handle = CreateFile(
+        path, 
+        READ_CONTROL | WRITE_DAC,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        (isDir ? FILE_FLAG_BACKUP_SEMANTICS : 0),
+        NULL
+    );
+    if (handle == INVALID_HANDLE_VALUE) {
+        err = HandleFSError(path);
+        goto done;
+    }
+
+    err = GetSecurityInfo(handle, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &oldDacl, NULL, (void**)&sd);
+    if (err) {
+        HandleFSError(path);
+        goto done;
+    }
+
+    if (!AllocateAndInitializeSid(&authNt, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_USERS, 0, 0, 0, 0, 0, 0, &sid)) {
+        err = HandleFSError(path);
+        goto done;
+    }
+
+    ea.grfAccessMode = GRANT_ACCESS;
+    ea.grfAccessPermissions = GENERIC_ALL;
+    ea.grfInheritance = CONTAINER_INHERIT_ACE | OBJECT_INHERIT_ACE;
+    ea.Trustee.TrusteeType = TRUSTEE_IS_GROUP;
+    ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+    ea.Trustee.ptstrName   = (LPTSTR)sid;
+
+    err = SetEntriesInAcl(1, &ea, oldDacl, &newDacl);
+    if (err) {
+        HandleFSError(path);
+        goto done;
+    }
+
+    err = SetSecurityInfo(handle, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, newDacl, NULL);
+    if (err) {
+        HandleFSError(path);
+        goto done;
+    }
+
+done:
+    
+    if (sid) {
+        FreeSid(sid);
+    }
+    if (newDacl) {
+        LocalFree(newDacl);
+    }
+    if (sd) {
+        LocalFree(sd);
+    }
+    //if (oldDacl) {
+    //    LocalFree(oldDacl);
+    //}
+    if (handle != INVALID_HANDLE_VALUE) {
+        CloseHandle(handle);
+    }
+
+    return err;
 }
 
 #endif

@@ -70,6 +70,8 @@ public:
     static bool IsFilePlaceholder(LPCWSTR path);
 
     static HRESULT RetrieveWindowsSid(MyStringW& sid);
+
+    static bool IsElevated();
     
     static int MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd);
     static int MyShellExecuteEx(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd, INT timeoutMS);

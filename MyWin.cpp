@@ -165,6 +165,22 @@ done:
     return err;
 }
 
+bool MyWin::IsElevated() {
+    BOOL ret = FALSE;
+    HANDLE token = NULL;
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+        TOKEN_ELEVATION elevation;
+        DWORD cbSize = sizeof(TOKEN_ELEVATION);
+        if (GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &cbSize)) {
+            ret = elevation.TokenIsElevated;
+        }
+    }
+    if (token) {
+        CloseHandle(token);
+    }
+    return ret;
+}
+
 int MyWin::MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd) {
     int ret = (int) ShellExecute(
         hwnd,

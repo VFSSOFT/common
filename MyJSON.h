@@ -61,6 +61,7 @@ public:
   inline void MarkAsTrue() { m_BoolValue = 1; }
   inline void MarkAsFalse() { m_BoolValue = 0; }
   inline bool BoolValue() { return m_BoolValue != 0; }
+  inline UINT64 UIntValue() { return m_NumberValue->DerefAsInt64(); }
 
   int          ChildrenCount();
   MyJsonValue* ChildAt(int index);

@@ -47,7 +47,7 @@ int MyAsn1Node::InitInteger(INT64 v) {
     } else {
         if (v < 0x80) {
             m_Content.Reset();
-            m_Content.AppendChar(v);
+            m_Content.AppendChar((char)(v & 0xFF));
         } else {
             int pos = 8;
             while (v > 0) {
@@ -692,7 +692,7 @@ int MyAsn1Node::DecodeOtherConstructed(MyDataPacket* p) {
 int MyAsn1Node::DecodeIDLengthContent(MyDataPacket* p) {
     int err = 0;
     int b = 0;
-    UINT64 length = 0;
+    int length = 0;
     int startPos = p->ReadOffset();
 
     if (err = p->ReadInt8(&b)) return LastError(err, p->LastErrorMessage());
@@ -709,7 +709,7 @@ int MyAsn1Node::DecodeIDLengthContent(MyDataPacket* p) {
 
         char bytes[8];
         if (err = p->ReadBytes(bytesCnt, bytes)) return LastError(err, p->LastErrorMessage());
-        length = MyEncodings::BytesToIntBigEndian(bytes, bytesCnt);
+        length = (int)MyEncodings::BytesToIntBigEndian(bytes, bytesCnt);
     }
 
     if (err = m_Content.SetLength(length)) return err;

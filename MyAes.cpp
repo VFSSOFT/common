@@ -130,6 +130,8 @@ const EVP_CIPHER* MyAes::GetEvpCipherFromAlg(int alg) {
     case MY_AES_256_CBC_CTS_CS3:
         return EVP_CIPHER_fetch(NULL, "AES-256-CBC-CTS", NULL);
     }
+
+    return NULL;
 }
 void MyAes::Reset() {
     m_Result.Reset();

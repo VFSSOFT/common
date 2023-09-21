@@ -232,12 +232,12 @@ int MyStringW::Replace(const WCHAR* toReplace, const WCHAR* replaceWith) {
             memmove(p + replaceWithLen, p + toReplaceLen, (m_Length - (p - m_Buffer) - toReplaceLen) * sizeof(wchar_t));
             if (errCode = SetLength(m_Length - (toReplaceLen - replaceWithLen))) return errCode;
         } else {
-            int lenToMove = m_Length - (p - m_Buffer) - toReplaceLen;
+            int lenToMove = m_Length - (int)(p - m_Buffer) - toReplaceLen;
             if (errCode = SetLength(m_Length + (replaceWithLen - toReplaceLen))) return errCode;
             memmove(p + replaceWithLen, p + toReplaceLen, lenToMove * sizeof(wchar_t));
             memcpy(p, replaceWith, replaceWithLen * sizeof(wchar_t));
         }
-        index = (p - m_Buffer) + replaceWithLen;
+        index = (int)(p - m_Buffer) + replaceWithLen;
     }
     return 0;
 }

@@ -1,7 +1,7 @@
 #include "MyPBKDF.h"
 
 
-int MyPBKDF::PBKDF2(int hmacAlg, const char* pass, int passLen, const char* salt, int saltLen, INT64 iter, int keyLen, char* buf) {
+int MyPBKDF::PBKDF2(int hmacAlg, const char* pass, int passLen, const char* salt, int saltLen, int iter, int keyLen, char* buf) {
     int success = 0;
     switch (hmacAlg) {
     case MYHASH_ALG_MD4:

@@ -9,7 +9,7 @@
 
 class MyPBKDF {
 public:
-    static int PBKDF2(int hmacAlg, const char* pass, int passLen, const char* salt, int saltLen, INT64 iter, int keyLen, char* buf);
+    static int PBKDF2(int hmacAlg, const char* pass, int passLen, const char* salt, int saltLen, int iter, int keyLen, char* buf);
 };
 
 #endif // _MY_PBKDF_H_

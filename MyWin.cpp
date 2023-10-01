@@ -756,7 +756,22 @@ HRESULT MyWinReg::GetKeyValue(HKEY rootKey, LPCWSTR subKey, LPCWSTR valueName, M
 
 
 
+bool MySingleInstance::Open(const char* name) {
+    HANDLE mutex = CreateMutexA(NULL, FALSE, name);
+    assert(mutex != NULL);
 
+    if (::GetLastError() == ERROR_ALREADY_EXISTS) {
+        return FALSE;
+    }
+    m_Mutex = mutex;
+    return true;
+}
+void MySingleInstance::Close() {
+    if (m_Mutex) {
+        CloseHandle(m_Mutex);
+        m_Mutex = NULL;
+    }
+}
 
 #endif // _WIN32
 

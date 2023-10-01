@@ -126,6 +126,19 @@ private:
     MY_LAST_ERROR_DECL;
 };
 
+class MySingleInstance {
+public:
+    MySingleInstance(): m_Mutex(NULL) {}
+    ~MySingleInstance() { Close(); }
+
+    bool Open(const char* name);
+
+private:
+    void Close();
+
+private:
+    HANDLE m_Mutex;
+};
 
 #endif // _WIN32
 

@@ -37,6 +37,7 @@ public:
 
   static void LocalNow(MyDate& ret);
   static void UtcNow(MyDate& ret);
+  static UINT64 CurrentMillisecondsUTC();
 
   void Reset();
 

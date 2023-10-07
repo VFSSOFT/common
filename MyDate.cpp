@@ -188,6 +188,12 @@ void MyDate::UtcNow(MyDate& ret) {
 #endif
 }
 
+UINT64 MyDate::CurrentMillisecondsUTC() {
+    MyDate d;
+    UtcNow(d);
+    return d.MillisecondsFrom1970();
+}
+
 UINT64 MyDate::MillisecondsFrom1970() {
   UINT64 millis = 0;
   ToMillisecondsFrom1970(

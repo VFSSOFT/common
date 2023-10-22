@@ -64,6 +64,17 @@ int MyConfigBase::AddStringChild(MyJsonValue* jsonVal, const char* key, MyString
     if (err = retStr->SetUnicode(val->Deref(), val->Length())) return LastError(err, "Failed to add string child");
     return 0;
 }
+int MyConfigBase::AddStringChildEncrypted(MyJsonValue* jsonVal, const char* key, MyStringA* val, const char* encKey, const char* encIV) {
+    int err = 0;
+    MyStringA encrypted;
+    MyAes aes;
+    if (err = aes.Init(MY_AES_128_CBC, encKey, encIV, true, MY_PADDING_MODE_PKCS7)) return LastError(err, aes.LastErrorMessage());
+    if (err = aes.Update(val->Deref(), val->Length())) return LastError(err, aes.LastErrorMessage());
+    if (err = aes.Final()) return LastError(err, aes.LastErrorMessage());
+    if (err = MyEncodings::HexEncode(aes.Result()->Deref(), aes.Result()->Length(), &encrypted)) return err;
+
+    return AddStringChild(jsonVal, key, &encrypted);
+}
 int MyConfigBase::AddBoolChild(MyJsonValue* jsonVal, const char* key, bool val) {
     int err = 0;
     if (err = jsonVal->AddBoolChild(key, val)) return LastError(err, jsonVal->LastErrorMessage());
@@ -96,6 +107,22 @@ int MyConfigBase::ParseStringChild(MyJsonValue* jsonVal, MyStringW* val) {
     }
 
     val->SetUtf8(jsonVal->StringValue()->Deref(), jsonVal->StringValue()->Length());
+    return 0;
+}
+int MyConfigBase::ParseStringChildDecrypted(MyJsonValue* jsonVal, MyStringA* val, const char* decKey, const char* decIV) {
+    int err = 0;
+    MyBuffer todec;
+    MyAes aes;
+
+    if (err = ParseStringChild(jsonVal, val)) return err;
+    if (val->Length() == 0) return 0;
+
+    if (err = MyEncodings::HexDecode(val->Deref(), val->Length(), &todec)) return err;
+    if (err = aes.Init(MY_AES_128_CBC, decKey, decIV, false, MY_PADDING_MODE_PKCS7)) return LastError(err, aes.LastErrorMessage());
+    if (err = aes.Update(todec.Deref(), todec.Length())) return LastError(err, aes.LastErrorMessage());
+    if (err = aes.Final()) return LastError(err, aes.LastErrorMessage());
+
+    if (err = val->Set(aes.Result()->Deref(), aes.Result()->Length())) return err;
     return 0;
 }
 int MyConfigBase::ParseBoolChild(MyJsonValue* jsonVal, bool* val) {

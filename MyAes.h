@@ -88,7 +88,7 @@ public:
     MyAes();
     ~MyAes();
 
-    int Init(int alg, const char* key, const char* iv, bool enc, int paddingMode);
+    int Init(int alg, const char* key, const char* iv, bool enc, int paddingMode=MY_PADDING_MODE_NONE);
     int Update(const char* data, int dataLen);
     int Final();
     MyBuffer* Result() { return &m_Result; }

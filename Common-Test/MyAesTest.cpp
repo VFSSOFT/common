@@ -26,7 +26,7 @@ TEST(MyAesTest, Aes128CbcTest) {
     MyStringA hex;
 
     for (int i = 0; i < 4; i++) {
-        //err = aes.Init(MY_AES_128_CBC, TEST_AES_128_KEY, TEST_AES_128_IV, true);
+        err = aes.Init(MY_AES_128_CBC, TEST_AES_128_KEY, TEST_AES_128_IV, true);
         ASSERT_EQ(err, 0);
 
         err = aes.Update(TEST_AES_128_IN[i], strlen(TEST_AES_128_IN[i]));
@@ -41,7 +41,7 @@ TEST(MyAesTest, Aes128CbcTest) {
     }
 
     for (int i = 0; i < 4; i++) {
-        //err = aes.Init(MY_AES_128_CBC, TEST_AES_128_KEY, TEST_AES_128_IV, false);
+        err = aes.Init(MY_AES_128_CBC, TEST_AES_128_KEY, TEST_AES_128_IV, false);
         ASSERT_EQ(err, 0);
 
         MyBuffer cipher;

@@ -684,7 +684,7 @@ HRESULT MyWinReg::WalkSubKeys(HKEY rootKey, LPCWSTR subKey, void* context, HRESU
 
   subKeyName.SetLength(maxSubKeyNameSize + 1);
   for (DWORD i = 0; retCode == ERROR_SUCCESS; ++i) {
-    subKeyNameSize = maxSubKeyNameSize;
+    subKeyNameSize = subKeyName.Length();
     retCode = RegEnumKeyEx(hKey, i, subKeyName.Deref(), &subKeyNameSize, NULL, NULL, NULL, NULL);
     if (retCode == ERROR_SUCCESS) {
       // subKeyNameSize excludes the trailing \0

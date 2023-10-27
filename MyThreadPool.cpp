@@ -57,7 +57,7 @@ int MyThreadPool::Destroy() {
     m_PendingTasks.Reset(); // TODO: should we quit before processing pending tasks?
     for (int i = 0; i < m_Threads.Size(); i++) {
         MyThreadPoolItem* item = m_Threads.Get(i);
-        if (err = item->Abort(&m_Lock, 30 * 1000)) {
+        if (err = item->Abort(30 * 1000)) {
             return LastError(err, item->LastErrorMessage());
         }
     }

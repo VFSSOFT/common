@@ -38,7 +38,7 @@ public:
 
     int Start();
     virtual int Abort();
-    virtual int Abort(MyLock* l, int timeoutMS);
+    virtual int Abort(int timeoutMS);
     bool WaitForExit(int millis);
     virtual int Run() = 0;
 

@@ -52,6 +52,7 @@ public:
   BOOL StartWith(const char c);
   BOOL EndWith(const char c);
   bool Contains(const char* ptr, int len);
+  bool Contains(const char* ptr);
   bool Equals(const char* b, int bLen) { return Equals(Deref(), Length(), b, bLen); }
   static bool Equals(const char* b1, int b1Len, const char* b2, int b2Len);
 

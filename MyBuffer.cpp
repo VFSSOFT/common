@@ -254,6 +254,10 @@ void MyBuffer::Replace(const char toReplace, const char replaceWith) {
   }
 }
 
+bool MyBuffer::StartWith(const char* ptr) {
+    if (ptr == NULL) return false;
+    return StartWith(ptr, strlen(ptr));
+}
 BOOL MyBuffer::StartWith(const char* ptr, int len) {
   if (len < 0)
     return MY_ERR_INVALID_PARAMETERS;

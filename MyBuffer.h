@@ -47,6 +47,7 @@ public:
   int LastIndexOf(const char c, int startIndex, int endIndex);
   void Replace(const char toReplace, const char replaceWith);
 
+  bool StartWith(const char* ptr);
   BOOL StartWith(const char* ptr, int len);
   BOOL EndWith(const char* ptr, int len);
   BOOL StartWith(const char c);

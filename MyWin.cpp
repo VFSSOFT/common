@@ -181,6 +181,11 @@ bool MyWin::IsElevated() {
     return ret;
 }
 
+void MyWin::OpenExplorer(const wchar_t* path) {
+    ShellExecute(NULL, L"explore", path, NULL, NULL, SW_SHOWNORMAL);
+}
+
+
 int MyWin::MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd) {
     int ret = (int) ShellExecute(
         hwnd,
@@ -753,7 +758,6 @@ HRESULT MyWinReg::GetKeyValue(HKEY rootKey, LPCWSTR subKey, LPCWSTR valueName, M
     RegCloseKey(hKey);
     return result;
 }
-
 
 
 bool MySingleInstance::Open(const char* name) {

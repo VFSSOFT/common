@@ -72,6 +72,8 @@ public:
     static HRESULT RetrieveWindowsSid(MyStringW& sid);
 
     static bool IsElevated();
+
+    static void OpenExplorer(const wchar_t* path);
     
     static int MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd);
     static int MyShellExecuteEx(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd, INT timeoutMS);

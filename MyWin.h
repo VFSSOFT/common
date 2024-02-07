@@ -3,6 +3,7 @@
 
 #include "MyStringA.h"
 #include "MyStringW.h"
+#include "MyArray.h"
 
 #ifdef _WIN32
 
@@ -77,6 +78,8 @@ public:
     
     static int MyShellExecute(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd);
     static int MyShellExecuteEx(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR parameters, LPCWSTR directory, INT showCmd, INT timeoutMS);
+
+    static int MyShellGetCurrentExplorersFolders(MyArray<MyStringW>* dirs);
     
     static void MyGetSystemInfo(MySystemInfo* sysInfo);
     static void MyGetFileSystemName(const wchar_t* rootName, MyStringW* ret);

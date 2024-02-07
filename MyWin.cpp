@@ -8,6 +8,8 @@
 
 #include "sddl.h"
 #include "shlobj_core.h"
+#include "ShlObj.h"
+#include "ExDisp.h"
 
 bool MySystemInfo::IsServerOS() {
     return OSProductType != VER_NT_WORKSTATION;
@@ -232,6 +234,72 @@ int MyWin::MyShellExecuteEx(HWND hwnd, LPCWSTR op, LPCWSTR file, LPCWSTR paramet
     } else {
         return -1;
     }
+}
+
+int MyWin::MyShellGetCurrentExplorersFolders(MyArray<MyStringW>* dirs) {
+    // ref: https://stackoverflow.com/questions/43815932/how-to-get-the-path-of-an-active-file-explorer-window-in-c-winapi
+    // ref: https://devblogs.microsoft.com/oldnewthing/20040720-00/?p=38393
+
+    HRESULT res = S_OK;
+    IShellWindows* shellWindows = NULL;
+
+    res = CoCreateInstance(CLSID_ShellWindows, NULL, CLSCTX_ALL, IID_IShellWindows, (void**)&shellWindows);
+    if (res != S_OK) return res;
+
+    VARIANT v;
+    V_VT(&v) = VT_I4;
+    IDispatch* dispatch = NULL;
+    for (V_I4(&v) = 0; shellWindows->Item(v, &dispatch) == S_OK; V_I4(&v)++) {
+        IWebBrowserApp*   webBrowserApp   = NULL;
+        IServiceProvider* serviceProvider = NULL;
+        IShellBrowser*    shellBrowser    = NULL;
+        IShellView*       shellView       = NULL;
+        IFolderView*      folderView      = NULL;
+        IPersistFolder2*  persistFolder2  = NULL;
+        LPITEMIDLIST      pidlFolder      = NULL;
+        TCHAR             path[MAX_PATH];
+
+        res = dispatch->QueryInterface(IID_IWebBrowserApp, (void**)&webBrowserApp);
+        if (res != S_OK) goto iter_done;
+
+        // HWND hwndWBA = NULL;
+        // webBrowserApp->get_HWND((LONG_PTR*)&hwndWBA)
+        
+        res = webBrowserApp->QueryInterface(IID_IServiceProvider, (void**)&serviceProvider);
+        if (res != S_OK) goto iter_done;
+
+        res = serviceProvider->QueryService(SID_STopLevelBrowser, IID_IShellBrowser, (void**)&shellBrowser);
+        if (res != S_OK) goto iter_done;
+
+        res = shellBrowser->QueryActiveShellView(&shellView);
+        if (res != S_OK) goto iter_done;
+
+        res = shellView->QueryInterface(IID_IFolderView, (void**)&folderView);
+        if (res != S_OK) goto iter_done;
+
+        res = folderView->GetFolder(IID_IPersistFolder2, (void**)&persistFolder2);
+        if (res != S_OK) goto iter_done;
+
+        res = persistFolder2->GetCurFolder(&pidlFolder);
+        if (res != S_OK) goto iter_done;
+
+        if (SHGetPathFromIDList(pidlFolder, path)) {
+            dirs->AddNew()->Set(path);
+        }
+
+    iter_done:
+        if (pidlFolder)      CoTaskMemFree(pidlFolder);
+        if (persistFolder2)  persistFolder2->Release();
+        if (folderView)      folderView->Release();
+        if (shellView)       shellView->Release();
+        if (shellBrowser)    shellBrowser->Release();
+        if (serviceProvider) serviceProvider->Release();
+        if (webBrowserApp)   webBrowserApp->Release();
+        if (dispatch)        dispatch->Release();
+    }
+
+    shellWindows->Release();
+    return 0;
 }
 
 void MyWin::MyGetSystemInfo(MySystemInfo* sysInfo) {

@@ -42,7 +42,7 @@ int MyNamedPipeServer::Init() {
             NULL // Use defualt security attributes
         );
         if (pipeHandle == NULL || pipeHandle == INVALID_HANDLE_VALUE) {
-            return HandleWinError();
+            return LastWinError();
         }
 
         if (ret = MyCreateEvent(&m_Events[2*i])) return ret;
@@ -81,7 +81,7 @@ int MyNamedPipeServer::DoEvents() {
     } else if (waitRet >= WAIT_OBJECT_0 && waitRet < WAIT_OBJECT_0 + eventsCount) {
         // continue
     } else {
-        return HandleWinError();
+        return LastWinError();
     }
 
     idx = waitRet - WAIT_OBJECT_0;
@@ -164,18 +164,18 @@ int MyNamedPipeServer::MyCreateEvent(HANDLE* evt) {
         NULL     // unnamed event object 
     );
     if (*evt == NULL) {
-        return HandleWinError();
+        return LastWinError();
     }
     return 0;
 }
 int MyNamedPipeServer::MyConnectNamedPipe(MyNamedPipeOpCtx* ctx) {
     if (ConnectNamedPipe(ctx->PipeHandle, &ctx->ReadOverlapped) == 0) {
         if (GetLastError() != ERROR_IO_PENDING) {
-            return HandleWinError();
+            return LastWinError();
         }
         return 0;
     } else {
-        return HandleWinError();
+        return LastWinError();
     }
 }
 int MyNamedPipeServer::MyReconnect(MyNamedPipeOpCtx* ctx) {
@@ -196,7 +196,7 @@ int MyNamedPipeServer::MyRead(MyNamedPipeOpCtx* ctx) {
 
     if (ReadFile(ctx->PipeHandle, ctx->ReadBuf, MY_PIPE_READ_BUF_SIZE, NULL, &ctx->ReadOverlapped) == 0) {
         if (GetLastError() != ERROR_IO_PENDING) {
-            return HandleWinError();
+            return LastWinError();
         }
     }
     return 0;
@@ -209,17 +209,12 @@ int MyNamedPipeServer::MyWrite(MyNamedPipeOpCtx* ctx) {
 
     if (WriteFile(ctx->PipeHandle, ctx->WriteBuf.DerefConst(), ctx->WriteBuf.Length(), NULL, &ctx->WriteOverlapped) == 0) {
         if (GetLastError() != ERROR_IO_PENDING) {
-            return HandleWinError();
+            return LastWinError();
         }
     }
     return 0;
 }
 
-int MyNamedPipeServer::HandleWinError() {
-    m_LastErrorCode = MyWin::GetSysLastErrorCode();
-    MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
-    return m_LastErrorCode;
-}
 
 
 

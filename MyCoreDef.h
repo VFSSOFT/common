@@ -99,6 +99,16 @@
     m_LastErrorMessage.Reset();  \
                                  \
 
+#define MY_LAST_WIN_ERROR_DECL                                               \
+private:                                                                     \
+    int LastWinError() {                                                     \
+        m_LastErrorCode = MyWin::GetSysLastErrorCode();                      \
+        MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode); \
+        return m_LastErrorCode;                                              \
+    }                                                                        \
+                                                                             \
+
+
 
 #define MY_ERR_BASE                   0x08000000
 #define MY_ERR_OUT_OF_MEMORY          (MY_ERR_BASE + 1)

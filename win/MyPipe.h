@@ -93,8 +93,6 @@ private:
     int MyRead(MyNamedPipeOpCtx* ctx);
     int MyWrite(MyNamedPipeOpCtx* ctx);
 
-    int HandleWinError();
-
 private:
     MyStringW m_Name;
     DWORD     m_OpenMode;
@@ -108,6 +106,7 @@ private:
     MyNamedPipeEventHandler* m_EventHandler;
     
     MY_LAST_ERROR_DECL;
+    MY_LAST_WIN_ERROR_DECL;
 };
 
 

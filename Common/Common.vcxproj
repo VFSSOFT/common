@@ -177,6 +177,7 @@
     <ClInclude Include="..\MyWin.h" />
     <ClInclude Include="..\MyWinService.h" />
     <ClInclude Include="..\MyWStrValHashMap.h" />
+    <ClInclude Include="..\win\MyPipe.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\MyAes.cpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="..\MyThreadPool.cpp" />
     <ClCompile Include="..\MyWin.cpp" />
     <ClCompile Include="..\MyWinService.cpp" />
+    <ClCompile Include="..\win\MyPipe.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

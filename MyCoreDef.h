@@ -100,7 +100,7 @@
                                  \
 
 #define MY_LAST_WIN_ERROR_DECL                                               \
-private:                                                                     \
+protected:                                                                     \
     int LastWinError() {                                                     \
         m_LastErrorCode = MyWin::GetSysLastErrorCode();                      \
         MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode); \

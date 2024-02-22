@@ -61,10 +61,10 @@ public:
     bool       Connected; // we're connecting in async mode
 };
 
-class MyNamedPipeServer {
+class MyNamedPipeBase {
 public:
-    MyNamedPipeServer(MyNamedPipeEventHandler* eventHandler);
-    virtual ~MyNamedPipeServer();
+    MyNamedPipeBase(MyNamedPipeEventHandler* eventHandler);
+    virtual ~MyNamedPipeBase();
 
     MyStringW* Name() { return &m_Name; }
     void SetName(const wchar_t* name) { m_Name.Set(name); }
@@ -74,6 +74,30 @@ public:
 
     DWORD PipeMode() { return m_PipeMode; }
     void SetPipeMode(DWORD val) { m_PipeMode = val; }
+
+protected:
+    int BuildPipeName(MyStringW* qualifiedName);
+    int MyCreateEvent(HANDLE* evt);
+    int MyConnectNamedPipe(MyNamedPipeOpCtx* ctx);
+    int MyReconnect(MyNamedPipeOpCtx* ctx);
+    int MyRead(MyNamedPipeOpCtx* ctx);
+    int MyWrite(MyNamedPipeOpCtx* ctx);
+
+protected:
+    MyStringW m_Name;
+    DWORD     m_OpenMode;
+    DWORD     m_PipeMode;
+
+    MyNamedPipeEventHandler* m_EventHandler;
+    
+    MY_LAST_ERROR_DECL;
+    MY_LAST_WIN_ERROR_DECL;
+};
+
+class MyNamedPipeServer: public MyNamedPipeBase {
+public:
+    MyNamedPipeServer(MyNamedPipeEventHandler* eventHandler);
+    virtual ~MyNamedPipeServer();
 
     int MaxInstances() { return m_MaxInstances; }
     void SetMaxInstances(int val) { m_MaxInstances = val; }
@@ -86,27 +110,13 @@ public:
     int Write(void* pipe, const char* data, int lenData);
     void Reset();
 
-private:
-    int MyCreateEvent(HANDLE* evt);
-    int MyConnectNamedPipe(MyNamedPipeOpCtx* ctx);
-    int MyReconnect(MyNamedPipeOpCtx* ctx);
-    int MyRead(MyNamedPipeOpCtx* ctx);
-    int MyWrite(MyNamedPipeOpCtx* ctx);
 
 private:
-    MyStringW m_Name;
-    DWORD     m_OpenMode;
-    DWORD     m_PipeMode;
     int       m_MaxInstances;
     int       m_DefaultTimeout;
 
     MyNamedPipeOpCtx* m_Ctxs;
     HANDLE*           m_Events;
-
-    MyNamedPipeEventHandler* m_EventHandler;
-    
-    MY_LAST_ERROR_DECL;
-    MY_LAST_WIN_ERROR_DECL;
 };
 
 

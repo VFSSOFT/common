@@ -33,27 +33,7 @@ int MyNamedPipeBase::MyCreateEvent(HANDLE* evt) {
     }
     return 0;
 }
-int MyNamedPipeBase::MyConnectNamedPipe(MyNamedPipeOpCtx* ctx) {
-    if (ConnectNamedPipe(ctx->PipeHandle, &ctx->ReadOverlapped) == 0) {
-        if (GetLastError() != ERROR_IO_PENDING) {
-            return LastWinError();
-        }
-        return 0;
-    } else {
-        return LastWinError();
-    }
-}
-int MyNamedPipeBase::MyReconnect(MyNamedPipeOpCtx* ctx) {
-    int ret = 0;
-    ctx->Connected = false;
-    DisconnectNamedPipe(ctx->PipeHandle);
 
-    if (m_EventHandler) {
-        if (ret = m_EventHandler->OnDisconnected(ctx)) return ret;
-    }
-
-    return MyConnectNamedPipe(ctx);
-}
 int MyNamedPipeBase::MyRead(MyNamedPipeOpCtx* ctx) {
     HANDLE evt = ctx->ReadOverlapped.hEvent;
     ZeroMemory(&ctx->ReadOverlapped, sizeof(OVERLAPPED));
@@ -79,6 +59,20 @@ int MyNamedPipeBase::MyWrite(MyNamedPipeOpCtx* ctx) {
         }
     }
     return 0;
+}
+int MyNamedPipeBase::MyWaitEvents(HANDLE* events, int eventsCount, int timeoutMS, int* retIndex) {
+    *retIndex = -1;
+    DWORD waitRet = WaitForMultipleObjects(eventsCount, events, FALSE, timeoutMS);
+    if (waitRet == WAIT_TIMEOUT) {
+        return 0; // NO pipe events is ready
+    } else if (waitRet >= WAIT_ABANDONED_0 && waitRet < WAIT_ABANDONED_0 + eventsCount) {
+        return 0;
+    } else if (waitRet >= WAIT_OBJECT_0 && waitRet < WAIT_OBJECT_0 + eventsCount) {
+        *retIndex = waitRet - WAIT_OBJECT_0;
+        return 0;
+    } else {
+        return LastWinError();
+    }
 }
 
 
@@ -141,24 +135,14 @@ int MyNamedPipeServer::Init() {
 
 int MyNamedPipeServer::DoEvents() {
     int ret = 0;
-    DWORD waitRet = 0;
     DWORD bytesTransferred = 0;
     int idx = 0;
     int eventsCount = 2 * m_MaxInstances;
     MyNamedPipeOpCtx ctx;
     
-    waitRet = WaitForMultipleObjects(eventsCount, m_Events, FALSE, 0);
-    if (waitRet == WAIT_TIMEOUT) {
-        return 0; // NO pipe events is ready
-    } else if (waitRet >= WAIT_ABANDONED_0 && waitRet < WAIT_ABANDONED_0 + eventsCount) {
-        return 0;
-    } else if (waitRet >= WAIT_OBJECT_0 && waitRet < WAIT_OBJECT_0 + eventsCount) {
-        // continue
-    } else {
-        return LastWinError();
-    }
+    if (ret = MyWaitEvents(m_Events, eventsCount, 0, &idx)) return ret;
+    if (idx < 0) return 0; // no events signalled
 
-    idx = waitRet - WAIT_OBJECT_0;
     ctx = m_Ctxs[idx/2];
 
     if (idx % 2 == 0) { // ReadOverlapped
@@ -214,15 +198,155 @@ void MyNamedPipeServer::Reset() {
 
         delete [] m_Ctxs;
     }
+    delete [] m_Events;
 
     m_Ctxs = NULL;
     m_Events = NULL; 
 
     // reinitialize default values
     m_OpenMode = MY_PIPE_ACCESS_DUPLEX | MY_PIPE_FILE_FLAG_OVERLAPPED;
-    m_PipeMode = MY_PIPE_TYPE_MESSAGE | MY_PIPE_READMODE_MESSAGE | MY_PIPE_WAIT,
+    m_PipeMode = MY_PIPE_TYPE_MESSAGE | MY_PIPE_READMODE_MESSAGE | MY_PIPE_WAIT;
     m_MaxInstances = 1;
     m_DefaultTimeout = NMPWAIT_USE_DEFAULT_WAIT;
+}
+
+int MyNamedPipeServer::MyConnectNamedPipe(MyNamedPipeOpCtx* ctx) {
+    if (ConnectNamedPipe(ctx->PipeHandle, &ctx->ReadOverlapped) == 0) {
+        if (GetLastError() != ERROR_IO_PENDING) {
+            return LastWinError();
+        }
+        return 0;
+    } else {
+        return LastWinError();
+    }
+}
+int MyNamedPipeServer::MyReconnect(MyNamedPipeOpCtx* ctx) {
+    int ret = 0;
+    ctx->Connected = false;
+    DisconnectNamedPipe(ctx->PipeHandle);
+
+    if (m_EventHandler) {
+        if (ret = m_EventHandler->OnDisconnected(ctx)) return ret;
+    }
+
+    return MyConnectNamedPipe(ctx);
+}
+
+
+
+MyNamedPipeClient::MyNamedPipeClient(MyNamedPipeEventHandler* eventHandler):
+    MyNamedPipeBase(eventHandler)
+{
+    m_Events[0] = NULL;
+    m_Events[1] = NULL;
+}
+MyNamedPipeClient::~MyNamedPipeClient() {
+    Reset();
+}
+
+int MyNamedPipeClient::Connect() {
+    int ret = 0;
+    MyStringW pipeName;
+
+    if (ret = BuildPipeName(&pipeName)) return ret;
+
+    HANDLE pipeHandle = CreateFile(
+        pipeName.Deref(),
+        GENERIC_READ | GENERIC_WRITE,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        0,
+        NULL
+    );
+    if (pipeHandle == NULL || pipeHandle == INVALID_HANDLE_VALUE) {
+        return LastWinError();
+    }
+
+    if (ret = MyCreateEvent(&m_Events[0])) return ret;
+    if (ret = MyCreateEvent(&m_Events[1])) return ret;
+
+    m_Ctx.PipeHandle = pipeHandle;
+    ZeroMemory(&m_Ctx.ReadOverlapped, sizeof(OVERLAPPED));
+    ZeroMemory(&m_Ctx.WriteOverlapped, sizeof(OVERLAPPED));
+    m_Ctx.ReadOverlapped.hEvent = m_Events[0];
+    m_Ctx.WriteOverlapped.hEvent = m_Events[1];
+
+    m_Ctx.ReadBuf = new char[MY_PIPE_READ_BUF_SIZE];
+    m_Ctx.WriteBuf.Reset();
+    m_Ctx.Connected = false;
+
+    if (!SetNamedPipeHandleState(
+        pipeHandle,
+        &m_PipeMode,
+        NULL,
+        NULL
+    )) {
+        return LastWinError();
+    }
+
+    return 0;
+}
+
+int MyNamedPipeClient::Disconnect() {
+    if (m_Ctx.Connected) {
+        CloseHandle(m_Ctx.PipeHandle);
+    }
+    m_Ctx.PipeHandle = NULL;
+    m_Ctx.Connected = false;
+    return 0;
+}
+
+int MyNamedPipeClient::DoEvents(int timeoutMS) {
+    int ret = 0;
+    DWORD bytesTransferred = 0;
+    int idx = 0;
+    
+    if (ret = MyWaitEvents(m_Events, 2, timeoutMS, &idx)) return ret;
+    if (idx < 0) return 0; // no events signalled
+
+    if (idx % 2 == 0) { // ReadOverlapped
+        if (GetOverlappedResult(m_Ctx.PipeHandle, &m_Ctx.ReadOverlapped, &bytesTransferred, FALSE) == 0) {
+            //if (ret = MyReconnect(&ctx)) return ret;
+        } else {
+            if (m_EventHandler) {
+                if (ret = m_EventHandler->OnDataIn(&m_Ctx, m_Ctx.ReadBuf, bytesTransferred)) return ret;
+            }
+            if (ret = MyRead(&m_Ctx)) return ret;
+        }
+
+    } else { // WriteOverlapped
+        if (GetOverlappedResult(m_Ctx.PipeHandle, &m_Ctx.WriteOverlapped, &bytesTransferred, FALSE) == 0) {
+            //if (ret = MyReconnect(&ctx)) return ret;
+        } else {
+            if (m_EventHandler) {
+                if (ret = m_EventHandler->OnDataOut(&m_Ctx, m_Ctx.WriteBuf.DerefConst(), bytesTransferred, bytesTransferred == m_Ctx.WriteBuf.Length())) return ret;
+                m_Ctx.WriteBuf.Delete(0, bytesTransferred);
+            }
+        }
+    }
+
+    return 0;
+}
+
+int MyNamedPipeClient::Write(const char* data, int lenData) {
+    if (!m_Ctx.Connected) return LastError(MY_ERR_INVALID_OPERATION, "Pipe is not connected yet");
+    if (m_Ctx.WriteBuf.Length() > 0) return LastError(MY_ERR_INVALID_OPERATION, "Previous write operation is not done yet");
+    
+    m_Ctx.WriteBuf.Set(data, lenData);
+    return MyWrite(&m_Ctx);
+}
+
+void MyNamedPipeClient::Reset() {
+    Disconnect();
+
+    if (m_Ctx.ReadOverlapped.hEvent) CloseHandle(m_Ctx.ReadOverlapped.hEvent);
+    if (m_Ctx.WriteOverlapped.hEvent) CloseHandle(m_Ctx.WriteOverlapped.hEvent);
+    if (m_Ctx.ReadBuf) delete [] m_Ctx.ReadBuf;
+
+    // reinitialize default values
+    m_OpenMode = MY_PIPE_ACCESS_DUPLEX | MY_PIPE_FILE_FLAG_OVERLAPPED;
+    m_PipeMode = MY_PIPE_TYPE_MESSAGE | MY_PIPE_READMODE_MESSAGE | MY_PIPE_WAIT;
 }
 
 

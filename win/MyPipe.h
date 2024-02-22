@@ -69,19 +69,16 @@ public:
     MyStringW* Name() { return &m_Name; }
     void SetName(const wchar_t* name) { m_Name.Set(name); }
 
-    DWORD OpenMode() { return m_OpenMode; }
-    void SetOpenMode(DWORD mode) { m_OpenMode = mode; }
-
     DWORD PipeMode() { return m_PipeMode; }
     void SetPipeMode(DWORD val) { m_PipeMode = val; }
 
 protected:
     int BuildPipeName(MyStringW* qualifiedName);
     int MyCreateEvent(HANDLE* evt);
-    int MyConnectNamedPipe(MyNamedPipeOpCtx* ctx);
-    int MyReconnect(MyNamedPipeOpCtx* ctx);
     int MyRead(MyNamedPipeOpCtx* ctx);
     int MyWrite(MyNamedPipeOpCtx* ctx);
+
+    int MyWaitEvents(HANDLE* events, int eventCount, int timeoutMS, int* retIndex);
 
 protected:
     MyStringW m_Name;
@@ -99,6 +96,9 @@ public:
     MyNamedPipeServer(MyNamedPipeEventHandler* eventHandler);
     virtual ~MyNamedPipeServer();
 
+    DWORD OpenMode() { return m_OpenMode; }
+    void SetOpenMode(DWORD mode) { m_OpenMode = mode; }
+
     int MaxInstances() { return m_MaxInstances; }
     void SetMaxInstances(int val) { m_MaxInstances = val; }
 
@@ -110,6 +110,9 @@ public:
     int Write(void* pipe, const char* data, int lenData);
     void Reset();
 
+private:
+    int MyConnectNamedPipe(MyNamedPipeOpCtx* ctx);
+    int MyReconnect(MyNamedPipeOpCtx* ctx);
 
 private:
     int       m_MaxInstances;
@@ -117,6 +120,22 @@ private:
 
     MyNamedPipeOpCtx* m_Ctxs;
     HANDLE*           m_Events;
+};
+
+class MyNamedPipeClient : public MyNamedPipeBase {
+public:
+    MyNamedPipeClient(MyNamedPipeEventHandler* eventHandler);
+    virtual ~MyNamedPipeClient();
+
+    int Connect();
+    int Disconnect();
+    int DoEvents(int timeoutMS);
+    int Write(const char* data, int lenData);
+    void Reset();
+
+private:
+    MyNamedPipeOpCtx m_Ctx;
+    HANDLE           m_Events[2];
 };
 
 

@@ -116,7 +116,7 @@ int MyNamedPipeServer::Init() {
         if (ret = MyCreateEvent(&m_Events[2*i])) return ret;
         if (ret = MyCreateEvent(&m_Events[2*i+1])) return ret;
 
-        MyNamedPipeOpCtx ctx = m_Ctxs[i];
+        MyNamedPipeOpCtx& ctx = m_Ctxs[i];
         ctx.PipeHandle = pipeHandle;
         ZeroMemory(&ctx.ReadOverlapped, sizeof(OVERLAPPED));
         ZeroMemory(&ctx.WriteOverlapped, sizeof(OVERLAPPED));
@@ -133,17 +133,16 @@ int MyNamedPipeServer::Init() {
     return 0;
 }
 
-int MyNamedPipeServer::DoEvents() {
+int MyNamedPipeServer::DoEvents(int timeoutMS) {
     int ret = 0;
     DWORD bytesTransferred = 0;
     int idx = 0;
     int eventsCount = 2 * m_MaxInstances;
-    MyNamedPipeOpCtx ctx;
     
-    if (ret = MyWaitEvents(m_Events, eventsCount, 0, &idx)) return ret;
+    if (ret = MyWaitEvents(m_Events, eventsCount, timeoutMS, &idx)) return ret;
     if (idx < 0) return 0; // no events signalled
 
-    ctx = m_Ctxs[idx/2];
+    MyNamedPipeOpCtx& ctx = m_Ctxs[idx/2];
 
     if (idx % 2 == 0) { // ReadOverlapped
         if (GetOverlappedResult(ctx.PipeHandle, &ctx.ReadOverlapped, &bytesTransferred, FALSE) == 0) {
@@ -188,7 +187,7 @@ int MyNamedPipeServer::Write(void* pipe, const char* data, int lenData) {
 void MyNamedPipeServer::Reset() {
     if (m_Ctxs) {
         for (int i = 0; i < m_MaxInstances; i++) {
-            MyNamedPipeOpCtx ctx = m_Ctxs[i];
+            MyNamedPipeOpCtx& ctx = m_Ctxs[i];
             if (ctx.Connected) DisconnectNamedPipe(m_Ctxs[i].PipeHandle);
             
             if (ctx.ReadOverlapped.hEvent) CloseHandle(ctx.ReadOverlapped.hEvent);
@@ -237,6 +236,7 @@ int MyNamedPipeServer::MyReconnect(MyNamedPipeOpCtx* ctx) {
 MyNamedPipeClient::MyNamedPipeClient(MyNamedPipeEventHandler* eventHandler):
     MyNamedPipeBase(eventHandler)
 {
+    m_PipeMode = MY_PIPE_READMODE_MESSAGE | MY_PIPE_WAIT;
     m_Events[0] = NULL;
     m_Events[1] = NULL;
 }

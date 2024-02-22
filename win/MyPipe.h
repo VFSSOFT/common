@@ -59,6 +59,8 @@ public:
     char*      ReadBuf;
     MyBuffer   WriteBuf;
     bool       Connected; // we're connecting in async mode
+
+    MyNamedPipeOpCtx() : PipeHandle(NULL), ReadBuf(NULL), Connected(false) {}
 };
 
 class MyNamedPipeBase {
@@ -106,7 +108,7 @@ public:
     void SetDefaultTimeout(int val) { m_DefaultTimeout = val; }
 
     int Init();
-    int DoEvents();
+    int DoEvents(int timeoutMS);
     int Write(void* pipe, const char* data, int lenData);
     void Reset();
 

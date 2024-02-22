@@ -53,6 +53,7 @@
     <ClCompile Include="MyHashTest.cpp" />
     <ClCompile Include="MyHmacTest.cpp" />
     <ClCompile Include="MyJsonTest.cpp" />
+    <ClCompile Include="MyNamedPipeTest.cpp" />
     <ClCompile Include="MySqliteTest.cpp" />
     <ClCompile Include="MyStackTest.cpp" />
     <ClCompile Include="MyStringWTest.cpp" />

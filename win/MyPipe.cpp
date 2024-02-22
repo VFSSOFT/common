@@ -285,6 +285,11 @@ int MyNamedPipeClient::Connect() {
         return LastWinError();
     }
 
+    if (m_EventHandler) {
+        m_EventHandler->OnConnected(&m_Ctx);
+    }
+    m_Ctx.Connected = true;
+
     return 0;
 }
 
@@ -294,6 +299,11 @@ int MyNamedPipeClient::Disconnect() {
     }
     m_Ctx.PipeHandle = NULL;
     m_Ctx.Connected = false;
+
+    if (m_EventHandler) {
+        m_EventHandler->OnDisconnected(&m_Ctx);
+    }
+
     return 0;
 }
 

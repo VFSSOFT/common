@@ -273,7 +273,7 @@ int MyNamedPipeClient::Connect() {
         0,
         NULL,
         OPEN_EXISTING,
-        0,
+        FILE_FLAG_OVERLAPPED,
         NULL
     );
     if (pipeHandle == NULL || pipeHandle == INVALID_HANDLE_VALUE) {
@@ -306,6 +306,8 @@ int MyNamedPipeClient::Connect() {
         m_EventHandler->OnConnected(&m_Ctx);
     }
     m_Ctx.Connected = true;
+
+    if (ret = MyRead(&m_Ctx)) return ret;
 
     return 0;
 }

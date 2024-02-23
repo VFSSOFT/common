@@ -8,6 +8,8 @@ public:
 
     int Connected;
     int Disconnected;
+    MyArray<MyBuffer> DataIn;
+    MyArray<MyBuffer> DataOut;
 
     virtual int OnConnected(MyNamedPipeOpCtx* pipeCtx) { 
         Connected++;
@@ -19,8 +21,15 @@ public:
         return 0;
     }
 
-    virtual int OnDataIn(MyNamedPipeOpCtx* pipeCtx, const char* data, int lenData) { return 0; }
-    virtual int OnDataOut(MyNamedPipeOpCtx* pipeCtx, const char* data, int lenData, bool writeDone) { return 0; }
+    virtual int OnDataIn(MyNamedPipeOpCtx* pipeCtx, const char* data, int lenData) { 
+        DataIn.AddNew()->Set(data, lenData);
+        return 0;
+    }
+
+    virtual int OnDataOut(MyNamedPipeOpCtx* pipeCtx, const char* data, int lenData, bool writeDone) {
+        DataOut.AddNew()->Set(data, lenData);
+        return 0;
+    }
 };
 
 TEST(MyPipeTest, ConnectToNotExistedPipeTest) {
@@ -172,3 +181,114 @@ TEST(MyPipeTest, ServerDisconnectTest) {
     ASSERT_EQ(pipes->Size(), 0);
 }
 
+TEST(MyPipeTest, ServerSendDataTest) {
+    int ret = 0;
+    TestPipeEventHandler clientEvtHandler;
+    TestPipeEventHandler serverEvtHandler;
+    MyNamedPipeClient client(&clientEvtHandler);
+    MyNamedPipeServer server(&serverEvtHandler);
+
+    client.SetName(L"pipename");
+    server.SetName(L"pipename");
+
+    ret = server.Init();
+    ASSERT_EQ(ret, 0);
+
+    ret = client.Connect();
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    MyValArray<void*>* pipes = server.Pipes();
+    ASSERT_EQ(pipes->Size(), 1);
+
+    const char* hello = "hello world";
+    ret = server.Write(pipes->Get(0), hello, strlen(hello));
+    ASSERT_EQ(pipes->Size(), 1);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ret = client.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ASSERT_EQ(clientEvtHandler.DataIn.Size(), 1);
+    ASSERT_STREQ(clientEvtHandler.DataIn.Get(0)->Deref(), hello);
+}
+
+TEST(MyPipeTest, ClientSendDataTest) {
+    int ret = 0;
+    TestPipeEventHandler clientEvtHandler;
+    TestPipeEventHandler serverEvtHandler;
+    MyNamedPipeClient client(&clientEvtHandler);
+    MyNamedPipeServer server(&serverEvtHandler);
+
+    client.SetName(L"pipename");
+    server.SetName(L"pipename");
+
+    ret = server.Init();
+    ASSERT_EQ(ret, 0);
+
+    ret = client.Connect();
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    const char* hello = "hello world";
+    ret = client.Write(hello, strlen(hello));
+    ASSERT_EQ(ret, 0);
+
+    ret = client.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ASSERT_EQ(serverEvtHandler.DataIn.Size(), 1);
+    ASSERT_STREQ(serverEvtHandler.DataIn.Get(0)->Deref(), hello);
+}
+
+TEST(MyPipeTest, EchoServerTest) {
+    int ret = 0;
+    TestPipeEventHandler clientEvtHandler;
+    TestPipeEventHandler serverEvtHandler;
+    MyNamedPipeClient client(&clientEvtHandler);
+    MyNamedPipeServer server(&serverEvtHandler);
+
+    client.SetName(L"pipename");
+    server.SetName(L"pipename");
+
+    ret = server.Init();
+    ASSERT_EQ(ret, 0);
+
+    ret = client.Connect();
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    const char* hello = "hello world";
+    ret = client.Write(hello, strlen(hello));
+    ASSERT_EQ(ret, 0);
+
+    ret = client.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ASSERT_EQ(serverEvtHandler.DataIn.Size(), 1);
+    ASSERT_STREQ(serverEvtHandler.DataIn.Get(0)->Deref(), hello);
+
+    MyValArray<void*>* pipes = server.Pipes();
+    ret = server.Write(pipes->Get(0), hello, strlen(hello));
+    ASSERT_EQ(ret, 0);
+
+    ret = client.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ASSERT_EQ(clientEvtHandler.DataIn.Size(), 1);
+    ASSERT_STREQ(clientEvtHandler.DataIn.Get(0)->Deref(), hello);
+}

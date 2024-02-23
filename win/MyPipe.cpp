@@ -90,6 +90,16 @@ MyNamedPipeServer::~MyNamedPipeServer() {
     Reset();
 }
 
+MyValArray<void*>* MyNamedPipeServer::Pipes() {
+    m_ConnectedPipes.Reset();
+    for (int i = 0; i < m_MaxInstances; i++) {
+        if (m_Ctxs[i].Connected) {
+            m_ConnectedPipes.Add(&m_Ctxs[i]);
+        }
+    }
+    return &m_ConnectedPipes;
+}
+
 int MyNamedPipeServer::Init() {
     int ret = 0;
     MyStringW pipeName;
@@ -146,7 +156,7 @@ int MyNamedPipeServer::DoEvents(int timeoutMS) {
 
     if (idx % 2 == 0) { // ReadOverlapped
         if (GetOverlappedResult(ctx.PipeHandle, &ctx.ReadOverlapped, &bytesTransferred, FALSE) == 0) {
-            if (ret = MyReconnect(&ctx)) return ret;
+            if (ret = Disconnect(&ctx)) return ret;
         } else {
             if (!ctx.Connected) { // we're just connected
                 ctx.Connected = true; 
@@ -163,7 +173,7 @@ int MyNamedPipeServer::DoEvents(int timeoutMS) {
 
     } else { // WriteOverlapped
         if (GetOverlappedResult(ctx.PipeHandle, &ctx.WriteOverlapped, &bytesTransferred, FALSE) == 0) {
-            if (ret = MyReconnect(&ctx)) return ret;
+            if (ret = Disconnect(&ctx)) return ret;
         } else {
             if (m_EventHandler) {
                 if (ret = m_EventHandler->OnDataOut(&ctx, ctx.WriteBuf.DerefConst(), bytesTransferred, bytesTransferred == ctx.WriteBuf.Length())) return ret;
@@ -184,11 +194,29 @@ int MyNamedPipeServer::Write(void* pipe, const char* data, int lenData) {
     return MyWrite(ctx);
 }
 
+int MyNamedPipeServer::Disconnect(void* pipe) {
+    int ret = 0;
+    MyNamedPipeOpCtx* ctx = (MyNamedPipeOpCtx*)pipe;
+
+    if (ctx->Connected) {
+        ctx->Connected = false;
+        DisconnectNamedPipe(ctx->PipeHandle);
+
+        if (m_EventHandler) {
+            if (ret = m_EventHandler->OnDisconnected(ctx)) return ret;
+        }
+
+        return MyConnectNamedPipe(ctx);
+    }
+    return 0;
+}
+
 void MyNamedPipeServer::Reset() {
     if (m_Ctxs) {
         for (int i = 0; i < m_MaxInstances; i++) {
             MyNamedPipeOpCtx& ctx = m_Ctxs[i];
-            if (ctx.Connected) DisconnectNamedPipe(m_Ctxs[i].PipeHandle);
+            /*if (ctx.Connected)*/DisconnectNamedPipe(m_Ctxs[i].PipeHandle);
+            CloseHandle(m_Ctxs[i].PipeHandle);
             
             if (ctx.ReadOverlapped.hEvent) CloseHandle(ctx.ReadOverlapped.hEvent);
             if (ctx.WriteOverlapped.hEvent) CloseHandle(ctx.WriteOverlapped.hEvent);
@@ -218,17 +246,6 @@ int MyNamedPipeServer::MyConnectNamedPipe(MyNamedPipeOpCtx* ctx) {
     } else {
         return LastWinError();
     }
-}
-int MyNamedPipeServer::MyReconnect(MyNamedPipeOpCtx* ctx) {
-    int ret = 0;
-    ctx->Connected = false;
-    DisconnectNamedPipe(ctx->PipeHandle);
-
-    if (m_EventHandler) {
-        if (ret = m_EventHandler->OnDisconnected(ctx)) return ret;
-    }
-
-    return MyConnectNamedPipe(ctx);
 }
 
 

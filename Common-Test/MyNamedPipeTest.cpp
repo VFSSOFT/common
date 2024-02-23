@@ -100,3 +100,75 @@ TEST(MyPipeTest, ClientConnectTest) {
     ASSERT_EQ(serverEvtHandler.Connected, 1);
     ASSERT_EQ(serverEvtHandler.Disconnected, 1);
 }
+
+TEST(MyPipeTest, ClientDisconnectTest) {
+    int ret = 0;
+    TestPipeEventHandler clientEvtHandler;
+    TestPipeEventHandler serverEvtHandler;
+    MyNamedPipeClient client(&clientEvtHandler);
+    MyNamedPipeServer server(&serverEvtHandler);
+
+    client.SetName(L"pipename");
+    server.SetName(L"pipename");
+
+    ret = server.Init();
+    ASSERT_EQ(ret, 0);
+
+    ret = client.Connect();
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(serverEvtHandler.Connected, 1);
+    ASSERT_EQ(serverEvtHandler.Disconnected, 0);
+
+    MyValArray<void*>* pipes = server.Pipes();
+    ASSERT_EQ(pipes->Size(), 1);
+
+    ret = client.Disconnect();
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(serverEvtHandler.Connected, 1);
+    ASSERT_EQ(serverEvtHandler.Disconnected, 1);
+    pipes = server.Pipes();
+    ASSERT_EQ(pipes->Size(), 0);
+}
+
+TEST(MyPipeTest, ServerDisconnectTest) {
+    int ret = 0;
+    TestPipeEventHandler clientEvtHandler;
+    TestPipeEventHandler serverEvtHandler;
+    MyNamedPipeClient client(&clientEvtHandler);
+    MyNamedPipeServer server(&serverEvtHandler);
+
+    client.SetName(L"pipename");
+    server.SetName(L"pipename");
+
+    ret = server.Init();
+    ASSERT_EQ(ret, 0);
+
+    ret = client.Connect();
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(serverEvtHandler.Connected, 1);
+    ASSERT_EQ(serverEvtHandler.Disconnected, 0);
+
+    MyValArray<void*>* pipes = server.Pipes();
+    ASSERT_EQ(pipes->Size(), 1);
+
+    ret = server.Disconnect(pipes->Get(0));
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(serverEvtHandler.Connected, 1);
+    ASSERT_EQ(serverEvtHandler.Disconnected, 1);
+
+    pipes = server.Pipes();
+    ASSERT_EQ(pipes->Size(), 0);
+}
+

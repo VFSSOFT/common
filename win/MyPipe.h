@@ -3,6 +3,7 @@
 
 #include "../MyStringA.h"
 #include "../MyStringW.h"
+#include "../MyValArray.h"
 #include "../MyWin.h"
 
 // Pipe Names: https://learn.microsoft.com/en-us/windows/win32/ipc/pipe-names
@@ -107,14 +108,16 @@ public:
     int DefaultTimeout() { return m_DefaultTimeout; }
     void SetDefaultTimeout(int val) { m_DefaultTimeout = val; }
 
+    MyValArray<void*>* Pipes();
+
     int Init();
     int DoEvents(int timeoutMS);
     int Write(void* pipe, const char* data, int lenData);
+    int Disconnect(void* pipe);
     void Reset();
 
 private:
     int MyConnectNamedPipe(MyNamedPipeOpCtx* ctx);
-    int MyReconnect(MyNamedPipeOpCtx* ctx);
 
 private:
     int       m_MaxInstances;
@@ -122,6 +125,8 @@ private:
 
     MyNamedPipeOpCtx* m_Ctxs;
     HANDLE*           m_Events;
+
+    MyValArray<void*> m_ConnectedPipes;
 };
 
 class MyNamedPipeClient : public MyNamedPipeBase {

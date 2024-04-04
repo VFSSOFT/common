@@ -34,7 +34,10 @@ public:
   void Reset();
   int Delete(int start, int len);
     int Sub(int startIndex);
-  int Sub(int startIndex, int endIndex);
+    int Sub(int startIndex, int endIndex);
+    int TrimLeft(const char* toTrim=" \t\r\n");
+    int TrimRight(const char* toTrim=" \t\r\n");
+    int Trim(const char* toTrim=" \t\r\n");
 
   inline char* Deref(int off=0) { return m_Length == 0 ? (char*)"" : m_Buffer + off; }
   inline const char* DerefConst(int off=0) { return Deref(off); }
@@ -60,6 +63,8 @@ public:
 private:
   int ExtendCap(int cap);
   inline bool HeapMemUsed() { return m_Length > 62; }
+
+  bool Contains_(const char* chars, char c);
 
 private:
   char  m_StackBuf[64];

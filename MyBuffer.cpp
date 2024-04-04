@@ -171,6 +171,47 @@ int MyBuffer::Sub(int startIndex, int endIndex) {
   return SetLength(newLen);
 }
 
+int MyBuffer::TrimLeft(const char* toTrim) {
+    int off = 0;
+    
+    while (off < m_Length) {
+        char c = m_Buffer[off];
+        if (Contains_(toTrim, c)) {
+            off++;
+        } else {
+            break;
+        }
+    }
+
+    if (off > 0) {
+        Sub(off);
+    }
+    return 0;
+}
+int MyBuffer::TrimRight(const char* toTrim) {
+    int newLen = m_Length;
+    
+    while (newLen > 0) {
+        char c = m_Buffer[newLen-1];
+        if (Contains_(toTrim, c)) {
+            newLen--;
+        } else {
+            break;
+        }
+    }
+
+    if (newLen < m_Length) {
+        SetLength(newLen);
+    }
+    return 0;
+}
+int MyBuffer::Trim(const char* toTrim) {
+    int err = 0;
+    if (err = TrimLeft(toTrim)) return err;
+    if (err = TrimRight(toTrim)) return err;
+    return 0;
+}
+
 int MyBuffer::IndexOf(const char* ptr, int len, int startIndex) {
   if (Length() == 0 || len < 0 || startIndex < 0 || startIndex + len > Length())
     return -1;
@@ -321,4 +362,17 @@ bool MyBuffer::Equals(const char* b1, int b1Len, const char* b2, int b2Len) {
     }
 
     return true;
+}
+
+
+bool MyBuffer::Contains_(const char* chars, char c) {
+    const char* p = chars;
+
+    while (p != NULL && *p != NULL) {
+        if (*p == c) {
+            return true;
+        }
+        p++;
+    }
+    return false;
 }

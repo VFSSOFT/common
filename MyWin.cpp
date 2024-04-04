@@ -616,7 +616,7 @@ int MyWinReg::GetValue(LPCWSTR key, MyWinRegValue* value) {
         // If the data has the REG_SZ, REG_MULTI_SZ or REG_EXPAND_SZ type, the string may not have been stored with
         // the proper terminating null characters. Therefore, even if the function returns ERROR_SUCCESS,
         // the application should ensure that the string is properly terminated before using it; otherwise, it may overwrite a buffer.
-        if (value->strValue[value->valueLen - 1] == 0) {
+        if (value->valueLen > 0 && value->strValue[value->valueLen - 1] == 0) {
             value->valueLen--;
         }
         break;
@@ -643,6 +643,36 @@ int MyWinReg::GetValue(LPCWSTR key, MyWinRegValue* value) {
     return 0;
 }
 
+int MyWinReg::GetSubKeyNames(MyArray<MyStringA>* subKeyNames) {
+    HRESULT   result;
+    DWORD     maxSubKeyNameSize = 0;
+    DWORD     subKeyNameSize = 0;
+    MyStringW subKeyName;
+    int       i = 0;
+
+    subKeyNames->Reset();
+
+    result = RegQueryInfoKeyW(m_HKey, NULL, NULL, NULL, NULL, &maxSubKeyNameSize, NULL, NULL, NULL, NULL, NULL, NULL);
+    if (result != ERROR_SUCCESS) {
+        return HandleSystemError(result);
+    }
+
+    while (true) {
+        subKeyName.SetLength(maxSubKeyNameSize + 1);
+        subKeyNameSize = maxSubKeyNameSize;
+
+        result = RegEnumKeyExW(m_HKey, i, subKeyName.Deref(), &subKeyNameSize, NULL, NULL, NULL, NULL);
+        if (result != ERROR_SUCCESS) break;
+
+        // subKeyNameSize excludes the trailing \0
+        subKeyName.SetLength(subKeyNameSize);
+        subKeyNames->AddNew()->SetUnicode(subKeyName.Deref());
+
+        i++;
+    }
+    
+    return 0;
+}
 
 int MyWinReg::HandleSystemError(HRESULT result) {
     m_LastErrorCode = result;
@@ -843,6 +873,150 @@ void MySingleInstance::Close() {
         CloseHandle(m_Mutex);
         m_Mutex = NULL;
     }
+}
+
+
+MyWinDeafultIcons::~MyWinDeafultIcons() {
+    for (int i = 0; i < m_Icons.Size(); i++) {
+        HICON hicon = m_Icons.Get(i);
+        if (hicon) {
+            DestroyIcon(hicon);
+        }
+    }
+}
+
+
+int MyWinDeafultIcons::Load() {
+    int err = 0;
+    MyWinReg classRootReg;
+    MyWinReg iconReg;
+    MyWinRegValue regValue;
+    MyArray<MyStringA> subKeyNames;
+    MyStringA* subKeyName;
+    MyStringW subKeyNameW;
+    MyStringW defaultIconSubKey;
+    MyStringW defaultIconPath;
+    int indexOfPoint;
+
+    if (err = classRootReg.Open(HKEY_CLASSES_ROOT, L"", KEY_READ | KEY_WOW64_64KEY)) return LastError(err, classRootReg.LastErrorMessage());
+    
+    if (err = classRootReg.GetSubKeyNames(&subKeyNames)) {
+        err = LastError(err, classRootReg.LastErrorMessage());
+        goto done;
+    }
+
+    for (int i = 0; i < subKeyNames.Size(); i++) {
+        subKeyName = subKeyNames.Get(i);
+
+        if (subKeyName->Empty()) continue;
+
+        indexOfPoint = subKeyName->IndexOf('.');
+        if (indexOfPoint != 0) continue;
+
+        subKeyNameW.SetUtf8(subKeyName->Deref(), subKeyName->Length());
+        if (err = iconReg.Open(HKEY_CLASSES_ROOT, subKeyNameW.Deref(), KEY_READ | KEY_WOW64_64KEY)) {
+            err = LastError(err, iconReg.LastErrorMessage());
+            goto done;
+        }
+        if (err = iconReg.GetValue(L"", &regValue)) {
+            iconReg.Close();
+
+            if (err == ERROR_FILE_NOT_FOUND) { // No Default Key, skip it
+                continue;
+            } else {
+                err = LastError(err, iconReg.LastErrorMessage());
+                goto done;
+            }
+        }
+        iconReg.Close();
+
+
+        defaultIconSubKey.Set(regValue.strValue, regValue.valueLen);
+        defaultIconSubKey.Append(L"\\DefaultIcon");
+
+        if (!MyWinReg::KeyExists(HKEY_CLASSES_ROOT, defaultIconSubKey.Deref())) {
+            continue;
+        }
+        if (err = iconReg.Open(HKEY_CLASSES_ROOT, defaultIconSubKey.Deref(), KEY_READ | KEY_WOW64_64KEY)) {
+            err = LastError(err, iconReg.LastErrorMessage());
+            goto done;
+        }
+        if (err = iconReg.GetValue(L"", &regValue)) {
+            err = LastError(err, iconReg.LastErrorMessage());
+            goto done;
+        }
+        iconReg.Close();
+
+        defaultIconPath.Set(regValue.strValue, regValue.valueLen);
+        defaultIconPath.Replace(L"\"", L"");
+
+        m_Exts.AddNew()->SetUnicode(subKeyNameW.Deref());
+        m_IconPaths.AddNew()->SetUnicode(defaultIconPath.Deref());
+        m_Icons.Add(NULL); // Mark it as not loaded
+    }
+
+done:
+    classRootReg.Close();
+    return err;
+}
+
+HICON MyWinDeafultIcons::GetIcon(const char* ext) {
+    int idx = FindExt(ext);
+
+    if (m_Icons.Get(idx) == NULL) {
+        MyStringA* iconPath = m_IconPaths.Get(idx);
+        MyStringW iconFile;
+        int iconIndex;
+        HICON icons[1];
+
+        ParseIconFileAndIndex(iconPath, &iconFile, &iconIndex);
+
+        int iconNum = ExtractIconExW(
+            iconFile.Deref(),
+            iconIndex,
+            NULL,
+            icons,
+            1
+        );
+
+        if (iconNum == 1) {
+            m_Icons.Set(idx, icons[0]);
+        }
+
+    }
+    
+    return m_Icons.Get(idx);
+}
+
+int MyWinDeafultIcons::FindExt(const char* ext) {
+    MyStringA extVal;
+    if (ext[0] != '.') {
+        extVal.AppendChar('.');
+    }
+    extVal.Append(ext);
+
+    for (int i = 0; i < m_Exts.Size(); i++) {
+        if (m_Exts.Get(i)->Equals(extVal.DerefConst())) {
+            return i;
+        }
+    }
+    return -1;
+}
+int MyWinDeafultIcons::ParseIconFileAndIndex(MyStringA* iconPath, MyStringW* file, int* index) {
+    int pos = iconPath->IndexOf(',');
+
+    if (pos < 0) {
+        file->SetUtf8(iconPath->DerefConst(), iconPath->Length());
+        *index = 0;
+    } else {
+        MyStringA indexStr;
+
+        file->SetUtf8(iconPath->DerefConst(), pos);
+        indexStr.Set(iconPath->DerefConst() + pos + 1);
+        *index = indexStr.DerefAsInt();
+    }
+
+    return 0;
 }
 
 #endif // _WIN32

@@ -4,6 +4,7 @@
 #include "MyStringA.h"
 #include "MyStringW.h"
 #include "MyArray.h"
+#include "MyValArray.h"
 
 #ifdef _WIN32
 
@@ -115,6 +116,7 @@ public:
     int AddKeyValueExpandString(LPCWSTR key, LPCWSTR value, int valueLen);
     int AddKeyValueString(LPCWSTR key, LPCWSTR value, int valueLen);
     int GetValue(LPCWSTR key, MyWinRegValue* value);
+    int GetSubKeyNames(MyArray<MyStringA>* subKeyNames);
 
     static BOOL KeyExists(HKEY rootKey, LPCWSTR subKey);
     static HRESULT SetKeyValue(HKEY rootKey, LPCWSTR subKey, LPCWSTR valueName, DWORD type, void* value);
@@ -143,6 +145,30 @@ private:
 
 private:
     HANDLE m_Mutex;
+};
+
+
+class MyWinDeafultIcons {
+public:
+    virtual ~MyWinDeafultIcons();
+
+    int Load();
+
+    HICON GetIcon(const char* ext);
+
+    MyArray<MyStringA>* Extensions() { return &m_Exts; }
+    MyArray<MyStringA>* IconPaths() { return &m_IconPaths; }
+
+private:
+    int FindExt(const char* ext);
+    int ParseIconFileAndIndex(MyStringA* iconPath, MyStringW* file, int* index);
+
+private:
+    MyArray<MyStringA> m_Exts;
+    MyArray<MyStringA> m_IconPaths;
+    MyValArray<HICON>  m_Icons; // item will be NULL if not loaded
+
+    MY_LAST_ERROR_DECL;
 };
 
 #endif // _WIN32

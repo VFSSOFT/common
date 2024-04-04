@@ -62,6 +62,7 @@
     <ClCompile Include="MyLinkListTest.cpp" />
     <ClCompile Include="MyMemPoolTest.cpp" />
     <ClCompile Include="MyStringATest.cpp" />
+    <ClCompile Include="MyWinTest.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

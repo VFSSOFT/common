@@ -30,6 +30,11 @@ public:
   int LastIndexOf(const WCHAR c);
   void Replace(const WCHAR toReplace, const WCHAR replaceWith);
   int Replace(const WCHAR* toReplace, const WCHAR* replaceWith);
+  int TrimLeft(const WCHAR* toTrim=L" \t\r\n");
+  int TrimRight(const WCHAR* toTrim=L" \t\r\n");
+  int Trim(const WCHAR* toTrim=L" \t\r\n");
+  int Sub(int startIndex);
+  int Sub(int startIndex, int endIndex);
 
   int RemoveLast() { return SetLength(m_Length - 1); }
 
@@ -53,7 +58,10 @@ public:
     static int SplitPath(const wchar_t* path, int pathLen, MyStringW* dir, MyStringW* name);
 
 private:
-  int EnsureCap(int cap);
+    int EnsureCap(int cap);
+
+    bool Contains(const WCHAR* chars, WCHAR c);
+
 private:
   WCHAR* m_Buffer;
   int    m_Length;

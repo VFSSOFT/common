@@ -228,3 +228,83 @@ TEST(MyStringWTest, LastIndexOfTest) {
     
 }
 
+TEST(MyStringWTest, SubTest) {
+    const wchar_t* rawStr = L"ABCDEFG";
+
+    int err = 0;
+    MyStringW str;
+
+    err = str.Set(rawStr);
+    EXPECT_EQ(err, 0);
+
+    err = str.Sub(1);
+    EXPECT_TRUE(wcscmp(str.Deref(), L"BCDEFG") == 0);
+    
+    err = str.Sub(0, str.Length() - 1);
+    EXPECT_TRUE(wcscmp(str.Deref(), L"BCDEF") == 0);
+
+    err = str.Sub(2, 3);
+    EXPECT_TRUE(wcscmp(str.Deref(), L"D") == 0);
+
+    err = str.Sub(0,1);
+    EXPECT_TRUE(wcscmp(str.Deref(), L"D") == 0);
+}
+
+
+TEST(MyStringWTest, TrimLeftTest) {
+    const wchar_t* rawStr = L" \tABC";
+
+    int err = 0;
+    MyStringW str;
+
+    err = str.Set(rawStr);
+    EXPECT_EQ(err, 0);
+
+    err = str.TrimLeft();
+    EXPECT_EQ(err, 0);
+
+    EXPECT_TRUE(wcscmp(str.Deref(), L"ABC") == 0);
+}
+TEST(MyStringWTest, TrimRightTest) {
+    const wchar_t* rawStr = L"ABC\r\n";
+
+    int err = 0;
+    MyStringW str;
+
+    err = str.Set(rawStr);
+    EXPECT_EQ(err, 0);
+
+    err = str.TrimRight();
+    EXPECT_EQ(err, 0);
+
+    EXPECT_TRUE(wcscmp(str.Deref(), L"ABC") == 0);
+}
+TEST(MyStringWTest, TrimTest) {
+    const wchar_t* rawStr = L"\tABC \r\n";
+
+    int err = 0;
+    MyStringW str;
+
+    err = str.Set(rawStr);
+    EXPECT_EQ(err, 0);
+
+    err = str.Trim();
+    EXPECT_EQ(err, 0);
+
+    EXPECT_TRUE(wcscmp(str.Deref(), L"ABC") == 0);
+}
+TEST(MyStringWTest, TrimTest2) {
+    const wchar_t* rawStr = L"\t \r\n";
+
+    int err = 0;
+    MyStringW str;
+
+    err = str.Set(rawStr);
+    EXPECT_EQ(err, 0);
+
+    err = str.Trim();
+    EXPECT_EQ(err, 0);
+
+    EXPECT_TRUE(wcscmp(str.Deref(), L"") == 0);
+}
+

@@ -242,6 +242,61 @@ int MyStringW::Replace(const WCHAR* toReplace, const WCHAR* replaceWith) {
     return 0;
 }
 
+int MyStringW::TrimLeft(const WCHAR* toTrim) {
+    int off = 0;
+    
+    while (off < m_Length) {
+        WCHAR c = m_Buffer[off];
+        if (Contains(toTrim, c)) {
+            off++;
+        } else {
+            break;
+        }
+    }
+
+    if (off > 0) {
+        Sub(off);
+    }
+    return 0;
+}
+int MyStringW::TrimRight(const WCHAR* toTrim) {
+    int newLen = m_Length;
+    
+    while (newLen > 0) {
+        WCHAR c = m_Buffer[newLen-1];
+        if (Contains(toTrim, c)) {
+            newLen--;
+        } else {
+            break;
+        }
+    }
+
+    if (newLen < m_Length) {
+        SetLength(newLen);
+    }
+    return 0;
+}
+int MyStringW::Trim(const WCHAR* toTrim) {
+    int err = 0;
+    if (err = TrimLeft(toTrim)) return err;
+    if (err = TrimRight(toTrim)) return err;
+    return 0;
+}
+
+int MyStringW::Sub(int startIndex) {
+    return Sub(startIndex, m_Length);
+}
+int MyStringW::Sub(int startIndex, int endIndex) {
+    if (startIndex < 0 || startIndex > endIndex || endIndex > m_Length) 
+        return MY_ERR_INDEX_OUT_OF_BOUNDARY;
+
+    if (startIndex == endIndex) return 0;
+
+    int newLen = endIndex - startIndex;
+    memmove(m_Buffer, m_Buffer + startIndex, newLen * sizeof(WCHAR));
+    return SetLength(newLen);
+}
+
 INT64 MyStringW::DerefAsInt64() {
     INT64 val = 0;
     bool negative = Length() > 0 && Deref()[0] == L'-';
@@ -376,6 +431,18 @@ int MyStringW::SplitPath(const wchar_t* path, int pathLen, MyStringW* dir, MyStr
     if (name) name->Set(path + index + 1, pathLen - index - 1);
 
     return 0;
+}
+
+bool MyStringW::Contains(const WCHAR* chars, WCHAR c) {
+    const WCHAR* p = chars;
+
+    while (p != NULL && *p != NULL) {
+        if (*p == c) {
+            return true;
+        }
+        p++;
+    }
+    return false;
 }
 
 #endif // _WIN32

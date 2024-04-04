@@ -157,6 +157,7 @@ public:
     int Load();
 
     HICON GetFolderIcon();
+    HICON GetUnknownIcon();
     HICON GetIcon(const char* ext);
 
     MyArray<MyStringA>* Extensions() { return &m_Exts; }
@@ -165,6 +166,8 @@ public:
 private:
     int FindExt(const char* ext);
     int ParseIconFileAndIndex(MyStringA* iconPath, MyStringW* file, int* index);
+
+    int LoadDefaultIcon(const wchar_t* defaultIconKey, const wchar_t* ext);
 
 private:
     MyArray<MyStringA> m_Exts;

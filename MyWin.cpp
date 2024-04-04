@@ -939,44 +939,46 @@ int MyWinDeafultIcons::Load() {
 
         defaultIconSubKey.Set(regValue.strValue, regValue.valueLen);
         defaultIconSubKey.Append(L"\\DefaultIcon");
-
-        if (!MyWinReg::KeyExists(HKEY_CLASSES_ROOT, defaultIconSubKey.Deref())) {
-            continue;
-        }
-        if (err = iconReg.QuickReadValue(HKEY_CLASSES_ROOT, defaultIconSubKey.Deref(), L"", &regValue)) {
-            err = LastError(err, iconReg.LastErrorMessage());
-            goto done;
-        }
-
-        defaultIconPath.Set(regValue.strValue, regValue.valueLen);
-        defaultIconPath.Replace(L"\"", L"");
-
-        m_Exts.AddNew()->SetUnicode(subKeyNameW.Deref());
-        m_IconPaths.AddNew()->SetUnicode(defaultIconPath.Deref());
-        m_Icons.Add(NULL); // Mark it as not loaded
+        if (err = LoadDefaultIcon(defaultIconSubKey.Deref(), subKeyNameW.Deref())) goto done;
     }
 
 
-    // Load the Folder icon
-    if (err = iconReg.QuickReadValue(HKEY_CLASSES_ROOT, L"Folder\\DefaultIcon", L"", &regValue)) {
-        err = LastError(err, iconReg.LastErrorMessage());
-        goto done;
-    }
-
-    defaultIconPath.Set(regValue.strValue, regValue.valueLen);
-    defaultIconPath.Replace(L"\"", L"");
-
-    m_Exts.AddNew()->SetUnicode(L"Folder"); // Use "Folder" as the extension of the folder type
-    m_IconPaths.AddNew()->SetUnicode(defaultIconPath.Deref());
-    m_Icons.Add(NULL); // Mark it as not loaded
+    if (err = LoadDefaultIcon(L"Folder\\DefaultIcon", L"Folder")) goto done;
+    if (err = LoadDefaultIcon(L"Unknown\\DefaultIcon", L"Unknown")) goto done;
 
 done:
     classRootReg.Close();
     return err;
 }
+int MyWinDeafultIcons::LoadDefaultIcon(const wchar_t* defaultIconKey, const wchar_t* ext) {
+    int err = 0;
+    MyWinReg iconReg;
+    MyWinRegValue regValue;
+    MyStringW defaultIconPath;
+
+    if (!MyWinReg::KeyExists(HKEY_CLASSES_ROOT, defaultIconKey)) {
+        return 0;
+    }
+
+    if (err = iconReg.QuickReadValue(HKEY_CLASSES_ROOT, defaultIconKey, L"", &regValue)) {
+        return LastError(err, iconReg.LastErrorMessage());
+    }
+
+    defaultIconPath.Set(regValue.strValue, regValue.valueLen);
+    defaultIconPath.Replace(L"\"", L"");
+
+    m_Exts.AddNew()->SetUnicode(ext);
+    m_IconPaths.AddNew()->SetUnicode(defaultIconPath.Deref());
+    m_Icons.Add(NULL); // Mark it as not loaded
+
+    return 0;
+}
 
 HICON MyWinDeafultIcons::GetFolderIcon() {
     return GetIcon("Folder");
+}
+HICON MyWinDeafultIcons::GetUnknownIcon() {
+    return GetIcon("Unknown");
 }
 HICON MyWinDeafultIcons::GetIcon(const char* ext) {
     int idx = FindExt(ext);
@@ -1008,7 +1010,7 @@ HICON MyWinDeafultIcons::GetIcon(const char* ext) {
 
 int MyWinDeafultIcons::FindExt(const char* ext) {
     MyStringA extVal;
-    if (strcmp(ext, "Folder") != 0 && ext[0] != '.') {
+    if (strcmp(ext, "Folder") != 0 && strcmp(ext, "Unknown") != 0  && ext[0] != '.') {
         extVal.AppendChar('.');
     }
     extVal.Append(ext);

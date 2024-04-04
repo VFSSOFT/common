@@ -43,6 +43,17 @@ TEST(MyWinTest, DeafultIconsTest_GetIcon_Folder) {
     ASSERT_TRUE(hicon != NULL);
 }
 
+TEST(MyWinTest, DeafultIconsTest_GetIcon_Unknown) {
+    int err = 0;
+    MyWinDeafultIcons defaultIcons;
+
+    err = defaultIcons.Load();
+    ASSERT_EQ(err, 0);
+
+    HICON hicon = defaultIcons.GetUnknownIcon();
+    ASSERT_TRUE(hicon != NULL);
+}
+
 TEST(MyWinTest, DeafultIconsTest_GetAllIcon) {
     int err = 0;
     MyWinDeafultIcons defaultIcons;

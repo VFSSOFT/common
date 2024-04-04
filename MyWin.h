@@ -118,6 +118,8 @@ public:
     int GetValue(LPCWSTR key, MyWinRegValue* value);
     int GetSubKeyNames(MyArray<MyStringA>* subKeyNames);
 
+    int QuickReadValue(HKEY root, LPCWSTR subKey, LPCWSTR keyName, MyWinRegValue* value);
+
     static BOOL KeyExists(HKEY rootKey, LPCWSTR subKey);
     static HRESULT SetKeyValue(HKEY rootKey, LPCWSTR subKey, LPCWSTR valueName, DWORD type, void* value);
     static BOOL DeleteKeyTree(HKEY rootKey, LPCWSTR subKey);
@@ -154,6 +156,7 @@ public:
 
     int Load();
 
+    HICON GetFolderIcon();
     HICON GetIcon(const char* ext);
 
     MyArray<MyStringA>* Extensions() { return &m_Exts; }

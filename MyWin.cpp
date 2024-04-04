@@ -674,6 +674,20 @@ int MyWinReg::GetSubKeyNames(MyArray<MyStringA>* subKeyNames) {
     return 0;
 }
 
+int MyWinReg::QuickReadValue(HKEY root, LPCWSTR subKey, LPCWSTR keyName, MyWinRegValue* value) {
+    int err = 0;
+
+    if (err = OpenExist(root, subKey, KEY_READ | KEY_WOW64_64KEY)) return err;
+
+    if (err = GetValue(keyName, value)) {
+        Close();
+        return err;
+    }
+
+    Close();
+    return 0;
+}
+
 int MyWinReg::HandleSystemError(HRESULT result) {
     m_LastErrorCode = result;
     MyWin::GetSysLastErrorMessage(&m_LastErrorMessage, m_LastErrorCode);
@@ -914,13 +928,7 @@ int MyWinDeafultIcons::Load() {
         if (indexOfPoint != 0) continue;
 
         subKeyNameW.SetUtf8(subKeyName->Deref(), subKeyName->Length());
-        if (err = iconReg.Open(HKEY_CLASSES_ROOT, subKeyNameW.Deref(), KEY_READ | KEY_WOW64_64KEY)) {
-            err = LastError(err, iconReg.LastErrorMessage());
-            goto done;
-        }
-        if (err = iconReg.GetValue(L"", &regValue)) {
-            iconReg.Close();
-
+        if (err = iconReg.QuickReadValue(HKEY_CLASSES_ROOT, subKeyNameW.Deref(), L"", &regValue)) {
             if (err == ERROR_FILE_NOT_FOUND) { // No Default Key, skip it
                 continue;
             } else {
@@ -928,8 +936,6 @@ int MyWinDeafultIcons::Load() {
                 goto done;
             }
         }
-        iconReg.Close();
-
 
         defaultIconSubKey.Set(regValue.strValue, regValue.valueLen);
         defaultIconSubKey.Append(L"\\DefaultIcon");
@@ -937,15 +943,10 @@ int MyWinDeafultIcons::Load() {
         if (!MyWinReg::KeyExists(HKEY_CLASSES_ROOT, defaultIconSubKey.Deref())) {
             continue;
         }
-        if (err = iconReg.Open(HKEY_CLASSES_ROOT, defaultIconSubKey.Deref(), KEY_READ | KEY_WOW64_64KEY)) {
+        if (err = iconReg.QuickReadValue(HKEY_CLASSES_ROOT, defaultIconSubKey.Deref(), L"", &regValue)) {
             err = LastError(err, iconReg.LastErrorMessage());
             goto done;
         }
-        if (err = iconReg.GetValue(L"", &regValue)) {
-            err = LastError(err, iconReg.LastErrorMessage());
-            goto done;
-        }
-        iconReg.Close();
 
         defaultIconPath.Set(regValue.strValue, regValue.valueLen);
         defaultIconPath.Replace(L"\"", L"");
@@ -955,11 +956,28 @@ int MyWinDeafultIcons::Load() {
         m_Icons.Add(NULL); // Mark it as not loaded
     }
 
+
+    // Load the Folder icon
+    if (err = iconReg.QuickReadValue(HKEY_CLASSES_ROOT, L"Folder\\DefaultIcon", L"", &regValue)) {
+        err = LastError(err, iconReg.LastErrorMessage());
+        goto done;
+    }
+
+    defaultIconPath.Set(regValue.strValue, regValue.valueLen);
+    defaultIconPath.Replace(L"\"", L"");
+
+    m_Exts.AddNew()->SetUnicode(L"Folder"); // Use "Folder" as the extension of the folder type
+    m_IconPaths.AddNew()->SetUnicode(defaultIconPath.Deref());
+    m_Icons.Add(NULL); // Mark it as not loaded
+
 done:
     classRootReg.Close();
     return err;
 }
 
+HICON MyWinDeafultIcons::GetFolderIcon() {
+    return GetIcon("Folder");
+}
 HICON MyWinDeafultIcons::GetIcon(const char* ext) {
     int idx = FindExt(ext);
 
@@ -990,7 +1008,7 @@ HICON MyWinDeafultIcons::GetIcon(const char* ext) {
 
 int MyWinDeafultIcons::FindExt(const char* ext) {
     MyStringA extVal;
-    if (ext[0] != '.') {
+    if (strcmp(ext, "Folder") != 0 && ext[0] != '.') {
         extVal.AppendChar('.');
     }
     extVal.Append(ext);
@@ -1013,9 +1031,11 @@ int MyWinDeafultIcons::ParseIconFileAndIndex(MyStringA* iconPath, MyStringW* fil
 
         file->SetUtf8(iconPath->DerefConst(), pos);
         indexStr.Set(iconPath->DerefConst() + pos + 1);
+        indexStr.Trim();
         *index = indexStr.DerefAsInt();
     }
 
+    file->Trim();
     return 0;
 }
 

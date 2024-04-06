@@ -57,6 +57,7 @@
     <ClCompile Include="MySqliteTest.cpp" />
     <ClCompile Include="MyStackTest.cpp" />
     <ClCompile Include="MyStringWTest.cpp" />
+    <ClCompile Include="MyUtilsTest.cpp" />
     <ClCompile Include="MyValArrayTest.cpp" />
     <ClCompile Include="MyValObjHashMapTest.cpp" />
     <ClCompile Include="MyLinkListTest.cpp" />
@@ -112,7 +113,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>sqlite.lib;libcrypto_static.lib;liblegacy.lib;Ws2_32.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sqlite.lib;libcrypto_static.lib;liblegacy.lib;Ws2_32.lib;Crypt32.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

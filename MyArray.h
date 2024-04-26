@@ -11,13 +11,13 @@ public:
   virtual ~MyArray();
 
   T*   AddNew();
-  T*   Get(int idx);
+  T*   Get(int idx) const;
   int  Delete(int idx);
   int Delete2(T* val);
   void Reset();
 
   inline BOOL Empty() { return m_Size == 0; }
-  inline int Size() { return m_Size; }
+  inline int Size() const { return m_Size; }
   int SetSize(int size);
   inline int LastError() { return m_LastError; }
 
@@ -59,9 +59,9 @@ T* MyArray<T>::AddNew() {
 }
 
 template <typename T>
-T* MyArray<T>::Get(int idx) {
+T* MyArray<T>::Get(int idx) const {
   if (idx < 0 || idx >= m_Size) {
-    m_LastError = MY_ERR_INDEX_OUT_OF_BOUNDARY;
+    //m_LastError = MY_ERR_INDEX_OUT_OF_BOUNDARY;
     return NULL;
   }
 

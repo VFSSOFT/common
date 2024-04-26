@@ -456,6 +456,12 @@ int MyWin::EnsureFolderExist(MyStringW* path, MyStringA* errMsg) {
     return 0;
 }
 
+void MyWin::GetCurrentExePath(MyStringW* retPath) {
+    wchar_t path[FILENAME_MAX] = { 0 };
+    GetModuleFileNameW(NULL, path, FILENAME_MAX);
+    retPath->Set(path);
+}
+
 bool MyWin::SetAutoStartAtStartup(const wchar_t* name, const wchar_t* binaryPath, bool enable) {
     if (enable) {
         MyWinReg reg;

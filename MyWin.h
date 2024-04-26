@@ -90,6 +90,8 @@ public:
     static int GetAppDataSubFolder(MyStringW* subFolder, MyStringW* subSub, bool createIfNotExist, MyStringW* ret, MyStringA* errMsg);
     static int EnsureFolderExist(MyStringW* path, MyStringA* errMsg);
 
+    static void GetCurrentExePath(MyStringW* retPath);
+
     static bool SetAutoStartAtStartup(const wchar_t* name, const wchar_t* binaryPath, bool enable);
 };
 

@@ -45,24 +45,25 @@ int MyThread::Start() {
     return 0;
 }
 int MyThread::Abort() {
-    return Abort(30 * 1000);
+    return Abort(-1);
 }
 int MyThread::Abort(int timeoutMS) {
     m_State.SetAborting();
 
     if (m_ThreadHandle != NULL) {
-        UINT64 timeoutMarker = GetTickCount64() + timeoutMS;
-        while (GetTickCount64() < timeoutMarker) {
-            if (WaitForExit(20)) {
-                break;
+        if (timeoutMS > 0) {
+            UINT64 timeoutMarker = GetTickCount64() + timeoutMS;
+            while (GetTickCount64() < timeoutMarker) {
+                if (WaitForExit(20)) {
+                    break;
+                }
+            }
+            if (GetTickCount64() >= timeoutMarker) {
+                return LastError(MY_ERR_OP_TIMEOUT, "Abort Timeout");
             }
         }
-        if (GetTickCount64() >= timeoutMarker) {
-            return LastError(MY_ERR_OP_TIMEOUT, "Abort Timeout");
-        } else {
-            CloseHandle(m_ThreadHandle);
-            m_ThreadHandle = NULL;
-        }
+        CloseHandle(m_ThreadHandle);
+        m_ThreadHandle = NULL;
     }
     return 0;
 }

@@ -250,6 +250,39 @@ TEST(MyPipeTest, ClientSendDataTest) {
     ASSERT_STREQ(serverEvtHandler.DataIn.Get(0)->Deref(), hello);
 }
 
+TEST(MyPipeTest, ClientSend4KDataTest) {
+    int ret = 0;
+    TestPipeEventHandler clientEvtHandler;
+    TestPipeEventHandler serverEvtHandler;
+    MyNamedPipeClient client(&clientEvtHandler);
+    MyNamedPipeServer server(&serverEvtHandler);
+
+    client.SetName(L"pipename");
+    server.SetName(L"pipename");
+
+    ret = server.Init();
+    ASSERT_EQ(ret, 0);
+
+    ret = client.Connect();
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    char* hello = new char[4096];
+    ret = client.Write(hello, 4096);
+    ASSERT_EQ(ret, 0);
+
+    ret = client.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ret = server.DoEvents(20);
+    ASSERT_EQ(ret, 0);
+
+    ASSERT_EQ(serverEvtHandler.DataIn.Size(), 1);
+    ASSERT_EQ(serverEvtHandler.DataIn.Get(0)->Length(), 4096);
+}
+
 TEST(MyPipeTest, EchoServerTest) {
     int ret = 0;
     TestPipeEventHandler clientEvtHandler;

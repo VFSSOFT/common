@@ -185,6 +185,11 @@ int MyNamedPipeServer::DoEvents(int timeoutMS) {
     return 0;
 }
 
+bool MyNamedPipeServer::CanWrite(void* pipe) {
+    MyNamedPipeOpCtx* ctx = (MyNamedPipeOpCtx*)pipe;
+    return ctx->Connected && ctx->WriteBuf.Length() == 0;
+}
+
 int MyNamedPipeServer::Write(void* pipe, const char* data, int lenData) {
     MyNamedPipeOpCtx* ctx = (MyNamedPipeOpCtx*)pipe;
     if (!ctx->Connected) return LastError(MY_ERR_INVALID_OPERATION, "Pipe is not connected yet");

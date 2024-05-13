@@ -112,6 +112,7 @@ public:
 
     int Init();
     int DoEvents(int timeoutMS);
+    bool CanWrite(void* pipe);
     int Write(void* pipe, const char* data, int lenData);
     int Disconnect(void* pipe);
     void Reset();

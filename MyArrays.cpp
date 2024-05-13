@@ -27,8 +27,12 @@ int MyAStrArray::Add(MyStringA* str) {
 MyStringA* MyAStrArray::Get(int index) {
     return m_Arr.Get(index);
 }
+MyStringA* MyAStrArray::Last() {
+    return Size() == 0 ? NULL : m_Arr.Get(Size() - 1);
+}
 
 int MyAStrArray::Index(const char* str, int len) {
+    if (len < 0) len = strlen(str);
     for (int i = 0; i < m_Arr.Size(); i++) {
         MyStringA* tmp = m_Arr.Get(i);
         if (tmp->Equals(str, len, false)) {

@@ -16,6 +16,8 @@ public:
   int Delete2(T* val);
   void Reset();
 
+  T* Last() const;
+
   inline BOOL Empty() { return m_Size == 0; }
   inline int Size() const { return m_Size; }
   int SetSize(int size);
@@ -66,6 +68,11 @@ T* MyArray<T>::Get(int idx) const {
   }
 
   return m_Array[idx];
+}
+
+template <typename T>
+T* MyArray<T>::Last() const {
+    return m_Size == 0 ? NULL : m_Array[m_Size - 1];
 }
 
 template <typename T>

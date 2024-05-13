@@ -13,6 +13,7 @@ public:
 
     int Size();
     MyStringA* Get(int index);
+    MyStringA* Last();
 
     int Index(const char* str, int len=-1);
     int Index(MyStringA* str);

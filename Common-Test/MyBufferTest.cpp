@@ -351,3 +351,66 @@ TEST(MyBufferTest, Contains2Test) {
     EXPECT_FALSE(res);
 }
 
+TEST(MyBufferTest, ReplaceTest) {
+    MyBuffer buf;
+
+    const char* ori = "hello world";
+    buf.Set(ori, strlen(ori));
+
+    buf.Replace("hello ", 6, "", 0);
+    ASSERT_STREQ(buf.Deref(), "world");
+}
+TEST(MyBufferTest, ReplaceTest2) {
+    MyBuffer buf;
+
+    const char* ori = "hello world";
+    buf.Set(ori, strlen(ori));
+
+    buf.Replace("dddd ", 4, "aaa", 3);
+    ASSERT_STREQ(buf.Deref(), "hello world");
+}
+TEST(MyBufferTest, ReplaceTest3) {
+    MyBuffer buf;
+
+    const char* ori = "hello";
+    buf.Set(ori, strlen(ori));
+
+    buf.Replace("hello", 5, "world", 5);
+    ASSERT_STREQ(buf.Deref(), "world");
+}
+TEST(MyBufferTest, ReplaceTest4) {
+    MyBuffer buf;
+
+    const char* ori = "this is a test";
+    buf.Set(ori, strlen(ori));
+
+    buf.Replace("is", 2, "are", 3);
+    ASSERT_STREQ(buf.Deref(), "thare are a test");
+}
+TEST(MyBufferTest, ReplaceTest5) {
+    MyBuffer buf;
+
+    const char* ori = "this are a test";
+    buf.Set(ori, strlen(ori));
+
+    buf.Replace("are", 3, "is", 2);
+    ASSERT_STREQ(buf.Deref(), "this is a test");
+}
+TEST(MyBufferTest, ReplaceTest6) {
+    MyBuffer buf;
+
+    const char* ori = "a test a test a";
+    buf.Set(ori, strlen(ori));
+
+    buf.Replace("a", 1, "A", 1);
+    ASSERT_STREQ(buf.Deref(), "A test A test A");
+}
+TEST(MyBufferTest, ReplaceTest7) {
+    MyBuffer buf;
+
+    const char* ori = "a test a test a";
+    buf.Set(ori, strlen(ori));
+
+    buf.Replace("test", 4, "A", 1);
+    ASSERT_STREQ(buf.Deref(), "a A a A a");
+}

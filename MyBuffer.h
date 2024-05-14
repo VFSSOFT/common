@@ -49,6 +49,7 @@ public:
   int LastIndexOf(const char c);
   int LastIndexOf(const char c, int startIndex, int endIndex);
   void Replace(const char toReplace, const char replaceWith);
+    void Replace(const char* toReplace, int toReplaceLen, const char* replaceWith, int replaceWithLen);
 
   bool StartWith(const char* ptr);
   BOOL StartWith(const char* ptr, int len);
@@ -65,6 +66,7 @@ private:
   inline bool HeapMemUsed() { return m_Length > 62; }
 
   bool Contains_(const char* chars, char c);
+  bool Equals_(const char* p1, const char* p2, int len);
 
 private:
   char  m_StackBuf[64];

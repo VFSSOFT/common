@@ -294,6 +294,31 @@ void MyBuffer::Replace(const char toReplace, const char replaceWith) {
       m_Buffer[i] = replaceWith;
   }
 }
+void MyBuffer::Replace(const char* toReplace, int toReplaceLen, const char* replaceWith, int replaceWithLen) {
+    int matched = 0;
+    for (int i = 0; i < Length() - toReplaceLen + 1; i++) {
+        if (Equals_(Deref(i), toReplace, toReplaceLen)) {
+            matched++;
+            i += toReplaceLen - 1;
+        }
+    }
+    if (matched == 0) return; // nothing
+
+    int j = 0;
+    int newlen = Length() + (replaceWithLen - toReplaceLen) * matched;
+    char* newbuf = (char*) malloc(newlen);
+    for (int i = 0; i < Length(); i++) {
+        if (i + toReplaceLen <= Length() && Equals_(Deref(i), toReplace, toReplaceLen)) {
+            memcpy(newbuf + j, replaceWith, replaceWithLen);
+            i += toReplaceLen - 1;
+            j += replaceWithLen;
+        } else {
+            newbuf[j++] = m_Buffer[i];
+        }
+    }
+    Set(newbuf, newlen);
+    free(newbuf);
+}
 
 bool MyBuffer::StartWith(const char* ptr) {
     if (ptr == NULL) return false;
@@ -375,4 +400,11 @@ bool MyBuffer::Contains_(const char* chars, char c) {
         p++;
     }
     return false;
+}
+
+bool MyBuffer::Equals_(const char* p1, const char* p2, int len) {
+    for (int i = 0; i < len; i++) {
+        if (p1[i] != p2[i]) return false;
+    }
+    return true;
 }

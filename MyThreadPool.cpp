@@ -61,6 +61,21 @@ int MyThreadPool::Destroy() {
             return LastError(err, item->LastErrorMessage());
         }
     }
+    while (true) {
+        bool hasPendingThread = false;
+        for (int i = 0; i < m_Threads.Size(); i++) {
+            MyThreadPoolItem* item = m_Threads.Get(i);
+            if (item->State() != MY_THREAD_STATE_IDLE) {
+                hasPendingThread = true;
+                break;
+            }
+        }
+        if (hasPendingThread) {
+            m_Lock.Wait(20);
+        } else {
+            break;
+        }
+    }
     m_State.SetIdle();
     m_Threads.Reset();
     m_Lock.Release();

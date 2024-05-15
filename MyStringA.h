@@ -6,19 +6,21 @@
 class MyStringA : public MyBuffer {
 
 public:
-  MyStringA();
-  ~MyStringA();
+    MyStringA();
+    ~MyStringA();
 
-  int Set(const char* str);
-  int Set(const char* str, int len);
-  int Set(MyStringA* str);
-  int Append(const char *str, int len=-1);
-  int AppendInt(int intVal, int placeHolderLen=0);
-  int SetInt64(UINT64 val, int placeHolderLen=0);
-  int AppendInt64(UINT64 intVal, int placeHolderLen=0);
+    int Set(const char* str);
+    int Set(const char* str, int len);
+    int Set(MyStringA* str);
+    int Append(const char *str, int len=-1);
+    int AppendInt(int intVal, int placeHolderLen=0);
+    int SetInt64(UINT64 val, int placeHolderLen=0);
+    int AppendInt64(UINT64 intVal, int placeHolderLen=0);
 
-  int SetWithFormat(const char* fmt, ...);
-  int AppendWithFormat(const char* fmt, ...);
+    int SetWithFormat(const char* fmt, ...);
+    int AppendWithFormat(const char* fmt, ...);
+
+    int Replace(const char* toReplace, const char* replaceWith);
 
     bool Equals(const char* str, int len, bool caseInsensitive) {
         if (this->Length() != len) return false;
@@ -36,17 +38,17 @@ public:
         }
     }
 
-  BOOL Equals(const char* str, BOOL caseInsensitive=FALSE) {
-    if (this->Length() == 0) return STR_IS_EMPTY(str);
-    if (caseInsensitive) return strcmpi(this->Deref(), str) == 0;
-    else                 return strcmp(this->Deref(), str) == 0;
-  }
+    BOOL Equals(const char* str, BOOL caseInsensitive=FALSE) {
+        if (this->Length() == 0) return STR_IS_EMPTY(str);
+        if (caseInsensitive) return strcmpi(this->Deref(), str) == 0;
+        else                 return strcmp(this->Deref(), str) == 0;
+    }
 
-  UINT64 DerefAsInt64();
-  int DerefAsInt();
-  int ToLower();
+    UINT64 DerefAsInt64();
+    int DerefAsInt();
+    int ToLower();
 
-  int HashCode();
+    int HashCode();
 
     static int ConvertToInt(const char* str, int len) { return (int)ConvertToInt64(str, len); }
     static INT64 ConvertToInt64(const char* str, int len);
@@ -62,8 +64,8 @@ public:
 
 #ifdef _WIN32
     int SetUnicode(const wchar_t* unistr) { return SetUnicode(unistr, wcslen(unistr)); }
-  int SetUnicode(const wchar_t* uniStr, int len);
-  int Append(const wchar_t* uniStr, int len);
+    int SetUnicode(const wchar_t* uniStr, int len);
+    int Append(const wchar_t* uniStr, int len);
 #endif 
 };
 

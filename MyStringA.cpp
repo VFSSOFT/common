@@ -86,6 +86,13 @@ int MyStringA::AppendWithFormat(const char* fmt, ...) {
     return this->Append(tmpBuf, formattedLen);
 }
 
+int MyStringA::Replace(const char* toReplace, const char* replaceWith) {
+    int toReplaceLen = strlen(toReplace);
+    int replaceWithLen = strlen(replaceWith);
+    MyBuffer::Replace(toReplace, toReplaceLen, replaceWith, replaceWithLen);
+    return 0;
+}
+
 UINT64 MyStringA::DerefAsInt64() {
     return ConvertToInt64(Deref(), Length());
 }

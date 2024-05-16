@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+	<Type Name="MyBuffer">
+		<DisplayString>{{ {m_Buffer} }}</DisplayString>
+		<Expand>
+			<Item Name="[Size]">m_Length</Item>
+			<ArrayItems>
+				<Size>m_Length + 1</Size>
+				<ValuePointer>m_Buffer</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="MyStringA">
+		<DisplayString>{{ {m_Buffer} }}</DisplayString>
+		<StringView>m_Buffer</StringView>
+		<Expand>
+			<Item Name="[Size]">m_Length</Item>
+			<ArrayItems>
+				<Size>m_Length + 1</Size>
+				<ValuePointer>m_Buffer</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="MyStringW">
+		<DisplayString>{{ {m_Buffer} }}</DisplayString>
+		<StringView>m_Buffer</StringView>
+		<Expand>
+			<Item Name="[Size]">m_Length</Item>
+			<ArrayItems>
+				<Size>m_Length + 1</Size>
+				<ValuePointer>m_Buffer</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="MyArray&lt;*&gt;">
+		<DisplayString>{{ Size = {m_Size} }}</DisplayString>
+		<Expand>
+			<Item Name="[Size]">m_Size</Item>
+			<IndexListItems>
+				<Size>m_Size</Size>
+				<ValueNode>*(m_Array[$i])</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="MyValArray&lt;*&gt;">
+		<DisplayString>{{ Size = {m_Size} }}</DisplayString>
+		<Expand>
+			<Item Name="[Size]">m_Size</Item>
+			<IndexListItems>
+				<Size>m_Size</Size>
+				<ValueNode>m_Array[$i]</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+</AutoVisualizer>

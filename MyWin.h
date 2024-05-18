@@ -163,13 +163,15 @@ public:
     HICON GetIcon(const char* ext);
 
     MyArray<MyStringA>* Extensions() { return &m_Exts; }
-    MyArray<MyStringA>* IconPaths() { return &m_IconPaths; }
+    //MyArray<MyStringA>* IconPaths() { return &m_IconPaths; }
 
 private:
     int FindExt(const char* ext);
     int ParseIconFileAndIndex(MyStringA* iconPath, MyStringW* file, int* index);
 
     int LoadDefaultIcon(const wchar_t* defaultIconKey, const wchar_t* ext);
+
+    int LoadWithSHGetFileInfo(const wchar_t* ext);
 
 private:
     MyArray<MyStringA> m_Exts;

@@ -246,10 +246,13 @@ int MyFile::DeleteDirectoryRecursively(const wchar_t* path) {
 
 int MyFile::DeleteFile() {
     int err = 0;
+    MyStringW path;
+    path.Set(m_Path.Deref());
+
     if (Opened()) {
         if (err = Close()) return err;
     }
-    if (err = this->DeleteFile((const wchar_t*)m_Path.Deref())) return err;
+    if (err = this->DeleteFile((const wchar_t*)path.Deref())) return err;
     return 0;
 }
 int MyFile::DeleteFile(const wchar_t* path) {
@@ -286,6 +289,36 @@ int MyFile::FullPath(const wchar_t* path, MyStringW* fullPath) {
 
     fullPath->Set(pathBuf, usedLen);
     return 0;
+}
+
+int MyFile::GetTemporaryPath(MyStringW* path) {
+    wchar_t temp[MAX_PATH];
+    DWORD len = GetTempPathW(MAX_PATH, temp);
+    if (len == 0) {
+        return HandleFSError(L"TemporaryPath");
+    } else {
+        path->Set(temp, len);
+    }
+    return 0;
+}
+int MyFile::GetTemporaryFile(const wchar_t* path, MyStringW* filepath) {
+    wchar_t temp[MAX_PATH];
+    DWORD ret = GetTempFileNameW(path, L"TMP", MAX_PATH, temp);
+    if (ret == 0) {
+        return HandleFSError(L"TemporaryFile");
+    } else {
+        filepath->Set(temp);
+    }
+    return 0;
+}
+int MyFile::OpenTempFile() {
+    int err = 0;
+    MyStringW tmpPath, tmpFile;
+    
+    if (err = GetTemporaryPath(&tmpPath)) return err;
+    if (err = GetTemporaryFile(tmpPath.Deref(), &tmpFile)) return err;
+
+    return Open(tmpFile.Deref(), MY_FILE_CREATION_DISP_CREATE_ALWAYS);
 }
 
 void* MyFile::OpenFileHandle(const wchar_t* path, int creationDisp, int desiredAccess, int shareMode) {

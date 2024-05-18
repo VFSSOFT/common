@@ -914,6 +914,7 @@ int MyWinDeafultIcons::Load() {
     MyArray<MyStringA> subKeyNames;
     MyStringA* subKeyName;
     MyStringW subKeyNameW;
+    MyStringW localMachineSubKeyName;
     MyStringW defaultIconSubKey;
     MyStringW defaultIconPath;
     int indexOfPoint;
@@ -934,15 +935,32 @@ int MyWinDeafultIcons::Load() {
         if (indexOfPoint != 0) continue;
 
         subKeyNameW.SetUtf8(subKeyName->Deref(), subKeyName->Length());
-        if (err = iconReg.QuickReadValue(HKEY_CLASSES_ROOT, subKeyNameW.Deref(), L"", &regValue)) {
-            if (err == ERROR_FILE_NOT_FOUND) { // No Default Key, skip it
-                continue;
-            } else {
-                err = LastError(err, iconReg.LastErrorMessage());
-                goto done;
-            }
-        }
 
+        err = iconReg.QuickReadValue(HKEY_CLASSES_ROOT, subKeyNameW.Deref(), L"", &regValue);
+        if (err == ERROR_FILE_NOT_FOUND || regValue.valueLen == 0) { // No Default Key in HKEY_CLASSES_ROOT
+            localMachineSubKeyName.Set(L"SOFTWARE\\Classes\\");
+            localMachineSubKeyName.Append(subKeyNameW.Deref());
+            err = iconReg.QuickReadValue(HKEY_LOCAL_MACHINE, localMachineSubKeyName.Deref(), L"", &regValue); // Give the LOCAL_MACHINE a try
+        }
+        if (err == ERROR_FILE_NOT_FOUND || regValue.valueLen == 0) { // No Default Key in HKEY_CLASSES_ROOT and HKEY_LOCAL_MACHINE
+            // It's not true that all extensions has corresponding registry
+            // when it happens, try to load it with SHGetFileInfo.
+            LoadWithSHGetFileInfo(subKeyNameW.Deref());
+            continue;
+        }
+        if (err == ERROR_FILE_NOT_FOUND) {
+#if _DEBUG
+            MyStringW t;
+            t.Append(L"WinDeafultIcons -- NOT_FOUDNED: ");
+            t.Append(subKeyNameW.Deref());
+            t.Append(L"\r\n");
+            OutputDebugStringW(t.Deref());
+#endif // _DEBUG
+            continue;
+        } else if (err) {
+            err = LastError(err, iconReg.LastErrorMessage());
+            goto done;
+        }
         defaultIconSubKey.Set(regValue.strValue, regValue.valueLen);
         defaultIconSubKey.Append(L"\\DefaultIcon");
         if (err = LoadDefaultIcon(defaultIconSubKey.Deref(), subKeyNameW.Deref())) goto done;
@@ -954,6 +972,27 @@ int MyWinDeafultIcons::Load() {
 
 done:
     classRootReg.Close();
+    return err;
+}
+int MyWinDeafultIcons::LoadWithSHGetFileInfo(const wchar_t* ext) {
+    int err = 0;
+
+    SHFILEINFO shfi = { 0 };
+    SHGetFileInfo(
+        ext,
+        0,
+        &shfi,
+        sizeof(shfi),
+        SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES
+    );
+
+    if (shfi.hIcon != NULL) {
+        m_Exts.AddNew()->SetUnicode(ext);
+        m_IconPaths.AddNew()->Set("NOT_AVAILABLE");
+        m_Icons.Add(shfi.hIcon);
+    } else {
+        err = -1;
+    }
     return err;
 }
 int MyWinDeafultIcons::LoadDefaultIcon(const wchar_t* defaultIconKey, const wchar_t* ext) {
@@ -990,6 +1029,9 @@ HICON MyWinDeafultIcons::GetIcon(const char* ext) {
     int idx = FindExt(ext);
 
     if (m_Icons.Get(idx) == NULL) {
+        if (stricmp(ext, ".png") == 0) {
+            int a = 0;
+        }
         MyStringA* iconPath = m_IconPaths.Get(idx);
         MyStringW iconFile;
         int iconIndex;

@@ -52,6 +52,10 @@ public:
 
     int FullPath(const wchar_t* path, MyStringW* fullPath);
 
+    int GetTemporaryPath(MyStringW* path);
+    int GetTemporaryFile(const wchar_t* path, MyStringW* filepath);
+    int OpenTempFile();
+
     HANDLE SysHandle() { return m_Handle; }
 
     inline bool Opened() { return m_Handle != NULL; }

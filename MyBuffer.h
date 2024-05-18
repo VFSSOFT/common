@@ -23,6 +23,7 @@ public:
 
   int SetCharAt(int index, char c);
   int CharAt(int index);
+  char LastChar() { return m_Length == 0 ? 0 : m_Buffer[m_Length-1]; }
 
   int Set(const char* data, int len);
   int Set(int index, const char* data, int len);

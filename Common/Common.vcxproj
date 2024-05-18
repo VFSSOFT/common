@@ -160,6 +160,7 @@
     <ClInclude Include="..\MyLock.h" />
     <ClInclude Include="..\MyLogger.h" />
     <ClInclude Include="..\MyMutex.h" />
+    <ClInclude Include="..\MyPath.h" />
     <ClInclude Include="..\MySqlEntity.h" />
     <ClInclude Include="..\MySqlite.h" />
     <ClInclude Include="..\MyStack.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="..\MyLogger.cpp" />
     <ClCompile Include="..\MyMemPool.cpp" />
     <ClCompile Include="..\MyMutex.cpp" />
+    <ClCompile Include="..\MyPath.cpp" />
     <ClCompile Include="..\MySqlEntity.cpp" />
     <ClCompile Include="..\MySqlite.cpp" />
     <ClCompile Include="..\MyStringA.cpp" />

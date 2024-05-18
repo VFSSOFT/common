@@ -42,6 +42,7 @@ public:
   int DerefAsInt(); 
   inline WCHAR* Deref(int off=0) { return m_Buffer + off; }
   inline int Length()   { return m_Length; }
+  wchar_t LastChar() { return m_Length > 0 ? m_Buffer[m_Length - 1] : 0; }
 
   BOOL StartWith(const WCHAR* str);
   BOOL EndWith(const WCHAR* str);

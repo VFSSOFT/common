@@ -162,9 +162,18 @@ protected:                                                                     \
 
 #define MY_INVALID_SOCKET INVALID_SOCKET
 
+#define MY_PATH_SEP_CHAR '\\'
+#define MY_PATH_SEP_STR "\\"
+
+#define MY_PATH_SEP_WCHAR L'\\'
+#define MY_PATH_SEP_WSTR  L"\\"
+
 #else
 
 #define MY_INVALID_SOCKET -1
+
+#define MY_PATH_SEP_CHAR '/'
+#define MY_PATH_SEP_STR "/"
 
 #endif
 

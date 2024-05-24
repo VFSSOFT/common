@@ -412,9 +412,7 @@ int MyWin::MyGetAppDataFolder(const wchar_t* appName, MyStringW* ret) {
     if (SUCCEEDED(result)) {
         ret->Set(path);
         if (appName != NULL && wcslen(appName) > 0) {
-            MyStringW newPath;
-            MyStringW::JoinPath(ret->Deref(), ret->Length(), appName, wcslen(appName), &newPath);
-            ret->Set(newPath.Deref(), newPath.Length());
+            MyPath::JoinPath(path, wcslen(path), appName, wcslen(appName), ret);
         }
         return 0;
     }

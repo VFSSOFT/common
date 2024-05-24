@@ -5,6 +5,7 @@
 #include "MyStringW.h"
 #include "MyArray.h"
 #include "MyValArray.h"
+#include "MyPath.h"
 
 #ifdef _WIN32
 

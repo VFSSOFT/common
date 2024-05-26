@@ -360,7 +360,7 @@ BOOL MyBuffer::EndWith(const char c) {
 bool MyBuffer::Contains(const char* ptr, int len) {
     if (len == 0) return false;
 
-    for (int i = 0; i < m_Length - len; i++) {
+    for (int i = 0; i < m_Length - len + 1; i++) {
         if (m_Buffer[i] == ptr[0]) {
             bool matched = true;
             for (int index = 0; index < len; index++) {

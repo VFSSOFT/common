@@ -7,7 +7,7 @@ TEST(MyBufferTest, SetNullDataTest) {
 
   EXPECT_EQ(0, buf.Set(NULL, 0));
   EXPECT_EQ(0, buf.Length());
-  EXPECT_EQ(NULL, buf.Deref());
+  EXPECT_STREQ("", buf.Deref());
 }
 
 TEST(MyBufferTest, Set1KDataTest) {
@@ -350,6 +350,15 @@ TEST(MyBufferTest, Contains2Test) {
     res = buf.Contains("\x1\x1\x2", 2);
     EXPECT_FALSE(res);
 }
+
+TEST(MyBufferTest, Contains3Test) {
+    MyBuffer buf;
+    EXPECT_EQ(0, buf.Set("Tencent COS", strlen("Tencent COS")));
+
+    bool res = buf.Contains("COS");
+    EXPECT_TRUE(res);
+}
+
 
 TEST(MyBufferTest, ReplaceTest) {
     MyBuffer buf;

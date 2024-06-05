@@ -3,6 +3,9 @@
 
 #include "MyError.h"
 
+
+MyError MyError::NoError;
+
 MyError::MyError() { Reset(); }
 MyError::MyError(int code, const char* msg) {
     Set(code, msg);

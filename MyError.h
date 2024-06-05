@@ -19,6 +19,8 @@ public:
     void CopyFrom(MyError* e);
     void CopyFrom(const MyError& e);
 
+    static MyError NoError;
+
 private:
     void SetMessage(const char* msg);
     void SetMessage(const wchar_t* msg);

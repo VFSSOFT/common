@@ -4,6 +4,37 @@
 
 #include "MyPath.h"
 
+
+
+#if _WIN32
+int MyPath::GetParent(MyPath* retParent) {
+    int idx1 = m_Path.LastIndexOf(L"/");
+    int idx2 = m_Path.LastIndexOf(L"\\");
+    int idx = MAX(idx1, idx2);
+
+    if (idx >= 0) {
+        retParent->m_Path.Set(m_Path.Deref(), idx);
+        return 0;
+    } else {
+        return -1;
+    }
+}
+#else // _WIN32
+#endif // _WIN32
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #if _WIN32
 
 int MyPath::JoinPath(MyStringW* p1, MyStringW* p2, MyStringW* ret) {

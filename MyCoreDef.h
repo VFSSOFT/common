@@ -71,6 +71,21 @@
 #define GB (1024 * 1024 * 1024)
 
 
+
+#define MYASSERT(expr, msg)                                                \
+    if (!(expr)) {                                                         \
+        char logbuf[1024];                                                 \
+        OutputDebugStringA("Assert failed:\n");                            \
+        sprintf(logbuf, "\tMessage :\t%s\n", msg);                         \
+        OutputDebugStringA(logbuf);                                        \
+        sprintf(logbuf, "\tExpected:\t%s\n", #expr);                       \
+        OutputDebugStringA(logbuf);                                        \
+        sprintf(logbuf, "\tSource  :\t%s:%d\n", __FUNCTION__, __LINE__);   \
+        OutputDebugStringA(logbuf);                                        \
+        __debugbreak();                                                    \
+     }                                                                     \
+
+
 #define MY_LAST_ERROR_DECL                                                 \
   public:                                                                  \
     inline int LastErrorCode() { return m_LastErrorCode; }                 \

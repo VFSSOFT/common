@@ -38,6 +38,7 @@ void MyError::CopyFrom(const MyError& e) {
 }
 
 void MyError::SetMessage(const char* msg) {
+    if (msg == NULL) msg = "";
     strcpy(m_Message, msg);
 }
 void MyError::SetMessage(const wchar_t* msg) {

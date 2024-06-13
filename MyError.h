@@ -15,6 +15,9 @@ public:
     void Set(int code, const char* msg);
     void Set(int code, const wchar_t* msg);
 
+    int Code() { return m_Code; }
+    const char* Message() { return m_Message; }
+
     void Reset();
     void CopyFrom(MyError* e);
     void CopyFrom(const MyError& e);

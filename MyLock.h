@@ -18,6 +18,11 @@ public:
 private:
 
     MyCriticalSection   m_CriticalSection;
+
+#if _DEBUG
+    DWORD m_LockThreads[64];
+    int   m_LockCount;
+#endif 
 };
 
 #endif // _MY_LOCK_H_
